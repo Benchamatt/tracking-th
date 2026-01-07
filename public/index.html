@@ -39,7 +39,7 @@
       color:var(--text);
     }
 
-    /* Wix iframe friendly: no fixed heights, flexible width */
+    /* Wix iframe friendly */
     .wrap{
       max-width: 980px;
       margin: 0 auto;
@@ -214,7 +214,7 @@
       margin-bottom: 10px;
     }
 
-    /* จุดไอคอนบนไทม์ไลน์ */
+    /* ไอคอนบนไทม์ไลน์ */
     .event .pin{
       position:absolute;
       left:-26px;
@@ -230,7 +230,6 @@
     }
     .event .pin svg{ width:12px; height:12px; fill:#fff }
 
-    /* สีตามสถานะ */
     .event .pin.warn{ background: rgba(180,83,9,1); border-color: rgba(180,83,9,.55); box-shadow: 0 0 0 3px rgba(180,83,9,.12) }
     .event .pin.ok{   background: rgba(15,118,110,1); border-color: rgba(15,118,110,.55); box-shadow: 0 0 0 3px rgba(15,118,110,.12) }
     .event .pin.bad{  background: rgba(185,28,28,1); border-color: rgba(185,28,28,.55); box-shadow: 0 0 0 3px rgba(185,28,28,.12) }
@@ -279,7 +278,6 @@
     <div class="topbar">
       <div class="brand">
         <div class="logo" aria-hidden="true" title="Weiming">
-          <!-- Simple shipping icon -->
           <svg viewBox="0 0 24 24">
             <path d="M20 8h-3V4H3v13h2.1a2.9 2.9 0 0 0 5.8 0h4.2a2.9 2.9 0 0 0 5.8 0H23v-5l-3-4zM6.5 19a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zm10 0a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zM17 12V9h2l2 3h-4z"/>
           </svg>
@@ -292,7 +290,6 @@
     </div>
 
     <div class="grid">
-      <!-- Left: Search + Summary -->
       <div>
         <div class="card">
           <h2>ค้นหาเลขพัสดุ</h2>
@@ -311,7 +308,6 @@
         <div class="card" id="summary" style="display:none"></div>
       </div>
 
-      <!-- Right: Timeline -->
       <div>
         <div class="card" id="history" style="display:none">
           <h2>ไทม์ไลน์สถานะ</h2>
@@ -337,25 +333,18 @@
 
   $("year").textContent = String(new Date().getFullYear());
 
-  // Badge classification by Thai status (no Chinese displayed)
   function classify(th){
     const s = (th || "").toLowerCase();
 
-    // Delivered / completed
     if (s.includes("ถึงแล้ว") || s.includes("จัดส่งสำเร็จ") || s.includes("เซ็นรับ") || s.includes("รับพัสดุ")) {
       return { cls:"ok", label:"ถึงแล้ว" };
     }
-
-    // Problem / failed
     if (s.includes("ตีกลับ") || s.includes("ไม่สำเร็จ") || s.includes("ผิดพลาด") || s.includes("ยกเลิก") || s.includes("ปัญหา")) {
       return { cls:"bad", label:"มีปัญหา" };
     }
-
-    // In transit / processing
     if (s.includes("กำลัง") || s.includes("ระหว่าง") || s.includes("ขนส่ง") || s.includes("ส่งต่อ") || s.includes("ออกจาก") || s.includes("กำลังดำเนินการ")) {
       return { cls:"warn", label:"กำลังขนส่ง" };
     }
-
     return { cls:"warn", label:"กำลังดำเนินการ" };
   }
 
@@ -404,7 +393,6 @@
   }
 
   function renderTimeline(events){
-    // ไม่แสดงตัวจีน: ใช้ status_th เท่านั้น
     const items = (events || []).map(e => {
       const th = e.status_th || "-";
       const cls = classify(th);

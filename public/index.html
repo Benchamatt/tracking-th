@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Weiming-TH Tracking</title>
+  <style>
+    body{font-family:system-ui,Segoe UI,Tahoma,sans-serif;max-width:860px;margin:32px auto;padding:0 16px}
+    .top{display:flex;align-items:center;justify-content:space-between;background:#1976d2;color:#fff;padding:14px 16px;border-radius:10px}
+    .box{border:1px solid #ddd;border-radius:10px;padding:16px;margin-top:16px}
+    input,button{font-size:16px;padding:10px}
+    input{width:100%;box-sizing:border-box}
+    button{cursor:pointer}
+    table{width:100%;border-collapse:collapse;margin-top:10px}
+    th,td{border:1px solid #ddd;padding:10px;text-align:left;vertical-align:top}
+    .row{display:grid;grid-template-columns:1fr 140px;gap:10px;margin-top:12px}
+    .muted{color:#666}
+    .ok{color:#0a7a2f}
+    .err{color:#b00020}
+  </style>
+</head>
+<body>
+  <div class="top">
+    <div><b>Weiming-TH Tracking</b></div>
+    <div>ตรวจสอบ</div>
+  </div>
+
+  <div class="box">
+    <div class="muted">กรอกเลขพัสดุ แล้วกด “ค้นหา”</div>
+    <div class="row">
+      <input id="no" placeholder="เลขพัสดุ" />
+      <button id="btn">ค้นหา</button>
+    </div>
+  </div>
+
+  <div class="box" id="summary" style="display:none"></div>
+
+  <div class="box" id="history" style="display:none">
+    <b>ประวัติสถานะ</b>
+    <div id="histTable"></div>
+  </div>
+
+  <script>
+    const $ = (id) => document.getElementById(id);
+    const summary = $("summary");
+    const history = $("history");
+    const histTable = $("histTable");
+
+    async function run() {
+      const no = $("no").value.trim();
+      if (!no) { alert("กรุณากรอกเลขพัสดุ"); return; }
+
+      summary.style.display = "block";
+      history.style.display = "none";
+      summary.innerHTML = `<b>กำลังค้นหา...</b><div class="muted">โปรดรอสักครู่</div>`;
+
+      try {
+        // IMPORTANT: ใช้ relative path เพราะหน้าเว็บนี้ถูก serve จาก Render เดียวกัน
+        const r = await fetch(`/api/track?no=${encodeURIComponent(no)}`);
+        const data = await r.json();
+
+        if (!r.ok) {
+          summary.innerHTML = `<b class="err">ไม่สำเร็จ</b><div class="muted">${data.error || "เกิดข้อผิดพลาด"}</div>`;
+          return;
+        }
+
+        summary.innerHTML = `
+          <div><b>เลขพัสดุ:</b> ${data.tracking_no}</div>
+          <div><b>สถานะล่าสุด:</b> <span class="ok">${data.latest_status_th || "-"}</span></div>
+          <div class="muted"><b>อัปเดตล่าสุด:</b> ${data.last_update || "-"}</div>
+        `;
+
+        const rows = (data.events || []).map(e => `
+          <tr>
+            <td>${e.time || "-"}</td>
+            <td>${e.status_th || "-"} <div class="muted">${e.status_cn || ""}</div></td>
+          </tr>
+        `).join("");
+
+        histTable.innerHTML = `
+          <table>
+            <thead><tr><th style="width:220px">เวลา</th><th>สถานะ</th></tr></thead>
+            <tbody>${rows || `<tr><td colspan="2" class="muted">ไม่มีข้อมูล</td></tr>`}</tbody>
+          </table>
+        `;
+
+        history.style.display = "block";
+      } catch (e) {
+        summary.innerHTML = `<b class="err">ระบบขัดข้อง</b><div class="muted">${String(e)}</div>`;
+      }
+    }
+
+    $("btn").addEventListener("click", run);
+    $("no").addEventListener("keydown", (e) => { if (e.key === "Enter") run(); });
+  </script>
+</body>
+</html>

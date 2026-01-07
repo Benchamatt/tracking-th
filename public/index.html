@@ -1,194 +1,514 @@
 <!doctype html>
 <html lang="th">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Weiming-TH Tracking</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Weiming Tracking</title>
 
-<style>
-:root{
-  --blue:#1976d2;
-  --blue-dark:#125aa3;
-  --bg:#f4f6f8;
-  --card:#ffffff;
-  --border:#e0e0e0;
-  --ok:#0a7a2f;
-  --muted:#666;
-}
+  <style>
+    :root{
+      --bg:#f6f8fb;
+      --surface:#ffffff;
+      --surface-2:#f1f4f9;
+      --text:#0f172a;
+      --muted:#64748b;
+      --border:#e5e7eb;
+      --shadow: 0 10px 24px rgba(2, 6, 23, 0.08);
 
-*{box-sizing:border-box}
+      --brand:#0f5fbf;
+      --brand-2:#0a3f7a;
 
-body{
-  margin:0;
-  font-family:system-ui,-apple-system,"Segoe UI",Tahoma,sans-serif;
-  background:var(--bg);
-  color:#222;
-}
+      --ok:#0f766e;
+      --warn:#b45309;
+      --bad:#b91c1c;
 
-header{
-  background:linear-gradient(135deg,var(--blue),var(--blue-dark));
-  color:#fff;
-  padding:18px;
-  text-align:center;
-  font-size:20px;
-  font-weight:600;
-}
+      --badge-bg: rgba(15, 95, 191, 0.10);
+      --badge-text: #0f5fbf;
 
-.container{
-  max-width:900px;
-  margin:24px auto;
-  padding:0 16px;
-}
+      --ring: rgba(15,95,191,.25);
+    }
 
-.card{
-  background:var(--card);
-  border-radius:12px;
-  box-shadow:0 4px 12px rgba(0,0,0,.06);
-  padding:18px;
-  margin-bottom:18px;
-}
+    [data-theme="dark"]{
+      --bg:#0b1220;
+      --surface:#0f1a2b;
+      --surface-2:#0b1424;
+      --text:#e5e7eb;
+      --muted:#93a4bd;
+      --border:#22324a;
+      --shadow: 0 10px 26px rgba(0,0,0,0.45);
 
-.search-row{
-  display:grid;
-  grid-template-columns:1fr 140px;
-  gap:10px;
-}
+      --brand:#4da3ff;
+      --brand-2:#1c5aa8;
 
-input{
-  padding:12px 14px;
-  font-size:16px;
-  border-radius:8px;
-  border:1px solid var(--border);
-}
+      --badge-bg: rgba(77,163,255,0.12);
+      --badge-text: #9fd0ff;
 
-button{
-  border:none;
-  border-radius:8px;
-  background:var(--blue);
-  color:#fff;
-  font-size:16px;
-  cursor:pointer;
-}
-button:hover{background:var(--blue-dark)}
+      --ring: rgba(77,163,255,.25);
+    }
 
-.status-main{
-  font-size:18px;
-  font-weight:600;
-  color:var(--ok);
-}
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      font-family: system-ui, -apple-system, "Segoe UI", Tahoma, sans-serif;
+      background: radial-gradient(1200px 600px at 20% -10%, rgba(15,95,191,.10), transparent 60%),
+                  radial-gradient(1000px 500px at 90% 0%, rgba(15,95,191,.08), transparent 55%),
+                  var(--bg);
+      color:var(--text);
+    }
 
-.small{font-size:14px;color:var(--muted)}
+    /* Wix iframe friendly: no fixed heights, flexible width */
+    .wrap{
+      max-width: 980px;
+      margin: 0 auto;
+      padding: 20px 14px 28px;
+    }
 
-table{
-  width:100%;
-  border-collapse:collapse;
-  margin-top:10px;
-}
+    .topbar{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      padding: 14px 16px;
+      border:1px solid var(--border);
+      border-radius: 16px;
+      background: linear-gradient(135deg, rgba(15,95,191,.12), rgba(15,95,191,.04));
+      box-shadow: var(--shadow);
+    }
 
-th,td{
-  padding:12px;
-  border-bottom:1px solid var(--border);
-  vertical-align:top;
-}
+    .brand{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      min-width:0;
+    }
 
-th{
-  background:#f0f3f7;
-  font-weight:600;
-}
+    .logo{
+      width:40px;height:40px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, var(--brand), var(--brand-2));
+      display:grid;
+      place-items:center;
+      box-shadow: 0 10px 18px rgba(15,95,191,.25);
+      flex:0 0 auto;
+    }
+    .logo svg{width:22px;height:22px;fill:#fff}
 
-.cn{
-  font-size:13px;
-  color:#888;
-}
+    .brand h1{
+      margin:0;
+      font-size:16px;
+      letter-spacing:.2px;
+      line-height:1.1;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+    .brand .sub{
+      font-size:12px;
+      color:var(--muted);
+      margin-top:2px;
+    }
 
-@media(max-width:600px){
-  .search-row{grid-template-columns:1fr}
-}
-</style>
+    .actions{
+      display:flex;
+      gap:8px;
+      align-items:center;
+    }
+
+    .toggle{
+      border:1px solid var(--border);
+      background: var(--surface);
+      color: var(--text);
+      padding: 10px 12px;
+      border-radius: 12px;
+      cursor:pointer;
+      font-size:13px;
+      display:flex;
+      align-items:center;
+      gap:8px;
+      box-shadow: 0 6px 14px rgba(2, 6, 23, 0.06);
+    }
+    .toggle:focus{outline:3px solid var(--ring)}
+
+    .grid{
+      display:grid;
+      grid-template-columns: 1.1fr .9fr;
+      gap: 14px;
+      margin-top: 14px;
+    }
+    @media(max-width: 860px){
+      .grid{grid-template-columns:1fr}
+    }
+
+    .card{
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      box-shadow: var(--shadow);
+      padding: 16px;
+      overflow:hidden;
+    }
+
+    .card h2{
+      margin:0 0 8px 0;
+      font-size:14px;
+      letter-spacing:.2px;
+    }
+    .muted{color:var(--muted); font-size:13px}
+    .small{font-size:12px; color:var(--muted)}
+
+    .searchRow{
+      display:grid;
+      grid-template-columns: 1fr 132px;
+      gap: 10px;
+      margin-top: 10px;
+    }
+    @media(max-width:520px){
+      .searchRow{grid-template-columns:1fr}
+    }
+
+    input{
+      width:100%;
+      padding: 12px 14px;
+      border-radius: 14px;
+      border: 1px solid var(--border);
+      background: var(--surface-2);
+      color: var(--text);
+      font-size: 15px;
+    }
+    input:focus{outline:3px solid var(--ring); border-color: transparent}
+
+    .btn{
+      border:none;
+      border-radius: 14px;
+      padding: 12px 14px;
+      background: linear-gradient(135deg, var(--brand), var(--brand-2));
+      color:#fff;
+      font-size:15px;
+      cursor:pointer;
+      box-shadow: 0 12px 18px rgba(15,95,191,.22);
+    }
+    .btn:disabled{
+      opacity:.6;
+      cursor:not-allowed;
+      box-shadow:none;
+    }
+
+    .summaryTop{
+      display:flex;
+      justify-content:space-between;
+      align-items:flex-start;
+      gap:10px;
+      margin-bottom: 10px;
+    }
+
+    .kv{
+      display:grid;
+      gap:6px;
+    }
+    .kv b{font-size:13px}
+    .kv .value{font-size:14px}
+
+    .badge{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding: 8px 10px;
+      border-radius: 999px;
+      background: var(--badge-bg);
+      color: var(--badge-text);
+      border: 1px solid rgba(15,95,191,.18);
+      font-size: 12px;
+      font-weight: 600;
+      white-space:nowrap;
+    }
+    .dot{width:8px;height:8px;border-radius:999px;background: currentColor;opacity:.9}
+
+    .badge.ok{background: rgba(15,118,110,.12); color: var(--ok); border-color: rgba(15,118,110,.25)}
+    .badge.warn{background: rgba(180,83,9,.12); color: var(--warn); border-color: rgba(180,83,9,.25)}
+    .badge.bad{background: rgba(185,28,28,.12); color: var(--bad); border-color: rgba(185,28,28,.25)}
+
+    /* Timeline */
+    .timeline{
+      margin-top: 12px;
+      position:relative;
+      padding-left: 18px;
+    }
+    .timeline:before{
+      content:"";
+      position:absolute;
+      left:7px;
+      top:2px;
+      bottom:2px;
+      width:2px;
+      background: linear-gradient(to bottom, rgba(15,95,191,.35), rgba(15,95,191,.08));
+    }
+    [data-theme="dark"] .timeline:before{
+      background: linear-gradient(to bottom, rgba(77,163,255,.45), rgba(77,163,255,.10));
+    }
+
+    .event{
+      position:relative;
+      padding: 10px 10px 10px 12px;
+      border-radius: 14px;
+      border: 1px solid var(--border);
+      background: var(--surface-2);
+      margin-bottom: 10px;
+    }
+    .event:before{
+      content:"";
+      position:absolute;
+      left:-18px;
+      top: 16px;
+      width: 12px;
+      height: 12px;
+      border-radius: 999px;
+      background: var(--surface);
+      border: 3px solid rgba(15,95,191,.55);
+      box-shadow: 0 0 0 3px rgba(15,95,191,.10);
+    }
+    [data-theme="dark"] .event:before{
+      border-color: rgba(77,163,255,.60);
+      box-shadow: 0 0 0 3px rgba(77,163,255,.12);
+    }
+
+    .event .time{font-size:12px; color: var(--muted)}
+    .event .text{font-size:14px; font-weight:600; margin-top:4px}
+
+    .footer{
+      margin-top: 14px;
+      padding: 12px 6px 2px;
+      text-align:center;
+      color: var(--muted);
+      font-size: 12px;
+    }
+    .footer a{color: var(--muted); text-decoration:none}
+    .footer a:hover{text-decoration:underline}
+
+    .errorBox{
+      border: 1px solid rgba(185,28,28,.25);
+      background: rgba(185,28,28,.08);
+      color: var(--bad);
+      border-radius: 14px;
+      padding: 10px 12px;
+      font-size: 13px;
+    }
+
+    .loading{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      font-size:13px;
+      color:var(--muted);
+    }
+    .spinner{
+      width:16px;height:16px;border-radius:999px;
+      border:2px solid rgba(15,95,191,.25);
+      border-top-color: rgba(15,95,191,.85);
+      animation: spin 0.9s linear infinite;
+    }
+    [data-theme="dark"] .spinner{
+      border-color: rgba(77,163,255,.22);
+      border-top-color: rgba(77,163,255,.9);
+    }
+    @keyframes spin{to{transform:rotate(360deg)}}
+  </style>
 </head>
 
 <body>
+  <div class="wrap" id="app" data-theme="light">
+    <div class="topbar">
+      <div class="brand">
+        <div class="logo" aria-hidden="true" title="Weiming">
+          <!-- Simple shipping icon -->
+          <svg viewBox="0 0 24 24">
+            <path d="M20 8h-3V4H3v13h2.1a2.9 2.9 0 0 0 5.8 0h4.2a2.9 2.9 0 0 0 5.8 0H23v-5l-3-4zM6.5 19a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zm10 0a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zM17 12V9h2l2 3h-4z"/>
+          </svg>
+        </div>
+        <div style="min-width:0">
+          <h1>Weiming Tracking</h1>
+          <div class="sub">ระบบตรวจสอบสถานะพัสดุ</div>
+        </div>
+      </div>
 
-<header>Weiming-TH Tracking</header>
+      <div class="actions">
+        <button class="toggle" id="themeBtn" type="button" aria-label="สลับโหมดสี">
+          <span id="themeIcon">🌙</span>
+          <span class="small" id="themeText">Dark</span>
+        </button>
+      </div>
+    </div>
 
-<div class="container">
+    <div class="grid">
+      <!-- Left: Search + Summary -->
+      <div>
+        <div class="card">
+          <h2>ค้นหาเลขพัสดุ</h2>
+          <div class="muted">กรอกเลขพัสดุ แล้วกด “ค้นหา”</div>
 
-  <!-- Search -->
-  <div class="card">
-    <div class="small">กรอกเลขพัสดุเพื่อตรวจสอบสถานะ</div>
-    <div class="search-row" style="margin-top:12px">
-      <input id="no" placeholder="เลขพัสดุ" />
-      <button id="btn">ค้นหา</button>
+          <div class="searchRow">
+            <input id="no" placeholder="เลขพัสดุ" inputmode="numeric" autocomplete="off" />
+            <button class="btn" id="btn">ค้นหา</button>
+          </div>
+
+          <div style="margin-top:10px" class="small">
+            หมายเหตุ: ระบบแสดงผลเป็นภาษาไทย และเรียงเหตุการณ์ล่าสุดก่อน
+          </div>
+        </div>
+
+        <div class="card" id="summary" style="display:none"></div>
+      </div>
+
+      <!-- Right: Timeline -->
+      <div>
+        <div class="card" id="history" style="display:none">
+          <h2>ไทม์ไลน์สถานะ</h2>
+          <div class="muted">เหตุการณ์ล่าสุดอยู่ด้านบน</div>
+          <div class="timeline" id="timeline"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer">
+      © <span id="year"></span> Weiming Tracking. All rights reserved.
+      <span class="muted"> | </span>
+      <a href="https://line.me/R/ti/p/@wmex" target="_blank" rel="noopener noreferrer">ติดต่อผ่าน LINE</a>
     </div>
   </div>
 
-  <!-- Summary -->
-  <div class="card" id="summary" style="display:none"></div>
-
-  <!-- History -->
-  <div class="card" id="history" style="display:none">
-    <div style="font-weight:600;margin-bottom:8px">ประวัติสถานะ</div>
-    <div id="histTable"></div>
-  </div>
-
-</div>
-
 <script>
-const $ = id => document.getElementById(id);
-const summary = $("summary");
-const history = $("history");
-const histTable = $("histTable");
+  const $ = (id) => document.getElementById(id);
+  const app = $("app");
+  const summary = $("summary");
+  const history = $("history");
+  const timeline = $("timeline");
+  const btn = $("btn");
 
-async function run(){
-  const no = $("no").value.trim();
-  if(!no){ alert("กรุณากรอกเลขพัสดุ"); return; }
+  // Theme
+  function setTheme(mode){
+    app.setAttribute("data-theme", mode);
+    localStorage.setItem("theme", mode);
+    const dark = mode === "dark";
+    $("themeIcon").textContent = dark ? "☀️" : "🌙";
+    $("themeText").textContent = dark ? "Light" : "Dark";
+  }
+  $("themeBtn").addEventListener("click", () => {
+    const cur = app.getAttribute("data-theme") || "light";
+    setTheme(cur === "light" ? "dark" : "light");
+  });
+  setTheme(localStorage.getItem("theme") || "light");
+  $("year").textContent = String(new Date().getFullYear());
 
-  summary.style.display="block";
-  history.style.display="none";
-  summary.innerHTML=`<b>กำลังค้นหา...</b><div class="small">โปรดรอสักครู่</div>`;
+  // Badge classification by Thai status (no Chinese displayed)
+  function classify(th){
+    const s = (th || "").toLowerCase();
 
-  try{
-    const r = await fetch(`/api/track?no=${encodeURIComponent(no)}`);
-    const data = await r.json();
-
-    if(!r.ok){
-      summary.innerHTML=`<b style="color:#b00020">ไม่พบข้อมูล</b><div class="small">${data.error}</div>`;
-      return;
+    // Delivered / completed
+    if (s.includes("ถึงแล้ว") || s.includes("จัดส่งสำเร็จ") || s.includes("เซ็นรับ") || s.includes("รับพัสดุ")) {
+      return { cls:"ok", label:"ถึงแล้ว" };
     }
 
-    summary.innerHTML=`
-      <div><b>เลขพัสดุ:</b> ${data.tracking_no}</div>
-      <div class="status-main">สถานะล่าสุด: ${data.latest_status_th || "-"}</div>
-      <div class="small">อัปเดตล่าสุด: ${data.last_update || "-"}</div>
-    `;
+    // Problem / failed
+    if (s.includes("ตีกลับ") || s.includes("ไม่สำเร็จ") || s.includes("ผิดพลาด") || s.includes("ยกเลิก") || s.includes("ปัญหา")) {
+      return { cls:"bad", label:"มีปัญหา" };
+    }
 
-    const rows=(data.events||[]).map(e=>`
-      <tr>
-        <td style="width:200px">${e.time||"-"}</td>
-        <td>
-          <b>${e.status_th||"-"}</b>
-          <div class="cn">${e.status_cn||""}</div>
-        </td>
-      </tr>
-    `).join("");
+    // In transit / processing
+    if (s.includes("กำลัง") || s.includes("ระหว่าง") || s.includes("ขนส่ง") || s.includes("ส่งต่อ") || s.includes("ออกจาก") || s.includes("กำลังดำเนินการ")) {
+      return { cls:"warn", label:"กำลังขนส่ง" };
+    }
 
-    histTable.innerHTML=`
-      <table>
-        <thead>
-          <tr><th>เวลา</th><th>สถานะ</th></tr>
-        </thead>
-        <tbody>${rows||`<tr><td colspan="2" class="small">ไม่มีข้อมูล</td></tr>`}</tbody>
-      </table>
-    `;
-    history.style.display="block";
-  }catch(e){
-    summary.innerHTML=`<b style="color:#b00020">ระบบขัดข้อง</b><div class="small">${e}</div>`;
+    return { cls:"warn", label:"กำลังดำเนินการ" };
   }
-}
 
-$("btn").onclick=run;
-$("no").addEventListener("keydown",e=>{ if(e.key==="Enter") run(); });
+  function renderSummary(data){
+    const cls = classify(data.latest_status_th);
+    summary.style.display = "block";
+    summary.innerHTML = `
+      <div class="summaryTop">
+        <div class="kv">
+          <div><b>เลขพัสดุ</b> <span class="value">${data.tracking_no || "-"}</span></div>
+          <div><b>อัปเดตล่าสุด</b> <span class="value">${data.last_update || "-"}</span></div>
+        </div>
+
+        <span class="badge ${cls.cls}">
+          <span class="dot"></span>
+          ${cls.label}
+        </span>
+      </div>
+
+      <div style="display:flex;flex-direction:column;gap:6px">
+        <div class="muted">สถานะล่าสุด</div>
+        <div style="font-size:18px;font-weight:700;letter-spacing:.2px">
+          ${data.latest_status_th || "-"}
+        </div>
+      </div>
+    `;
+  }
+
+  function renderTimeline(events){
+    // ไม่แสดงตัวจีน: ใช้ status_th เท่านั้น
+    const items = (events || []).map(e => {
+      const th = e.status_th || "-";
+      return `
+        <div class="event">
+          <div class="time">${e.time || "-"}</div>
+          <div class="text">${th}</div>
+        </div>
+      `;
+    }).join("");
+
+    timeline.innerHTML = items || `<div class="muted" style="padding:10px 0">ไม่มีข้อมูล</div>`;
+  }
+
+  function setLoading(){
+    summary.style.display = "block";
+    history.style.display = "none";
+    summary.innerHTML = `
+      <div class="loading">
+        <span class="spinner" aria-hidden="true"></span>
+        <div>
+          <div style="font-weight:600">กำลังค้นหา...</div>
+          <div class="small">โปรดรอสักครู่</div>
+        </div>
+      </div>
+    `;
+  }
+
+  function setError(msg){
+    summary.style.display = "block";
+    history.style.display = "none";
+    summary.innerHTML = `<div class="errorBox"><b>ไม่สำเร็จ:</b> ${msg || "เกิดข้อผิดพลาด"}</div>`;
+  }
+
+  async function run(){
+    const no = $("no").value.trim();
+    if(!no){ alert("กรุณากรอกเลขพัสดุ"); return; }
+
+    btn.disabled = true;
+    setLoading();
+
+    try{
+      const r = await fetch(`/api/track?no=${encodeURIComponent(no)}`);
+      const data = await r.json();
+
+      if(!r.ok){
+        setError(data.error || "ไม่พบข้อมูล");
+        return;
+      }
+
+      renderSummary(data);
+      renderTimeline(data.events);
+      history.style.display = "block";
+    }catch(e){
+      setError(String(e));
+    }finally{
+      btn.disabled = false;
+    }
+  }
+
+  $("btn").addEventListener("click", run);
+  $("no").addEventListener("keydown", (e) => { if(e.key === "Enter") run(); });
 </script>
-
 </body>
 </html>

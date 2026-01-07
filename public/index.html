@@ -28,24 +28,6 @@
       --ring: rgba(15,95,191,.25);
     }
 
-    [data-theme="dark"]{
-      --bg:#0b1220;
-      --surface:#0f1a2b;
-      --surface-2:#0b1424;
-      --text:#e5e7eb;
-      --muted:#93a4bd;
-      --border:#22324a;
-      --shadow: 0 10px 26px rgba(0,0,0,0.45);
-
-      --brand:#4da3ff;
-      --brand-2:#1c5aa8;
-
-      --badge-bg: rgba(77,163,255,0.12);
-      --badge-text: #9fd0ff;
-
-      --ring: rgba(77,163,255,.25);
-    }
-
     *{box-sizing:border-box}
     html,body{height:100%}
     body{
@@ -108,27 +90,6 @@
       color:var(--muted);
       margin-top:2px;
     }
-
-    .actions{
-      display:flex;
-      gap:8px;
-      align-items:center;
-    }
-
-    .toggle{
-      border:1px solid var(--border);
-      background: var(--surface);
-      color: var(--text);
-      padding: 10px 12px;
-      border-radius: 12px;
-      cursor:pointer;
-      font-size:13px;
-      display:flex;
-      align-items:center;
-      gap:8px;
-      box-shadow: 0 6px 14px rgba(2, 6, 23, 0.06);
-    }
-    .toggle:focus{outline:3px solid var(--ring)}
 
     .grid{
       display:grid;
@@ -243,9 +204,6 @@
       width:2px;
       background: linear-gradient(to bottom, rgba(15,95,191,.35), rgba(15,95,191,.08));
     }
-    [data-theme="dark"] .timeline:before{
-      background: linear-gradient(to bottom, rgba(77,163,255,.45), rgba(77,163,255,.10));
-    }
 
     .event{
       position:relative;
@@ -255,22 +213,27 @@
       background: var(--surface-2);
       margin-bottom: 10px;
     }
-    .event:before{
-      content:"";
+
+    /* จุดไอคอนบนไทม์ไลน์ */
+    .event .pin{
       position:absolute;
-      left:-18px;
-      top: 16px;
-      width: 12px;
-      height: 12px;
+      left:-26px;
+      top: 12px;
+      width: 22px;
+      height: 22px;
       border-radius: 999px;
-      background: var(--surface);
+      display:grid;
+      place-items:center;
       border: 3px solid rgba(15,95,191,.55);
+      background: var(--surface);
       box-shadow: 0 0 0 3px rgba(15,95,191,.10);
     }
-    [data-theme="dark"] .event:before{
-      border-color: rgba(77,163,255,.60);
-      box-shadow: 0 0 0 3px rgba(77,163,255,.12);
-    }
+    .event .pin svg{ width:12px; height:12px; fill:#fff }
+
+    /* สีตามสถานะ */
+    .event .pin.warn{ background: rgba(180,83,9,1); border-color: rgba(180,83,9,.55); box-shadow: 0 0 0 3px rgba(180,83,9,.12) }
+    .event .pin.ok{   background: rgba(15,118,110,1); border-color: rgba(15,118,110,.55); box-shadow: 0 0 0 3px rgba(15,118,110,.12) }
+    .event .pin.bad{  background: rgba(185,28,28,1); border-color: rgba(185,28,28,.55); box-shadow: 0 0 0 3px rgba(185,28,28,.12) }
 
     .event .time{font-size:12px; color: var(--muted)}
     .event .text{font-size:14px; font-weight:600; margin-top:4px}
@@ -307,16 +270,12 @@
       border-top-color: rgba(15,95,191,.85);
       animation: spin 0.9s linear infinite;
     }
-    [data-theme="dark"] .spinner{
-      border-color: rgba(77,163,255,.22);
-      border-top-color: rgba(77,163,255,.9);
-    }
     @keyframes spin{to{transform:rotate(360deg)}}
   </style>
 </head>
 
 <body>
-  <div class="wrap" id="app" data-theme="light">
+  <div class="wrap" id="app">
     <div class="topbar">
       <div class="brand">
         <div class="logo" aria-hidden="true" title="Weiming">
@@ -329,13 +288,6 @@
           <h1>Weiming Tracking</h1>
           <div class="sub">ระบบตรวจสอบสถานะพัสดุ</div>
         </div>
-      </div>
-
-      <div class="actions">
-        <button class="toggle" id="themeBtn" type="button" aria-label="สลับโหมดสี">
-          <span id="themeIcon">🌙</span>
-          <span class="small" id="themeText">Dark</span>
-        </button>
       </div>
     </div>
 
@@ -378,25 +330,11 @@
 
 <script>
   const $ = (id) => document.getElementById(id);
-  const app = $("app");
   const summary = $("summary");
   const history = $("history");
   const timeline = $("timeline");
   const btn = $("btn");
 
-  // Theme
-  function setTheme(mode){
-    app.setAttribute("data-theme", mode);
-    localStorage.setItem("theme", mode);
-    const dark = mode === "dark";
-    $("themeIcon").textContent = dark ? "☀️" : "🌙";
-    $("themeText").textContent = dark ? "Light" : "Dark";
-  }
-  $("themeBtn").addEventListener("click", () => {
-    const cur = app.getAttribute("data-theme") || "light";
-    setTheme(cur === "light" ? "dark" : "light");
-  });
-  setTheme(localStorage.getItem("theme") || "light");
   $("year").textContent = String(new Date().getFullYear());
 
   // Badge classification by Thai status (no Chinese displayed)
@@ -446,12 +384,35 @@
     `;
   }
 
+  function iconSvg(kind){
+    const truck = `
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M20 8h-3V4H3v13h2.1a2.9 2.9 0 0 0 5.8 0h4.2a2.9 2.9 0 0 0 5.8 0H23v-5l-3-4zM6.5 19a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zm10 0a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zM17 12V9h2l2 3h-4z"/>
+      </svg>`;
+    const check = `
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M9 16.2 4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4z"/>
+      </svg>`;
+    const alert = `
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M1 21h22L12 2 1 21zm12-3h-2v2h2v-2zm0-8h-2v6h2V10z"/>
+      </svg>`;
+
+    if(kind === "ok") return check;
+    if(kind === "bad") return alert;
+    return truck;
+  }
+
   function renderTimeline(events){
     // ไม่แสดงตัวจีน: ใช้ status_th เท่านั้น
     const items = (events || []).map(e => {
       const th = e.status_th || "-";
+      const cls = classify(th);
       return `
         <div class="event">
+          <div class="pin ${cls.cls}" title="${cls.label}">
+            ${iconSvg(cls.cls)}
+          </div>
           <div class="time">${e.time || "-"}</div>
           <div class="text">${th}</div>
         </div>
@@ -511,4 +472,4 @@
   $("no").addEventListener("keydown", (e) => { if(e.key === "Enter") run(); });
 </script>
 </body>
-</html>อันไหน 
+</html>

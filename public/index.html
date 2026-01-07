@@ -28,6 +28,24 @@
       --ring: rgba(15,95,191,.25);
     }
 
+    [data-theme="dark"]{
+      --bg:#0b1220;
+      --surface:#0f1a2b;
+      --surface-2:#0b1424;
+      --text:#e5e7eb;
+      --muted:#93a4bd;
+      --border:#22324a;
+      --shadow: 0 10px 26px rgba(0,0,0,0.45);
+
+      --brand:#4da3ff;
+      --brand-2:#1c5aa8;
+
+      --badge-bg: rgba(77,163,255,0.12);
+      --badge-text: #9fd0ff;
+
+      --ring: rgba(77,163,255,.25);
+    }
+
     *{box-sizing:border-box}
     html,body{height:100%}
     body{
@@ -90,6 +108,27 @@
       color:var(--muted);
       margin-top:2px;
     }
+
+    .actions{
+      display:flex;
+      gap:8px;
+      align-items:center;
+    }
+
+    .toggle{
+      border:1px solid var(--border);
+      background: var(--surface);
+      color: var(--text);
+      padding: 10px 12px;
+      border-radius: 12px;
+      cursor:pointer;
+      font-size:13px;
+      display:flex;
+      align-items:center;
+      gap:8px;
+      box-shadow: 0 6px 14px rgba(2, 6, 23, 0.06);
+    }
+    .toggle:focus{outline:3px solid var(--ring)}
 
     .grid{
       display:grid;
@@ -204,6 +243,9 @@
       width:2px;
       background: linear-gradient(to bottom, rgba(15,95,191,.35), rgba(15,95,191,.08));
     }
+    [data-theme="dark"] .timeline:before{
+      background: linear-gradient(to bottom, rgba(77,163,255,.45), rgba(77,163,255,.10));
+    }
 
     .event{
       position:relative;
@@ -224,6 +266,10 @@
       background: var(--surface);
       border: 3px solid rgba(15,95,191,.55);
       box-shadow: 0 0 0 3px rgba(15,95,191,.10);
+    }
+    [data-theme="dark"] .event:before{
+      border-color: rgba(77,163,255,.60);
+      box-shadow: 0 0 0 3px rgba(77,163,255,.12);
     }
 
     .event .time{font-size:12px; color: var(--muted)}
@@ -261,15 +307,20 @@
       border-top-color: rgba(15,95,191,.85);
       animation: spin 0.9s linear infinite;
     }
+    [data-theme="dark"] .spinner{
+      border-color: rgba(77,163,255,.22);
+      border-top-color: rgba(77,163,255,.9);
+    }
     @keyframes spin{to{transform:rotate(360deg)}}
   </style>
 </head>
 
 <body>
-  <div class="wrap" id="app">
+  <div class="wrap" id="app" data-theme="light">
     <div class="topbar">
       <div class="brand">
         <div class="logo" aria-hidden="true" title="Weiming">
+          <!-- Simple shipping icon -->
           <svg viewBox="0 0 24 24">
             <path d="M20 8h-3V4H3v13h2.1a2.9 2.9 0 0 0 5.8 0h4.2a2.9 2.9 0 0 0 5.8 0H23v-5l-3-4zM6.5 19a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zm10 0a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zM17 12V9h2l2 3h-4z"/>
           </svg>
@@ -279,9 +330,17 @@
           <div class="sub">ระบบตรวจสอบสถานะพัสดุ</div>
         </div>
       </div>
+
+      <div class="actions">
+        <button class="toggle" id="themeBtn" type="button" aria-label="สลับโหมดสี">
+          <span id="themeIcon">🌙</span>
+          <span class="small" id="themeText">Dark</span>
+        </button>
+      </div>
     </div>
 
     <div class="grid">
+      <!-- Left: Search + Summary -->
       <div>
         <div class="card">
           <h2>ค้นหาเลขพัสดุ</h2>
@@ -300,6 +359,7 @@
         <div class="card" id="summary" style="display:none"></div>
       </div>
 
+      <!-- Right: Timeline -->
       <div>
         <div class="card" id="history" style="display:none">
           <h2>ไทม์ไลน์สถานะ</h2>
@@ -318,26 +378,46 @@
 
 <script>
   const $ = (id) => document.getElementById(id);
+  const app = $("app");
   const summary = $("summary");
   const history = $("history");
   const timeline = $("timeline");
   const btn = $("btn");
 
+  // Theme
+  function setTheme(mode){
+    app.setAttribute("data-theme", mode);
+    localStorage.setItem("theme", mode);
+    const dark = mode === "dark";
+    $("themeIcon").textContent = dark ? "☀️" : "🌙";
+    $("themeText").textContent = dark ? "Light" : "Dark";
+  }
+  $("themeBtn").addEventListener("click", () => {
+    const cur = app.getAttribute("data-theme") || "light";
+    setTheme(cur === "light" ? "dark" : "light");
+  });
+  setTheme(localStorage.getItem("theme") || "light");
   $("year").textContent = String(new Date().getFullYear());
 
   // Badge classification by Thai status (no Chinese displayed)
   function classify(th){
     const s = (th || "").toLowerCase();
 
+    // Delivered / completed
     if (s.includes("ถึงแล้ว") || s.includes("จัดส่งสำเร็จ") || s.includes("เซ็นรับ") || s.includes("รับพัสดุ")) {
       return { cls:"ok", label:"ถึงแล้ว" };
     }
+
+    // Problem / failed
     if (s.includes("ตีกลับ") || s.includes("ไม่สำเร็จ") || s.includes("ผิดพลาด") || s.includes("ยกเลิก") || s.includes("ปัญหา")) {
       return { cls:"bad", label:"มีปัญหา" };
     }
+
+    // In transit / processing
     if (s.includes("กำลัง") || s.includes("ระหว่าง") || s.includes("ขนส่ง") || s.includes("ส่งต่อ") || s.includes("ออกจาก") || s.includes("กำลังดำเนินการ")) {
       return { cls:"warn", label:"กำลังขนส่ง" };
     }
+
     return { cls:"warn", label:"กำลังดำเนินการ" };
   }
 
@@ -367,6 +447,7 @@
   }
 
   function renderTimeline(events){
+    // ไม่แสดงตัวจีน: ใช้ status_th เท่านั้น
     const items = (events || []).map(e => {
       const th = e.status_th || "-";
       return `
@@ -430,4 +511,4 @@
   $("no").addEventListener("keydown", (e) => { if(e.key === "Enter") run(); });
 </script>
 </body>
-</html>
+</html>อันไหน 

@@ -39,7 +39,6 @@
       color:var(--text);
     }
 
-    /* Wix iframe friendly: no fixed heights, flexible width */
     .wrap{
       max-width: 980px;
       margin: 0 auto;
@@ -262,6 +261,77 @@
       animation: spin 0.9s linear infinite;
     }
     @keyframes spin{to{transform:rotate(360deg)}}
+
+    /* ===== Progress 1–9 (ใส่ให้ถูกตำแหน่งใน <style>) ===== */
+    .progressWrap{
+      margin-top: 12px;
+      padding: 12px 12px;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      background: linear-gradient(180deg, rgba(15,95,191,.06), transparent);
+    }
+    .progressHead{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      margin-bottom: 10px;
+    }
+    .progressHead .title{
+      font-size:13px;
+      color: var(--muted);
+    }
+    .progressHead .stepText{
+      font-size:12px;
+      font-weight:700;
+      color: var(--text);
+      background: rgba(15,95,191,.08);
+      border: 1px solid rgba(15,95,191,.18);
+      padding: 6px 10px;
+      border-radius: 999px;
+      white-space:nowrap;
+    }
+    .progressBar{
+      position:relative;
+      height:10px;
+      border-radius:999px;
+      background: rgba(15, 23, 42, .08);
+      overflow:hidden;
+    }
+    .progressFill{
+      height:100%;
+      width:0%;
+      background: linear-gradient(90deg, var(--brand), var(--brand-2));
+      border-radius:999px;
+      transition: width .35s ease;
+    }
+    .progressDots{
+      display:flex;
+      justify-content:space-between;
+      gap:8px;
+      margin-top: 10px;
+    }
+    .pdot{
+      width:12px;height:12px;border-radius:999px;
+      background: rgba(15, 23, 42, .12);
+      border: 2px solid rgba(255,255,255,.95);
+      box-shadow: 0 8px 16px rgba(2,6,23,.08);
+    }
+    .pdot.done{ background: var(--brand); }
+    .pdot.active{
+      background: #fff;
+      border-color: rgba(15,95,191,.6);
+      box-shadow: 0 0 0 4px rgba(15,95,191,.15), 0 8px 18px rgba(2,6,23,.08);
+    }
+    .progressLabels{
+      display:grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap:6px 10px;
+      margin-top: 10px;
+      font-size:12px;
+      color: var(--muted);
+    }
+    .progressLabels b{ color: var(--text); font-weight:700; }
   </style>
 </head>
 
@@ -325,24 +395,147 @@
 
   $("year").textContent = String(new Date().getFullYear());
 
-  // Badge classification by Thai status (no Chinese displayed)
+  // ===== 1) แปลงสถานะ (จีน/ไทย) -> ไทยมาตรฐาน เพื่อไม่ให้โชว์จีน =====
+  function isDeliveredText(text){
+    const t = (text || "");
+    return (
+      t.includes("จัดส่งสำเร็จ") || t.includes("ถึงแล้ว") ||
+      /順利送達|配完|已送達|送達收件人|收件人/.test(t)
+    );
+  }
+
+  function toThaiStatus(text){
+    const t = (text || "").trim();
+    if(!t) return "-";
+
+    // Delivered
+    if (isDeliveredText(t)) return "จัดส่งสำเร็จ";
+
+    // Out for delivery
+    if (/配送中|正在將包裹配送/.test(t) || t.includes("กำลังจัดส่ง")) return "กำลังจัดส่งถึงผู้รับ";
+
+    // Transit
+    if (/轉運|運送|途中/.test(t) || t.includes("ระหว่างการขนส่ง") || t.includes("กำลังขนส่ง")) return "อยู่ระหว่างการขนส่งระหว่างประเทศ";
+
+    // Customs
+    if (/放行/.test(t)) return "ศุลกากรอนุญาตให้ปล่อยพัสดุ";
+    if (/清關|海關|通關方式|通關/.test(t) || t.includes("ศุลกากร")) return "อยู่ระหว่างพิธีการศุลกากร";
+
+    // Warehouse out
+    if (/出倉|集運倉出倉/.test(t) || t.includes("ออกจากคลัง")) return "พัสดุออกจากคลังต้นทาง";
+
+    // Warehouse processing / order
+    if (/訂單|下單|建檔/.test(t) || t.includes("รับคำสั่งซื้อ")) return "รับคำสั่งซื้อแล้ว";
+    if (/揀貨|打印|重量|面單/.test(t) || t.includes("คลังสินค้า")) return "คลังสินค้ากำลังเตรียมพัสดุ";
+
+    // Problems / hold
+    if (/不受理|錯單|查無|失敗|退回/.test(t) || t.includes("มีปัญหา") || t.includes("ผิดพลาด")) return "มีปัญหาในการจัดส่ง";
+    if (/休息/.test(t) || t.includes("หยุด")) return "ผู้รับ/บริษัทหยุดทำการ";
+
+    // ถ้ายังมีจีนอยู่และไม่เข้าเงื่อนไข ให้ไม่โชว์จีน
+    if (/[\u4E00-\u9FFF]/.test(t)) return "กำลังดำเนินการ";
+
+    // fallback ไทยเดิม
+    return t;
+  }
+
+  // ถ้าใน events มี delivered ให้สรุปเป็น delivered เสมอ
+  function deriveMainStatus(data){
+    const events = Array.isArray(data?.events) ? data.events : [];
+    if (events.some(e => isDeliveredText(e.status_th))) return "จัดส่งสำเร็จ";
+    return toThaiStatus(data?.latest_status_th || "");
+  }
+
+  // ===== 2) Badge classification (ใช้กับไทยมาตรฐาน) =====
   function classify(th){
     const s = (th || "").toLowerCase();
 
-    if (s.includes("ถึงแล้ว") || s.includes("จัดส่งสำเร็จ") || s.includes("เซ็นรับ") || s.includes("รับพัสดุ")) {
-      return { cls:"ok", label:"ถึงแล้ว" };
+    if (s.includes("จัดส่งสำเร็จ") || s.includes("ถึงแล้ว")) {
+      return { cls:"ok", label:"จัดส่งสำเร็จ" };
     }
-    if (s.includes("ตีกลับ") || s.includes("ไม่สำเร็จ") || s.includes("ผิดพลาด") || s.includes("ยกเลิก") || s.includes("ปัญหา")) {
+    if (s.includes("มีปัญหา") || s.includes("ตีกลับ") || s.includes("ไม่สำเร็จ") || s.includes("ผิดพลาด") || s.includes("ยกเลิก")) {
       return { cls:"bad", label:"มีปัญหา" };
     }
-    if (s.includes("กำลัง") || s.includes("ระหว่าง") || s.includes("ขนส่ง") || s.includes("ส่งต่อ") || s.includes("ออกจาก") || s.includes("กำลังดำเนินการ")) {
+    if (s.includes("กำลังจัดส่ง") || s.includes("ขนส่ง") || s.includes("ศุลกากร") || s.includes("คลังสินค้า") || s.includes("กำลังดำเนินการ")) {
       return { cls:"warn", label:"กำลังขนส่ง" };
     }
     return { cls:"warn", label:"กำลังดำเนินการ" };
   }
 
+  // ===== 3) Progress 1–9 (ใส่ให้ถูกต้องใน <script>) =====
+  const STEPS_9 = [
+    "รับคำสั่งซื้อแล้ว",
+    "คลังสินค้ากำลังเตรียมพัสดุ",
+    "พัสดุออกจากคลังต้นทาง",
+    "อยู่ระหว่างการขนส่งระหว่างประเทศ",
+    "อยู่ระหว่างพิธีการศุลกากร",
+    "ศุลกากรอนุญาตให้ปล่อยพัสดุ",
+    "รับเข้าศูนย์ปลายทาง",
+    "กำลังจัดส่งถึงผู้รับ",
+    "จัดส่งสำเร็จ",
+  ];
+
+  function statusToStepIndex(thTH){
+    const s = (thTH || "").toLowerCase();
+    if (s.includes("จัดส่งสำเร็จ")) return 9;
+    if (s.includes("กำลังจัดส่ง")) return 8;
+    if (s.includes("ศูนย์ปลายทาง")) return 7;
+    if (s.includes("ปล่อยพัสดุ")) return 6;
+    if (s.includes("พิธีการศุลกากร") || s.includes("ศุลกากร")) return 5;
+    if (s.includes("ขนส่งระหว่างประเทศ") || (s.includes("ขนส่ง") && !s.includes("กำลังจัดส่ง"))) return 4;
+    if (s.includes("ออกจากคลัง")) return 3;
+    if (s.includes("คลังสินค้า")) return 2;
+    if (s.includes("รับคำสั่งซื้อ")) return 1;
+    return 2;
+  }
+
+  function renderProgress9(stepIndex){
+    const idx = Math.max(1, Math.min(9, stepIndex));
+    const pct = (idx / 9) * 100;
+
+    const dots = Array.from({length:9}).map((_,i)=>{
+      const n = i+1;
+      const cls = n < idx ? "pdot done" : (n === idx ? "pdot active" : "pdot");
+      return `<span class="${cls}" title="ขั้นที่ ${n}: ${STEPS_9[n-1]}"></span>`;
+    }).join("");
+
+    const labels = `
+      <div class="progressLabels">
+        <div><b>1</b> รับคำสั่งซื้อ</div>
+        <div><b>2</b> คลังเตรียม</div>
+        <div><b>3</b> ออกจากคลัง</div>
+        <div><b>4</b> ขนส่ง</div>
+        <div><b>5</b> ศุลกากร</div>
+        <div><b>6</b> ปล่อยพัสดุ</div>
+        <div><b>7</b> ศูนย์ปลายทาง</div>
+        <div><b>8</b> ออกนำส่ง</div>
+        <div><b>9</b> สำเร็จ</div>
+      </div>
+    `;
+
+    return `
+      <div class="progressWrap">
+        <div class="progressHead">
+          <div class="title">ความคืบหน้า</div>
+          <div class="stepText">ขั้นที่ ${idx}/9 · ${STEPS_9[idx-1] || "-"}</div>
+        </div>
+
+        <div class="progressBar" aria-label="progress">
+          <div class="progressFill" style="width:${pct}%"></div>
+        </div>
+
+        <div class="progressDots" aria-hidden="true">${dots}</div>
+        ${labels}
+      </div>
+    `;
+  }
+
+  // ===== 4) Render Summary + Progress =====
   function renderSummary(data){
-    const cls = classify(data.latest_status_th);
+    const mainTH = deriveMainStatus(data);      // ✅ ใช้สถานะไทยมาตรฐาน
+    const cls = classify(mainTH);
+    const stepIndex = statusToStepIndex(mainTH);
+
     summary.style.display = "block";
     summary.innerHTML = `
       <div class="summaryTop">
@@ -360,19 +553,22 @@
       <div style="display:flex;flex-direction:column;gap:6px">
         <div class="muted">สถานะล่าสุด</div>
         <div style="font-size:18px;font-weight:700;letter-spacing:.2px">
-          ${data.latest_status_th || "-"}
+          ${mainTH || "-"}
         </div>
       </div>
+
+      ${renderProgress9(stepIndex)}
     `;
   }
 
+  // ===== 5) Timeline: แสดงไทยเท่านั้น =====
   function renderTimeline(events){
     const items = (events || []).map(e => {
-      const th = e.status_th || "-";
+      const thTH = toThaiStatus(e.status_th || "-");
       return `
         <div class="event">
           <div class="time">${e.time || "-"}</div>
-          <div class="text">${th}</div>
+          <div class="text">${thTH}</div>
         </div>
       `;
     }).join("");

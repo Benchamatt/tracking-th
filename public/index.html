@@ -7,73 +7,84 @@
 
   <style>
     :root{
-      --bg:#f6f8fb;
+      --bg:#f4f6f9;
       --surface:#ffffff;
-      --surface-2:#f1f4f9;
-      --text:#0f172a;
-      --muted:#64748b;
-      --border:#e5e7eb;
-      --shadow: 0 10px 24px rgba(2, 6, 23, 0.08);
+      --surface-2:#f6f7fb;
+      --text:#0b1220;
+      --muted:#5b667a;
+      --border:#e6e9f0;
 
-      --brand:#0f5fbf;
-      --brand-2:#0a3f7a;
+      --navy:#0a2f5a;
+      --navy-2:#0b3a70;
+      --gold:#b58a3a;
 
-      --ok:#0f766e;
-      --warn:#b45309;
-      --bad:#b91c1c;
+      --ok:#0a7a5c;
+      --warn:#b06b12;
+      --bad:#b42318;
 
-      --badge-bg: rgba(15, 95, 191, 0.10);
-      --badge-text: #0f5fbf;
-
-      --ring: rgba(15,95,191,.25);
+      --shadow: 0 16px 40px rgba(10, 20, 40, .08);
+      --shadow-soft: 0 10px 22px rgba(10, 20, 40, .06);
+      --ring: rgba(10, 47, 90, .18);
     }
 
     *{box-sizing:border-box}
     html,body{height:100%}
     body{
       margin:0;
-      font-family: system-ui, -apple-system, "Segoe UI", Tahoma, sans-serif;
-      background: radial-gradient(1200px 600px at 20% -10%, rgba(15,95,191,.10), transparent 60%),
-                  radial-gradient(1000px 500px at 90% 0%, rgba(15,95,191,.08), transparent 55%),
-                  var(--bg);
+      font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Tahoma, sans-serif;
       color:var(--text);
+      background:
+        radial-gradient(1100px 520px at 14% -6%, rgba(10,47,90,.10), transparent 60%),
+        radial-gradient(900px 460px at 90% 0%, rgba(181,138,58,.10), transparent 55%),
+        var(--bg);
     }
 
     .wrap{
-      max-width: 980px;
+      max-width: 1040px;
       margin: 0 auto;
-      padding: 20px 14px 28px;
+      padding: 22px 14px 28px;
     }
 
+    /* Topbar (lux / formal) */
     .topbar{
       display:flex;
       align-items:center;
       justify-content:space-between;
       gap:12px;
-      padding: 14px 16px;
-      border:1px solid var(--border);
-      border-radius: 16px;
-      background: linear-gradient(135deg, rgba(15,95,191,.12), rgba(15,95,191,.04));
+      padding: 16px 18px;
+      border:1px solid rgba(255,255,255,.65);
+      border-radius: 18px;
+      background: linear-gradient(135deg, rgba(255,255,255,.92), rgba(255,255,255,.78));
       box-shadow: var(--shadow);
+      backdrop-filter: blur(8px);
     }
 
     .brand{
       display:flex;
       align-items:center;
-      gap:10px;
+      gap:12px;
       min-width:0;
     }
 
     .logo{
-      width:40px;height:40px;
-      border-radius: 12px;
-      background: linear-gradient(135deg, var(--brand), var(--brand-2));
+      width:42px;height:42px;
+      border-radius: 14px;
+      background: linear-gradient(135deg, var(--navy), var(--navy-2));
       display:grid;
       place-items:center;
-      box-shadow: 0 10px 18px rgba(15,95,191,.25);
+      box-shadow: 0 14px 26px rgba(10,47,90,.24);
       flex:0 0 auto;
+      position:relative;
+      overflow:hidden;
     }
-    .logo svg{width:22px;height:22px;fill:#fff}
+    .logo:after{
+      content:"";
+      position:absolute;
+      inset:-40%;
+      background: radial-gradient(circle at 30% 30%, rgba(255,255,255,.22), transparent 55%);
+      transform: rotate(18deg);
+    }
+    .logo svg{width:22px;height:22px;fill:#fff; position:relative; z-index:1}
 
     .brand h1{
       margin:0;
@@ -87,39 +98,41 @@
     .brand .sub{
       font-size:12px;
       color:var(--muted);
-      margin-top:2px;
+      margin-top:3px;
     }
 
     .grid{
       display:grid;
-      grid-template-columns: 1.1fr .9fr;
+      grid-template-columns: 1.12fr .88fr;
       gap: 14px;
       margin-top: 14px;
+      align-items:start;
     }
-    @media(max-width: 860px){
+    @media(max-width: 920px){
       .grid{grid-template-columns:1fr}
     }
 
     .card{
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      box-shadow: var(--shadow);
+      background: rgba(255,255,255,.92);
+      border: 1px solid rgba(255,255,255,.65);
+      border-radius: 18px;
+      box-shadow: var(--shadow-soft);
       padding: 16px;
       overflow:hidden;
+      backdrop-filter: blur(8px);
     }
 
     .card h2{
       margin:0 0 8px 0;
       font-size:14px;
-      letter-spacing:.2px;
+      letter-spacing:.3px;
     }
     .muted{color:var(--muted); font-size:13px}
     .small{font-size:12px; color:var(--muted)}
 
     .searchRow{
       display:grid;
-      grid-template-columns: 1fr 132px;
+      grid-template-columns: 1fr 148px;
       gap: 10px;
       margin-top: 10px;
     }
@@ -132,9 +145,10 @@
       padding: 12px 14px;
       border-radius: 14px;
       border: 1px solid var(--border);
-      background: var(--surface-2);
+      background: linear-gradient(180deg, rgba(255,255,255,.9), rgba(246,247,251,.9));
       color: var(--text);
       font-size: 15px;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.8);
     }
     input:focus{outline:3px solid var(--ring); border-color: transparent}
 
@@ -142,11 +156,12 @@
       border:none;
       border-radius: 14px;
       padding: 12px 14px;
-      background: linear-gradient(135deg, var(--brand), var(--brand-2));
+      background: linear-gradient(135deg, var(--navy), var(--navy-2));
       color:#fff;
       font-size:15px;
       cursor:pointer;
-      box-shadow: 0 12px 18px rgba(15,95,191,.22);
+      box-shadow: 0 14px 22px rgba(10,47,90,.18);
+      letter-spacing:.2px;
     }
     .btn:disabled{
       opacity:.6;
@@ -154,41 +169,49 @@
       box-shadow:none;
     }
 
+    /* Summary */
     .summaryTop{
       display:flex;
       justify-content:space-between;
       align-items:flex-start;
       gap:10px;
-      margin-bottom: 10px;
+      margin-bottom: 12px;
     }
 
     .kv{
       display:grid;
       gap:6px;
     }
-    .kv b{font-size:13px}
+    .kv b{font-size:12px; letter-spacing:.2px}
     .kv .value{font-size:14px}
 
     .badge{
       display:inline-flex;
       align-items:center;
       gap:8px;
-      padding: 8px 10px;
+      padding: 8px 12px;
       border-radius: 999px;
-      background: var(--badge-bg);
-      color: var(--badge-text);
-      border: 1px solid rgba(15,95,191,.18);
       font-size: 12px;
-      font-weight: 600;
+      font-weight: 700;
       white-space:nowrap;
+      border: 1px solid rgba(10,20,40,.10);
+      background: rgba(255,255,255,.85);
+      box-shadow: 0 10px 20px rgba(10,20,40,.06);
     }
-    .dot{width:8px;height:8px;border-radius:999px;background: currentColor;opacity:.9}
+    .dot{width:8px;height:8px;border-radius:999px;background: currentColor;opacity:.95}
 
-    .badge.ok{background: rgba(15,118,110,.12); color: var(--ok); border-color: rgba(15,118,110,.25)}
-    .badge.warn{background: rgba(180,83,9,.12); color: var(--warn); border-color: rgba(180,83,9,.25)}
-    .badge.bad{background: rgba(185,28,28,.12); color: var(--bad); border-color: rgba(185,28,28,.25)}
+    .badge.ok{color: var(--ok)}
+    .badge.warn{color: var(--warn)}
+    .badge.bad{color: var(--bad)}
 
-    /* Timeline */
+    .headline{
+      padding-top: 2px;
+      font-size: 18px;
+      font-weight: 800;
+      letter-spacing:.2px;
+    }
+
+    /* Timeline (lux) */
     .timeline{
       margin-top: 12px;
       position:relative;
@@ -197,40 +220,51 @@
     .timeline:before{
       content:"";
       position:absolute;
-      left:7px;
+      left:8px;
       top:2px;
       bottom:2px;
       width:2px;
-      background: linear-gradient(to bottom, rgba(15,95,191,.35), rgba(15,95,191,.08));
+      background: linear-gradient(to bottom, rgba(10,47,90,.30), rgba(10,47,90,.06));
     }
 
     .event{
       position:relative;
-      padding: 10px 10px 10px 12px;
-      border-radius: 14px;
+      padding: 12px 12px 12px 12px;
+      border-radius: 16px;
       border: 1px solid var(--border);
-      background: var(--surface-2);
+      background: linear-gradient(180deg, rgba(246,247,251,.92), rgba(255,255,255,.86));
       margin-bottom: 10px;
+      box-shadow: 0 10px 18px rgba(10,20,40,.05);
     }
+
     .event:before{
       content:"";
       position:absolute;
       left:-18px;
-      top: 16px;
+      top: 18px;
       width: 12px;
       height: 12px;
       border-radius: 999px;
-      background: var(--surface);
-      border: 3px solid rgba(15,95,191,.55);
-      box-shadow: 0 0 0 3px rgba(15,95,191,.10);
+      background: #fff;
+      border: 3px solid rgba(10,47,90,.45);
+      box-shadow: 0 0 0 4px rgba(10,47,90,.08);
     }
 
-    .event .time{font-size:12px; color: var(--muted)}
-    .event .text{font-size:14px; font-weight:600; margin-top:4px}
+    .event .time{
+      font-size:12px;
+      color: var(--muted);
+      letter-spacing:.1px;
+    }
+    .event .text{
+      font-size:14px;
+      font-weight:750;
+      margin-top:6px;
+      line-height:1.35;
+    }
 
     .footer{
       margin-top: 14px;
-      padding: 12px 6px 2px;
+      padding: 10px 6px 2px;
       text-align:center;
       color: var(--muted);
       font-size: 12px;
@@ -239,8 +273,8 @@
     .footer a:hover{text-decoration:underline}
 
     .errorBox{
-      border: 1px solid rgba(185,28,28,.25);
-      background: rgba(185,28,28,.08);
+      border: 1px solid rgba(180,35,24,.25);
+      background: rgba(180,35,24,.06);
       color: var(--bad);
       border-radius: 14px;
       padding: 10px 12px;
@@ -256,90 +290,11 @@
     }
     .spinner{
       width:16px;height:16px;border-radius:999px;
-      border:2px solid rgba(15,95,191,.25);
-      border-top-color: rgba(15,95,191,.85);
+      border:2px solid rgba(10,47,90,.18);
+      border-top-color: rgba(10,47,90,.85);
       animation: spin 0.9s linear infinite;
     }
     @keyframes spin{to{transform:rotate(360deg)}}
-
-    /* ===== Progress 1–9 ===== */
-    .progressWrap{
-      margin-top: 12px;
-      padding: 12px 12px;
-      border: 1px solid var(--border);
-      border-radius: 14px;
-      background: linear-gradient(180deg, rgba(15,95,191,.06), transparent);
-    }
-
-    .progressHead{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:10px;
-      margin-bottom: 10px;
-    }
-    .progressHead .title{
-      font-size:13px;
-      color: var(--muted);
-    }
-    .progressHead .stepText{
-      font-size:12px;
-      font-weight:700;
-      color: var(--text);
-      background: rgba(15,95,191,.08);
-      border: 1px solid rgba(15,95,191,.18);
-      padding: 6px 10px;
-      border-radius: 999px;
-      white-space:nowrap;
-    }
-
-    .progressBar{
-      position:relative;
-      height:10px;
-      border-radius:999px;
-      background: rgba(15, 23, 42, .08);
-      overflow:hidden;
-    }
-    .progressFill{
-      height:100%;
-      width:0%;
-      background: linear-gradient(90deg, var(--brand), var(--brand-2));
-      border-radius:999px;
-      transition: width .35s ease;
-    }
-
-    .progressDots{
-      display:flex;
-      justify-content:space-between;
-      gap:8px;
-      margin-top: 10px;
-    }
-    .pdot{
-      width:12px;height:12px;border-radius:999px;
-      background: rgba(15, 23, 42, .12);
-      border: 2px solid rgba(255,255,255,.95);
-      box-shadow: 0 8px 16px rgba(2,6,23,.08);
-    }
-    .pdot.done{ background: var(--brand); }
-    .pdot.active{
-      background: #fff;
-      border-color: rgba(15,95,191,.6);
-      box-shadow: 0 0 0 4px rgba(15,95,191,.15), 0 8px 18px rgba(2,6,23,.08);
-    }
-
-    /* เรียง label 1→9 แบบอ่านง่าย: แถวบน 1-5, แถวล่าง 6-9 */
-    .progressLabels{
-      display:grid;
-      grid-template-columns: repeat(5, 1fr);
-      gap:6px 10px;
-      margin-top: 10px;
-      font-size:12px;
-      color: var(--muted);
-    }
-    .progressLabels b{ color: var(--text); font-weight:700; }
-    @media (max-width: 520px){
-      .progressLabels{ grid-template-columns: repeat(3, 1fr); }
-    }
   </style>
 </head>
 
@@ -403,203 +358,87 @@
 
   $("year").textContent = String(new Date().getFullYear());
 
-  // ---------- Status mapping (Chinese/Thai -> Thai standard) ----------
-  function isDeliveredText(text){
-    const t = (text || "");
-    return (
-      t.includes("จัดส่งสำเร็จ") || t.includes("ถึงแล้ว") ||
-      /順利送達|配完|已送達|送達收件人|收件人/.test(t)
-    );
-  }
-
+  // ---------- Standard TH status (10) ----------
   function toThaiStatus(text){
     const t = (text || "").trim();
     if(!t) return "-";
 
-    if (isDeliveredText(t)) return "จัดส่งสำเร็จ";
-
-    if (/配送中|正在將包裹配送/.test(t) || t.includes("กำลังจัดส่ง")) return "กำลังจัดส่งถึงผู้รับ";
-
-    if (/轉運|運送|途中/.test(t) || t.includes("ระหว่างการขนส่ง") || t.includes("กำลังขนส่ง")) {
-      return "อยู่ระหว่างการขนส่งระหว่างประเทศ";
+    // If contains Chinese, map only what we can; otherwise hide it.
+    if (/[\u4E00-\u9FFF]/.test(t)) {
+      if (/順利送達|配完|已送達|送達收件人|收件人/.test(t)) return "จัดส่งสำเร็จ";
+      if (/配送中|正在將包裹配送/.test(t)) return "อยู่ระหว่างการนำส่งถึงผู้รับ";
+      if (/清關|海關|通關方式|通關/.test(t)) return "ถึงศุลกากรและอยู่ระหว่างการตรวจสอบ";
+      if (/放行/.test(t)) return "ผ่านพิธีการศุลกากรเรียบร้อยแล้ว";
+      if (/出倉|集運倉出倉/.test(t)) return "พัสดุออกจากศูนย์คัดแยกต้นทางแล้ว";
+      return "กำลังดำเนินการ";
     }
 
-    if (/放行/.test(t)) return "ศุลกากรอนุญาตให้ปล่อยพัสดุ";
-    if (/清關|海關|通關方式|通關/.test(t) || t.includes("ศุลกากร")) return "อยู่ระหว่างพิธีการศุลกากร";
+    if (/จัดส่งสำเร็จ|การจัดส่งสำเร็จ|ถึงแล้ว|เซ็นรับ|รับพัสดุ/.test(t)) return "จัดส่งสำเร็จ";
+    if (/อยู่ระหว่างการนำส่ง|อยู่ระหว่างการจัดส่ง|กำลังนำส่ง|กำลังจัดส่ง|คนขับรถ/.test(t)) return "อยู่ระหว่างการนำส่งถึงผู้รับ";
+    if (/ถึงศูนย์คัดแยกสินค้าปลายทาง|ถึงศูนย์คัดแยกปลายทาง|ถึงศูนย์ปลายทาง|ถึงสาขาปลายทาง/.test(t)) return "ถึงศูนย์คัดแยกปลายทางแล้ว";
+    if (/ผ่านพิธีการศุลกากร|ปล่อยพัสดุ|ผ่านการตรวจสอบโดยศุลกากร|ศุลกากรปล่อย/.test(t)) return "ผ่านพิธีการศุลกากรเรียบร้อยแล้ว";
+    if (/ถึงที่ทำการศุลกากร|อยู่ระหว่างการตรวจสอบของหน่วยงาน|ตรวจสอบเอกสาร|พิธีการศุลกากร/.test(t)) return "ถึงศุลกากรและอยู่ระหว่างการตรวจสอบ";
+    if (/อยู่ระหว่างการจัดส่งไปประเทศ\s*ไทย|อยู่ระหว่างการจัดส่งไปประเทศไทย|ขนส่งระหว่างประเทศ|ระหว่างประเทศ|ออกจากประเทศต้นทาง|กำลังออกจากประเทศต้นทาง/.test(t)) return "อยู่ระหว่างการขนส่งระหว่างประเทศ";
+    if (/ส่งมอบให้บริษัทขนส่งต่างประเทศ|รอส่งไปยังคลังสินค้า\s*ขาออก|เตรียมการจัดส่งไปต่างประเทศ|ส่งมอบให้ผู้ให้บริการขนส่งระหว่างประเทศ/.test(t)) return "ส่งมอบให้ผู้ให้บริการขนส่งระหว่างประเทศแล้ว";
+    if (/ออกจากศูนย์คัดแยกสินค้า|พัสดุถูกส่งต่อไปยังสาขาปลายทาง|ส่งต่อไปยังสาขาปลายทาง/.test(t)) return "พัสดุออกจากศูนย์คัดแยกต้นทางแล้ว";
+    if (/รับพัสดุแล้ว|รับพัสดุเข้าระบบ|กำลังเตรียมพัสดุ|ผู้ส่งกำลังเตรียมพัสดุ|เตรียมพัสดุ/.test(t)) return "รับพัสดุเข้าระบบเรียบร้อยแล้ว";
+    if (/นำมาถึงสาขาแล้ว|ถึงสาขาแล้ว|รอการรับเข้าระบบ|รอรับเข้าระบบ/.test(t)) return "พัสดุถึงสาขาต้นทางแล้ว (รอรับเข้าระบบ)";
 
-    if (/出倉|集運倉出倉/.test(t) || t.includes("ออกจากคลัง")) return "พัสดุออกจากคลังต้นทาง";
-
-    if (/訂單|下單|建檔/.test(t) || t.includes("รับคำสั่งซื้อ")) return "รับคำสั่งซื้อแล้ว";
-    if (/揀貨|打印|重量|面單/.test(t) || t.includes("คลังสินค้า") || t.includes("เตรียมพัสดุ")) return "คลังสินค้ากำลังเตรียมพัสดุ";
-
-    if (/不受理|錯單|查無|失敗|退回/.test(t) || t.includes("มีปัญหา") || t.includes("ผิดพลาด")) return "มีปัญหาในการจัดส่ง";
-    if (/休息/.test(t) || t.includes("หยุด")) return "ผู้รับ/บริษัทหยุดทำการ";
-
-    if (/[\u4E00-\u9FFF]/.test(t)) return "กำลังดำเนินการ";
-    return t;
-  }
-
-  function deriveMainStatus(data){
-    const events = Array.isArray(data?.events) ? data.events : [];
-    if (events.some(e => isDeliveredText(e.status_th))) return "จัดส่งสำเร็จ";
-    return toThaiStatus(data?.latest_status_th || "");
+    return "กำลังดำเนินการ";
   }
 
   // ---------- Badge classification ----------
   function classify(th){
-    const s = (th || "").toLowerCase();
-
-    if (s.includes("จัดส่งสำเร็จ") || s.includes("ถึงแล้ว")) {
-      return { cls:"ok", label:"จัดส่งสำเร็จ" };
-    }
-    if (s.includes("มีปัญหา") || s.includes("ตีกลับ") || s.includes("ไม่สำเร็จ") || s.includes("ผิดพลาด") || s.includes("ยกเลิก")) {
-      return { cls:"bad", label:"มีปัญหา" };
-    }
-    if (s.includes("กำลังจัดส่ง") || s.includes("ขนส่ง") || s.includes("ศุลกากร") || s.includes("คลังสินค้า") || s.includes("กำลังดำเนินการ")) {
-      return { cls:"warn", label:"กำลังขนส่ง" };
-    }
-    return { cls:"warn", label:"กำลังดำเนินการ" };
+    const s = (th || "").trim();
+    if (s === "จัดส่งสำเร็จ") return { cls:"ok", label:"จัดส่งสำเร็จ" };
+    if (s.includes("มีปัญหา")) return { cls:"bad", label:"มีปัญหา" };
+    return { cls:"warn", label:"อยู่ระหว่างดำเนินการ" };
   }
 
-  // ---------- Progress 1–9 ----------
-  const STEPS_9 = [
-    "รับคำสั่งซื้อแล้ว",
-    "คลังสินค้ากำลังเตรียมพัสดุ",
-    "พัสดุออกจากคลังต้นทาง",
-    "อยู่ระหว่างการขนส่งระหว่างประเทศ",
-    "อยู่ระหว่างพิธีการศุลกากร",
-    "ศุลกากรอนุญาตให้ปล่อยพัสดุ",
-    "รับเข้าศูนย์ปลายทาง",
-    "กำลังจัดส่งถึงผู้รับ",
-    "จัดส่งสำเร็จ",
-  ];
-
-  function statusToStepIndex(thTH){
-    const s = (thTH || "").toLowerCase();
-    if (s.includes("จัดส่งสำเร็จ")) return 9;
-    if (s.includes("กำลังจัดส่ง")) return 8;
-    if (s.includes("ศูนย์ปลายทาง")) return 7;
-    if (s.includes("ปล่อยพัสดุ")) return 6;
-    if (s.includes("พิธีการศุลกากร") || s.includes("ศุลกากร")) return 5;
-    if (s.includes("ขนส่งระหว่างประเทศ") || (s.includes("ขนส่ง") && !s.includes("กำลังจัดส่ง"))) return 4;
-    if (s.includes("ออกจากคลัง")) return 3;
-    if (s.includes("คลังสินค้า")) return 2;
-    if (s.includes("รับคำสั่งซื้อ")) return 1;
-    return 2;
+  // ---------- Main status: Delivered wins ----------
+  function deriveMainStatus(data){
+    const events = Array.isArray(data?.events) ? data.events : [];
+    const mapped = events.map(e => toThaiStatus(e.status_th || ""));
+    if (mapped.includes("จัดส่งสำเร็จ")) return "จัดส่งสำเร็จ";
+    return toThaiStatus(data?.latest_status_th || "");
   }
 
-  function renderProgress9(stepIndex){
-    const idx = Math.max(1, Math.min(9, stepIndex));
-    const pct = (idx / 9) * 100;
-
-    const dots = Array.from({length:9}).map((_,i)=>{
-      const n = i+1;
-      const cls = n < idx ? "pdot done" : (n === idx ? "pdot active" : "pdot");
-      return `<span class="${cls}" title="ขั้นที่ ${n}: ${STEPS_9[n-1]}"></span>`;
-    }).join("");
-
-    const labels = `
-      <div class="progressLabels">
-        <div><b>1</b> รับคำสั่งซื้อ</div>
-        <div><b>2</b> คลังเตรียม</div>
-        <div><b>3</b> ออกจากคลัง</div>
-        <div><b>4</b> ขนส่ง</div>
-        <div><b>5</b> ศุลกากร</div>
-        <div><b>6</b> ปล่อยพัสดุ</div>
-        <div><b>7</b> ศูนย์ปลายทาง</div>
-        <div><b>8</b> ออกนำส่ง</div>
-        <div><b>9</b> สำเร็จ</div>
-        <div></div>
-      </div>
-    `;
-
-    return `
-      <div class="progressWrap">
-        <div class="progressHead">
-          <div class="title">ความคืบหน้า</div>
-          <div class="stepText">ขั้นที่ ${idx}/9 · ${STEPS_9[idx-1] || "-"}</div>
-        </div>
-
-        <div class="progressBar" aria-label="progress">
-          <div class="progressFill" style="width:${pct}%"></div>
-        </div>
-
-        <div class="progressDots" aria-hidden="true">${dots}</div>
-        ${labels}
-      </div>
-    `;
-  }
-
-  // ---------- Timeline: pick important events, dedupe, limit 10 ----------
-  const IMPORTANT_ORDER = [
-    { key:"delivered", match: (raw, th)=> isDeliveredText(raw) || th === "จัดส่งสำเร็จ" },
-    { key:"out_for_delivery", match: (raw, th)=> th.includes("กำลังจัดส่ง") },
-    { key:"dest_facility", match: (raw, th)=> th.includes("ศูนย์ปลายทาง") },
-    { key:"released", match: (raw, th)=> th.includes("ปล่อยพัสดุ") },
-    { key:"customs", match: (raw, th)=> th.includes("พิธีการศุลกากร") },
-    { key:"transit", match: (raw, th)=> th.includes("ขนส่งระหว่างประเทศ") || th.includes("อยู่ระหว่างการขนส่ง") },
-    { key:"warehouse_out", match: (raw, th)=> th.includes("ออกจากคลัง") },
-    { key:"warehouse", match: (raw, th)=> th.includes("คลังสินค้า") || th.includes("เตรียมพัสดุ") },
-    { key:"order", match: (raw, th)=> th.includes("รับคำสั่งซื้อ") },
-    { key:"hold", match: (raw, th)=> th.includes("หยุดทำการ") },
-    { key:"issue", match: (raw, th)=> th.includes("มีปัญหา") },
-  ];
-
-  function dedupeByThaiConsecutive(events){
-    const out = [];
-    let last = "";
-    for(const e of events){
-      const th = e._th || toThaiStatus(e.status_th || "");
-      if(th === last) continue;
-      last = th;
-      out.push(e);
-    }
-    return out;
-  }
-
+  // ---------- Timeline: important, dedupe, limit 10 ----------
   function pickImportantEvents(rawEvents, limit = 10){
     if(!Array.isArray(rawEvents)) return [];
 
     const mapped = rawEvents.map(e => ({
       ...e,
-      _raw: (e.status_th || "").trim(),
       _th: toThaiStatus(e.status_th || ""),
     }));
 
-    const deduped = dedupeByThaiConsecutive(mapped);
+    // Remove consecutive duplicates after mapping
+    const dedup = [];
+    let last = "";
+    for(const e of mapped){
+      if(!e._th || e._th === "-") continue;
+      if(e._th === last) continue;
+      last = e._th;
+      dedup.push(e);
+    }
 
+    // Pick latest of each status (max 10)
     const seen = new Set();
-    const picked = [];
-
-    for(const e of deduped){
-      const grp = IMPORTANT_ORDER.find(g => g.match(e._raw, e._th));
-      if(!grp) continue;
-      if(seen.has(grp.key)) continue;
-      seen.add(grp.key);
-      picked.push({ ...e, _group: grp.key });
-      if(picked.length >= limit) break;
+    const out = [];
+    for(const e of dedup){
+      if(seen.has(e._th)) continue;
+      seen.add(e._th);
+      out.push(e);
+      if(out.length >= limit) break;
     }
 
-    // เติม fallback ถ้าน้อยเกินไป (กันซ้ำตาม time+th)
-    if(picked.length < Math.min(limit, 6)){
-      const used = new Set(picked.map(x => `${x.time}|${x._th}`));
-      for(const e of deduped){
-        const k = `${e.time}|${e._th}`;
-        if(used.has(k)) continue;
-        used.add(k);
-        picked.push(e);
-        if(picked.length >= limit) break;
-      }
-    }
-
-    return picked.slice(0, limit);
+    return out;
   }
 
   // ---------- Render ----------
   function renderSummary(data){
     const mainTH = deriveMainStatus(data);
     const cls = classify(mainTH);
-    const stepIndex = statusToStepIndex(mainTH);
 
     summary.style.display = "block";
     summary.innerHTML = `
@@ -615,27 +454,18 @@
         </span>
       </div>
 
-      <div style="display:flex;flex-direction:column;gap:6px">
-        <div class="muted">สถานะล่าสุด</div>
-        <div style="font-size:18px;font-weight:700;letter-spacing:.2px">
-          ${mainTH || "-"}
-        </div>
-      </div>
-
-      ${renderProgress9(stepIndex)}
+      <div class="muted">สถานะล่าสุด</div>
+      <div class="headline">${mainTH || "-"}</div>
     `;
   }
 
   function renderTimeline(events){
-    const items = (events || []).map(e => {
-      const thTH = e._th || toThaiStatus(e.status_th || "-");
-      return `
-        <div class="event">
-          <div class="time">${e.time || "-"}</div>
-          <div class="text">${thTH}</div>
-        </div>
-      `;
-    }).join("");
+    const items = (events || []).map(e => `
+      <div class="event">
+        <div class="time">${e.time || "-"}</div>
+        <div class="text">${e._th || "-"}</div>
+      </div>
+    `).join("");
 
     timeline.innerHTML = items || `<div class="muted" style="padding:10px 0">ไม่มีข้อมูล</div>`;
   }
@@ -647,7 +477,7 @@
       <div class="loading">
         <span class="spinner" aria-hidden="true"></span>
         <div>
-          <div style="font-weight:600">กำลังค้นหา...</div>
+          <div style="font-weight:700">กำลังค้นหา...</div>
           <div class="small">โปรดรอสักครู่</div>
         </div>
       </div>

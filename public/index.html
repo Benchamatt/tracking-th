@@ -340,39 +340,78 @@
 
   $("year").textContent = String(new Date().getFullYear());
 
-  function normalizeLatestStatusTH(th){
-    // เปลี่ยนเฉพาะ “จัดส่งสำเร็จ” ให้เป็น “จัดส่ง”
-    if(!th) return th;
-    return th.replace("จัดส่งสำเร็จ", "จัดส่ง");
+ function isDeliveredText(text){
+  const t = (text || "");
+  return (
+    t.includes("จัดส่งสำเร็จ") || t.includes("ถึงแล้ว") || t.includes("เซ็นรับ") || t.includes("รับพัสดุ") ||
+    /順利送達|配完|已送達|送達收件人|收件人/.test(t)
+  );
+}
+
+// แปลงข้อความเดิม (ไทย/จีน/อังกฤษ) -> สถานะไทย "สั้นและมาตรฐาน"
+function toThaiStatus(text){
+  const t = (text || "").trim();
+  if(!t) return "-";
+
+  // ถ้าเป็นไทยอยู่แล้ว (และไม่อยากแตะ) ก็คืนค่า แต่กันจีนปน
+  // หากมีตัวจีนปน ให้แปลงเป็นไทยตาม mapping ด้านล่าง
+  const hasCJK = /[\u4E00-\u9FFF]/.test(t);
+
+  // Delivered
+  if (t.includes("จัดส่งสำเร็จ") || isDeliveredText(t)) return "จัดส่งสำเร็จ";
+
+  // Out for delivery / delivering
+  if (t.includes("อยู่ระหว่างการจัดส่ง") || t.includes("กำลังจัดส่ง") || /配送中|正在將包裹配送/.test(t)) {
+    return "กำลังจัดส่งถึงผู้รับ";
   }
 
-  function classify(th){
-    const s = (th || "").toLowerCase();
-
-    // ไทย
-    if (s.includes("ถึงแล้ว") || s.includes("จัดส่งสำเร็จ") || s.includes("เซ็นรับ") || s.includes("รับพัสดุ")) {
-      return { cls:"ok", label:"ถึงแล้ว" };
-    }
-    if (s.includes("ตีกลับ") || s.includes("ไม่สำเร็จ") || s.includes("ผิดพลาด") || s.includes("ยกเลิก") || s.includes("ปัญหา")) {
-      return { cls:"bad", label:"มีปัญหา" };
-    }
-    if (s.includes("กำลัง") || s.includes("ระหว่าง") || s.includes("ขนส่ง") || s.includes("ส่งต่อ") || s.includes("ออกจาก") || s.includes("กำลังดำเนินการ")) {
-      return { cls:"warn", label:"กำลังขนส่ง" };
-    }
-
-    // จีน (รองรับสถานะพัสดุต่างประเทศ)
-    if (s.includes("順利送達") || s.includes("配完") || s.includes("收件人") || s.includes("送達")) {
-      return { cls:"ok", label:"ถึงแล้ว" };
-    }
-    if (s.includes("不受理") || s.includes("錯單") || s.includes("查無") || s.includes("失敗") || s.includes("退回") || s.includes("問題")) {
-      return { cls:"bad", label:"มีปัญหา" };
-    }
-    if (s.includes("配送中") || s.includes("轉運") || s.includes("已集貨") || s.includes("出倉") || s.includes("清關") || s.includes("通關") || s.includes("放行")) {
-      return { cls:"warn", label:"กำลังขนส่ง" };
-    }
-
-    return { cls:"warn", label:"กำลังดำเนินการ" };
+  // Transit
+  if (t.includes("ระหว่างขนส่ง") || t.includes("กำลังขนส่ง") || /轉運|途中|運送/.test(t)) {
+    return "อยู่ระหว่างการขนส่ง";
   }
+
+  // Warehouse out / depart
+  if (t.includes("ออกจากคลัง") || /出倉|集運倉出倉/.test(t)) {
+    return "พัสดุออกจากคลังสินค้า";
+  }
+
+  // Warehouse processing
+  if (t.includes("คัดแยก") || t.includes("พิมพ์") || t.includes("ตรวจน้ำหนัก") || /揀貨|打印|重量.*審核|面單|建檔/.test(t)) {
+    return "คลังสินค้ากำลังดำเนินการ";
+  }
+
+  // Customs
+  if (t.includes("ศุลกากร") || /清關|海關|通關方式|通關/.test(t)) {
+    // แยก “ปล่อยของแล้ว”
+    if (/放行/.test(t)) return "ศุลกากรอนุญาตให้ปล่อยพัสดุ";
+    return "อยู่ระหว่างพิธีการศุลกากร";
+  }
+
+  // Problems
+  if (t.includes("ผิดพลาด") || t.includes("ยกเลิก") || t.includes("ตีกลับ") || t.includes("ปัญหา") || /不受理|錯單|查無|失敗|退回/.test(t)) {
+    return "มีปัญหาในการจัดส่ง";
+  }
+
+  // ถ้ามีจีนแต่ไม่เข้า mapping ให้ไม่โชว์จีน — ใช้ค่าไทยกลาง ๆ
+  if (hasCJK) return "กำลังดำเนินการ";
+
+  // fallback ไทยเดิม
+  return t;
+}
+
+// สถานะหลัก (ใช้กับ badge/summary) โดย "ถ้ามีจัดส่งสำเร็จในไทม์ไลน์ ให้ชนะ"
+function deriveMainStatus(data){
+  const events = Array.isArray(data?.events) ? data.events : [];
+
+  // ถ้าเหตุการณ์ใด ๆ เป็น Delivered => ส่ง Delivered ทันที
+  if (events.some(e => isDeliveredText(e.status_th))) {
+    return "จัดส่งสำเร็จ";
+  }
+
+  // ไม่เช่นนั้น ใช้ latest_status_th (แปลงเป็นไทย)
+  return toThaiStatus(data?.latest_status_th || "");
+}
+
 
   // ====== เลือกเฉพาะ "สถานะสำคัญ" ไม่เกิน 10 ======
   const IMPORTANT_GROUPS = [

@@ -193,12 +193,12 @@
     .timeline{
       margin-top: 12px;
       position:relative;
-      padding-left: 0; /* เดิม 18px -> เอาช่องว่างออก */
+      padding-left: 0;
     }
     .timeline:before{
       content:"";
       position:absolute;
-      left:0;           /* เดิม 7px -> ชิดซ้าย */
+      left:0;
       top:2px;
       bottom:2px;
       width:2px;
@@ -212,11 +212,34 @@
       border: 1px solid var(--border);
       background: var(--surface-2);
       margin-bottom: 10px;
-      margin-left: 12px; /* เว้นจากเส้นไทม์ไลน์เล็กน้อย */
+      margin-left: 12px;
     }
 
-    /* === เอาไอคอน (pin) ออกทั้งหมด === */
-    .event .pin{ display:none !important; }
+    /* ไอคอนแบบใหม่ */
+    .event{
+      display:grid;
+      grid-template-columns: 28px 1fr;
+      gap:10px;
+      align-items:flex-start;
+    }
+    .event .ico{
+      width:28px;height:28px;
+      border-radius: 999px;
+      border: 1px solid rgba(15, 23, 42, .10);
+      background: var(--surface);
+      display:grid;
+      place-items:center;
+      margin-left: -40px; /* ให้ไปอยู่บนเส้น timeline */
+      box-shadow: 0 10px 18px rgba(2, 6, 23, .06);
+      color: var(--brand);
+      font-size: 14px;
+      line-height: 1;
+      position:relative;
+      top:2px;
+    }
+    .event.ok .ico{ color: var(--ok); }
+    .event.warn .ico{ color: var(--warn); }
+    .event.bad .ico{ color: var(--bad); }
 
     .event .time{font-size:12px; color: var(--muted)}
     .event .text{font-size:14px; font-weight:600; margin-top:4px}
@@ -294,8 +317,8 @@
 
       <div>
         <div class="card" id="history" style="display:none">
-          <h2>ไทม์ไลน์สถานะ</h2>
-          <div class="muted">เหตุการณ์ล่าสุดอยู่ด้านบน</div>
+          <h2>ไทม์ไลน์สถานะ (เฉพาะสถานะสำคัญ)</h2>
+          <div class="muted">เหตุการณ์ล่าสุดอยู่ด้านบน (แสดงไม่เกิน 10 รายการ)</div>
           <div class="timeline" id="timeline"></div>
         </div>
       </div>
@@ -318,7 +341,7 @@
   $("year").textContent = String(new Date().getFullYear());
 
   function normalizeLatestStatusTH(th){
-    // เปลี่ยนเฉพาะ “จัดส่งสำเร็จ” ให้เป็น “จัดส่ง” (ตามที่ขอ)
+    // เปลี่ยนเฉพาะ “จัดส่งสำเร็จ” ให้เป็น “จัดส่ง”
     if(!th) return th;
     return th.replace("จัดส่งสำเร็จ", "จัดส่ง");
   }
@@ -326,6 +349,7 @@
   function classify(th){
     const s = (th || "").toLowerCase();
 
+    // ไทย
     if (s.includes("ถึงแล้ว") || s.includes("จัดส่งสำเร็จ") || s.includes("เซ็นรับ") || s.includes("รับพัสดุ")) {
       return { cls:"ok", label:"ถึงแล้ว" };
     }
@@ -335,12 +359,82 @@
     if (s.includes("กำลัง") || s.includes("ระหว่าง") || s.includes("ขนส่ง") || s.includes("ส่งต่อ") || s.includes("ออกจาก") || s.includes("กำลังดำเนินการ")) {
       return { cls:"warn", label:"กำลังขนส่ง" };
     }
+
+    // จีน (รองรับสถานะพัสดุต่างประเทศ)
+    if (s.includes("順利送達") || s.includes("配完") || s.includes("收件人") || s.includes("送達")) {
+      return { cls:"ok", label:"ถึงแล้ว" };
+    }
+    if (s.includes("不受理") || s.includes("錯單") || s.includes("查無") || s.includes("失敗") || s.includes("退回") || s.includes("問題")) {
+      return { cls:"bad", label:"มีปัญหา" };
+    }
+    if (s.includes("配送中") || s.includes("轉運") || s.includes("已集貨") || s.includes("出倉") || s.includes("清關") || s.includes("通關") || s.includes("放行")) {
+      return { cls:"warn", label:"กำลังขนส่ง" };
+    }
+
     return { cls:"warn", label:"กำลังดำเนินการ" };
+  }
+
+  // ====== เลือกเฉพาะ "สถานะสำคัญ" ไม่เกิน 10 ======
+  const IMPORTANT_GROUPS = [
+    // จัดส่งสำเร็จ / ถึงผู้รับ
+    { key:"delivered",   icon:"✅", match: (t)=> /順利送達|配完|送達收件人|收件人|已送達/.test(t) },
+
+    // กำลังจัดส่งถึงผู้รับ
+    { key:"out_for_delivery", icon:"🚚", match: (t)=> /配送中|正在將包裹配送/.test(t) },
+
+    // รับเข้าศูนย์/สาขาปลายทาง
+    { key:"dest_facility", icon:"🏢", match: (t)=> /營業所|配送中心|目的地/.test(t) },
+
+    // ระหว่างขนส่ง/โอนถ่าย
+    { key:"transit",     icon:"🔁", match: (t)=> /轉運中|轉運|運送中|途中/.test(t) },
+
+    // รับพัสดุ/รวมสินค้า
+    { key:"collected",   icon:"📦", match: (t)=> /已集貨|已集貸|收到包裹|收件|集貨/.test(t) },
+
+    // ออกจากคลัง/เตรียมออกคลัง
+    { key:"warehouse_out", icon:"📤", match: (t)=> /出倉|準備.*出倉|集運倉出倉/.test(t) },
+
+    // พิธีการศุลกากร
+    { key:"customs",     icon:"🛃", match: (t)=> /清關|通關方式|通關|海關/.test(t) },
+
+    // ปล่อยของ/ผ่านด่าน
+    { key:"released",    icon:"🟢", match: (t)=> /放行/.test(t) },
+
+    // รับคำสั่งซื้อ/สร้างรายการ
+    { key:"order",       icon:"🧾", match: (t)=> /訂單已接收|下單成功|連線收單建檔/.test(t) },
+
+    // ปัญหา (ถ้ามี ให้ขึ้น)
+    { key:"issue",       icon:"⚠️", match: (t)=> /不受理|錯單|查無|失敗|退回|問題/.test(t) },
+  ];
+
+  function filterImportantEvents(events, limit = 10){
+    if(!Array.isArray(events)) return [];
+
+    const seen = new Set();
+    const result = [];
+
+    for(const e of events){
+      const text = (e.status_th || "").trim();
+      if(!text) continue;
+
+      // หาว่าข้อความนี้อยู่กลุ่มไหน
+      const grp = IMPORTANT_GROUPS.find(g => g.match(text));
+      if(!grp) continue;
+
+      // กันซ้ำ: แสดงเฉพาะเหตุการณ์ล่าสุดของแต่ละกลุ่ม
+      if(seen.has(grp.key)) continue;
+
+      seen.add(grp.key);
+      result.push({ ...e, _icon: grp.icon, _group: grp.key });
+
+      if(result.length >= limit) break;
+    }
+
+    return result;
   }
 
   function renderSummary(data){
     const cls = classify(data.latest_status_th);
-
     const latestText = normalizeLatestStatusTH(data.latest_status_th) || "-";
 
     summary.style.display = "block";
@@ -369,11 +463,16 @@
   function renderTimeline(events){
     const items = (events || []).map(e => {
       const th = e.status_th || "-";
-      // เอา pin ออก: ไม่ต้อง render .pin แล้ว
+      const cls = classify(th);
+      const icon = e._icon || "ℹ️";
+
       return `
-        <div class="event">
-          <div class="time">${e.time || "-"}</div>
-          <div class="text">${th}</div>
+        <div class="event ${cls.cls}">
+          <div class="ico" title="${cls.label}">${icon}</div>
+          <div>
+            <div class="time">${e.time || "-"}</div>
+            <div class="text">${th}</div>
+          </div>
         </div>
       `;
     }).join("");
@@ -418,7 +517,11 @@
       }
 
       renderSummary(data);
-      renderTimeline(data.events);
+
+      // แสดงเฉพาะสถานะสำคัญ ไม่เกิน 10
+      const important = filterImportantEvents(data.events, 10);
+      renderTimeline(important);
+
       history.style.display = "block";
     }catch(e){
       setError(String(e));

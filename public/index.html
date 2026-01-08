@@ -45,7 +45,7 @@
       padding: 22px 14px 28px;
     }
 
-    /* Topbar (lux / formal) */
+    /* Topbar (formal) */
     .topbar{
       display:flex;
       align-items:center;
@@ -211,7 +211,7 @@
       letter-spacing:.2px;
     }
 
-    /* Timeline (lux) */
+    /* Timeline */
     .timeline{
       margin-top: 12px;
       position:relative;
@@ -335,8 +335,8 @@
 
       <div>
         <div class="card" id="history" style="display:none">
-          <h2>ไทม์ไลน์สถานะ (สำคัญ)</h2>
-          <div class="muted">เหตุการณ์ล่าสุดอยู่ด้านบน (แสดงไม่เกิน 10 รายการ)</div>
+          <h2>ไทม์ไลน์สถานะ</h2>
+          <div class="muted">เหตุการณ์ล่าสุดอยู่ด้านบน</div>
           <div class="timeline" id="timeline"></div>
         </div>
       </div>
@@ -358,7 +358,7 @@
 
   $("year").textContent = String(new Date().getFullYear());
 
-  // ---------- Standard TH status (10) ----------
+  // ---------- Map any input (TH/CN) -> Formal Thai (no CN shown) ----------
   function toThaiStatus(text){
     const t = (text || "").trim();
     if(!t) return "-";
@@ -403,8 +403,8 @@
     return toThaiStatus(data?.latest_status_th || "");
   }
 
-  // ---------- Timeline: important, dedupe, limit 10 ----------
-  function pickImportantEvents(rawEvents, limit = 10){
+  // ---------- Pick ALL events (no limit), but remove consecutive duplicates ----------
+  function pickAllEvents(rawEvents){
     if(!Array.isArray(rawEvents)) return [];
 
     const mapped = rawEvents.map(e => ({
@@ -412,26 +412,14 @@
       _th: toThaiStatus(e.status_th || ""),
     }));
 
-    // Remove consecutive duplicates after mapping
-    const dedup = [];
+    const out = [];
     let last = "";
     for(const e of mapped){
       if(!e._th || e._th === "-") continue;
-      if(e._th === last) continue;
+      if(e._th === last) continue; // consecutive dedupe
       last = e._th;
-      dedup.push(e);
-    }
-
-    // Pick latest of each status (max 10)
-    const seen = new Set();
-    const out = [];
-    for(const e of dedup){
-      if(seen.has(e._th)) continue;
-      seen.add(e._th);
       out.push(e);
-      if(out.length >= limit) break;
     }
-
     return out;
   }
 
@@ -508,8 +496,9 @@
 
       renderSummary(data);
 
-      const important = pickImportantEvents(data.events, 10);
-      renderTimeline(important);
+      // ✅ Show ALL events, no limit; still dedupe consecutive
+      const allEvents = pickAllEvents(data.events);
+      renderTimeline(allEvents);
 
       history.style.display = "block";
     }catch(e){

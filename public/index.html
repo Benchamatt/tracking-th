@@ -39,6 +39,7 @@
       color:var(--text);
     }
 
+    /* Wix iframe friendly: no fixed heights, flexible width */
     .wrap{
       max-width: 980px;
       margin: 0 auto;
@@ -192,12 +193,12 @@
     .timeline{
       margin-top: 12px;
       position:relative;
-      padding-left: 0;
+      padding-left: 18px;
     }
     .timeline:before{
       content:"";
       position:absolute;
-      left:0;
+      left:7px;
       top:2px;
       bottom:2px;
       width:2px;
@@ -211,30 +212,19 @@
       border: 1px solid var(--border);
       background: var(--surface-2);
       margin-bottom: 10px;
-      margin-left: 12px;
-      display:grid;
-      grid-template-columns: 28px 1fr;
-      gap:10px;
-      align-items:flex-start;
     }
-    .event .ico{
-      width:28px;height:28px;
+    .event:before{
+      content:"";
+      position:absolute;
+      left:-18px;
+      top: 16px;
+      width: 12px;
+      height: 12px;
       border-radius: 999px;
-      border: 1px solid rgba(15, 23, 42, .10);
       background: var(--surface);
-      display:grid;
-      place-items:center;
-      margin-left: -40px;
-      box-shadow: 0 10px 18px rgba(2, 6, 23, .06);
-      color: var(--brand);
-      font-size: 14px;
-      line-height: 1;
-      position:relative;
-      top:2px;
+      border: 3px solid rgba(15,95,191,.55);
+      box-shadow: 0 0 0 3px rgba(15,95,191,.10);
     }
-    .event.ok .ico{ color: var(--ok); }
-    .event.warn .ico{ color: var(--warn); }
-    .event.bad .ico{ color: var(--bad); }
 
     .event .time{font-size:12px; color: var(--muted)}
     .event .text{font-size:14px; font-weight:600; margin-top:4px}
@@ -312,8 +302,8 @@
 
       <div>
         <div class="card" id="history" style="display:none">
-          <h2>ไทม์ไลน์สถานะ (เฉพาะสถานะสำคัญ)</h2>
-          <div class="muted">เหตุการณ์ล่าสุดอยู่ด้านบน (แสดงไม่เกิน 10 รายการ)</div>
+          <h2>ไทม์ไลน์สถานะ</h2>
+          <div class="muted">เหตุการณ์ล่าสุดอยู่ด้านบน</div>
           <div class="timeline" id="timeline"></div>
         </div>
       </div>
@@ -335,117 +325,24 @@
 
   $("year").textContent = String(new Date().getFullYear());
 
-  // ====== 1) แปลสถานะให้เป็นไทย (ไม่โชว์จีน) + ตรวจ delivered ======
-  function isDeliveredText(text){
-    const t = (text || "");
-    return (
-      t.includes("จัดส่งสำเร็จ") || t.includes("ถึงแล้ว") || t.includes("เซ็นรับ") || t.includes("รับพัสดุ") ||
-      /順利送達|配完|已送達|送達收件人|收件人/.test(t)
-    );
-  }
+  // Badge classification by Thai status (no Chinese displayed)
+  function classify(th){
+    const s = (th || "").toLowerCase();
 
-  function toThaiStatus(text){
-    const t = (text || "").trim();
-    if(!t) return "-";
-    const hasCJK = /[\u4E00-\u9FFF]/.test(t);
-
-    if (t.includes("จัดส่งสำเร็จ") || isDeliveredText(t)) return "จัดส่งสำเร็จ";
-
-    if (t.includes("อยู่ระหว่างการจัดส่ง") || t.includes("กำลังจัดส่ง") || /配送中|正在將包裹配送/.test(t)) {
-      return "กำลังจัดส่งถึงผู้รับ";
+    if (s.includes("ถึงแล้ว") || s.includes("จัดส่งสำเร็จ") || s.includes("เซ็นรับ") || s.includes("รับพัสดุ")) {
+      return { cls:"ok", label:"ถึงแล้ว" };
     }
-
-    if (t.includes("ระหว่างขนส่ง") || t.includes("กำลังขนส่ง") || /轉運|途中|運送/.test(t)) {
-      return "อยู่ระหว่างการขนส่ง";
-    }
-
-    if (t.includes("ออกจากคลัง") || /出倉|集運倉出倉/.test(t)) {
-      return "พัสดุออกจากคลังสินค้า";
-    }
-
-    if (t.includes("คัดแยก") || t.includes("พิมพ์") || t.includes("ตรวจน้ำหนัก") || /揀貨|打印|重量.*審核|面單|建檔/.test(t)) {
-      return "คลังสินค้ากำลังดำเนินการ";
-    }
-
-    if (t.includes("ศุลกากร") || /清關|海關|通關方式|通關/.test(t)) {
-      if (/放行/.test(t)) return "ศุลกากรอนุญาตให้ปล่อยพัสดุ";
-      return "อยู่ระหว่างพิธีการศุลกากร";
-    }
-
-    if (t.includes("ผิดพลาด") || t.includes("ยกเลิก") || t.includes("ตีกลับ") || t.includes("ปัญหา") || /不受理|錯單|查無|失敗|退回/.test(t)) {
-      return "มีปัญหาในการจัดส่ง";
-    }
-
-    if (hasCJK) return "กำลังดำเนินการ";
-    return t;
-  }
-
-  // ถ้าไทม์ไลน์มี delivered ให้ badge ขึ้น delivered เสมอ
-  function deriveMainStatus(data){
-    const events = Array.isArray(data?.events) ? data.events : [];
-    if (events.some(e => isDeliveredText(e.status_th))) return "จัดส่งสำเร็จ";
-    return toThaiStatus(data?.latest_status_th || "");
-  }
-
-  // ====== 2) classify ใช้กับ "ไทยมาตรฐาน" เท่านั้น ======
-  function classify(thTH){
-    const s = (thTH || "").toLowerCase();
-
-    if (s.includes("จัดส่งสำเร็จ") || s.includes("ถึงแล้ว")) {
-      return { cls:"ok", label:"จัดส่งสำเร็จ" };
-    }
-    if (s.includes("มีปัญหา") || s.includes("ตีกลับ") || s.includes("ไม่สำเร็จ") || s.includes("ผิดพลาด") || s.includes("ยกเลิก")) {
+    if (s.includes("ตีกลับ") || s.includes("ไม่สำเร็จ") || s.includes("ผิดพลาด") || s.includes("ยกเลิก") || s.includes("ปัญหา")) {
       return { cls:"bad", label:"มีปัญหา" };
     }
-    if (s.includes("กำลังจัดส่ง") || s.includes("อยู่ระหว่างการขนส่ง") || s.includes("ศุลกากร") || s.includes("คลังสินค้า") || s.includes("กำลังดำเนินการ")) {
+    if (s.includes("กำลัง") || s.includes("ระหว่าง") || s.includes("ขนส่ง") || s.includes("ส่งต่อ") || s.includes("ออกจาก") || s.includes("กำลังดำเนินการ")) {
       return { cls:"warn", label:"กำลังขนส่ง" };
     }
     return { cls:"warn", label:"กำลังดำเนินการ" };
   }
 
-  // ====== 3) เลือกเฉพาะสถานะสำคัญ ไม่เกิน 10 (รองรับจีน+ไทย) ======
-  const IMPORTANT_GROUPS = [
-    { key:"delivered",        icon:"✅", match: (t)=> /順利送達|配完|送達收件人|收件人|已送達/.test(t) || /จัดส่งสำเร็จ|ถึงแล้ว/.test(t) },
-    { key:"out_for_delivery", icon:"🚚", match: (t)=> /配送中|正在將包裹配送/.test(t) || /กำลังจัดส่ง/.test(t) },
-    { key:"dest_facility",    icon:"🏢", match: (t)=> /營業所|配送中心|目的地/.test(t) || /ถึงสาขา|ศูนย์ปลายทาง/.test(t) },
-    { key:"transit",          icon:"🔁", match: (t)=> /轉運中|轉運|運送中|途中/.test(t) || /ระหว่างการขนส่ง/.test(t) },
-    { key:"collected",        icon:"📦", match: (t)=> /已集貨|已集貸|收到包裹|收件|集貨/.test(t) || /รับพัสดุ/.test(t) },
-    { key:"warehouse_out",    icon:"📤", match: (t)=> /出倉|準備.*出倉|集運倉出倉/.test(t) || /ออกจากคลัง/.test(t) },
-    { key:"customs",          icon:"🛃", match: (t)=> /清關|通關方式|通關|海關/.test(t) || /ศุลกากร/.test(t) },
-    { key:"released",         icon:"🟢", match: (t)=> /放行/.test(t) || /ปล่อยพัสดุ/.test(t) },
-    { key:"order",            icon:"🧾", match: (t)=> /訂單已接收|下單成功|連線收單建檔/.test(t) || /รับคำสั่งซื้อ/.test(t) },
-    { key:"issue",            icon:"⚠️", match: (t)=> /不受理|錯單|查無|失敗|退回|問題/.test(t) || /มีปัญหา|ผิดพลาด|ยกเลิก|ตีกลับ/.test(t) },
-  ];
-
-  function filterImportantEvents(events, limit = 10){
-    if(!Array.isArray(events)) return [];
-
-    const seen = new Set();
-    const result = [];
-
-    for(const e of events){
-      const raw = (e.status_th || "").trim();
-      if(!raw) continue;
-
-      const grp = IMPORTANT_GROUPS.find(g => g.match(raw));
-      if(!grp) continue;
-
-      if(seen.has(grp.key)) continue;
-
-      seen.add(grp.key);
-      result.push({ ...e, _icon: grp.icon, _group: grp.key });
-
-      if(result.length >= limit) break;
-    }
-
-    return result;
-  }
-
-  // ====== 4) Summary: ใช้ deriveMainStatus + แสดงไทยเท่านั้น ======
   function renderSummary(data){
-    const mainTH = deriveMainStatus(data);    // ✅ ถ้ามี delivered ในไทม์ไลน์ จะเป็น “จัดส่งสำเร็จ”
-    const cls = classify(mainTH);
-
+    const cls = classify(data.latest_status_th);
     summary.style.display = "block";
     summary.innerHTML = `
       <div class="summaryTop">
@@ -463,27 +360,19 @@
       <div style="display:flex;flex-direction:column;gap:6px">
         <div class="muted">สถานะล่าสุด</div>
         <div style="font-size:18px;font-weight:700;letter-spacing:.2px">
-          ${mainTH || "-"}
+          ${data.latest_status_th || "-"}
         </div>
       </div>
     `;
   }
 
-  // ====== 5) Timeline: แสดงไทยเท่านั้น (ไม่โชว์จีน) ======
   function renderTimeline(events){
     const items = (events || []).map(e => {
-      const raw = e.status_th || "-";
-      const thTH = toThaiStatus(raw);         // ✅ แปลงเป็นไทย
-      const cls = classify(thTH);             // ✅ จัดสีตามไทย
-      const icon = e._icon || "ℹ️";
-
+      const th = e.status_th || "-";
       return `
-        <div class="event ${cls.cls}">
-          <div class="ico" title="${cls.label}">${icon}</div>
-          <div>
-            <div class="time">${e.time || "-"}</div>
-            <div class="text">${thTH}</div>
-          </div>
+        <div class="event">
+          <div class="time">${e.time || "-"}</div>
+          <div class="text">${th}</div>
         </div>
       `;
     }).join("");
@@ -528,11 +417,7 @@
       }
 
       renderSummary(data);
-
-      // แสดงเฉพาะสถานะสำคัญ ไม่เกิน 10
-      const important = filterImportantEvents(data.events, 10);
-      renderTimeline(important);
-
+      renderTimeline(data.events);
       history.style.display = "block";
     }catch(e){
       setError(String(e));

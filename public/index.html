@@ -7,16 +7,12 @@
 
   <style>
     :root{
-      /* Navy / Sky */
       --navy:#0b2a4a;
       --navy2:#08345f;
-      --sky:#eaf3ff;
-      --sky2:#f7fbff;
-
       --bg:#f3f7ff;
-      --surface:#ffffff;
-      --surface2:#f7fbff;
+      --sky:#eaf3ff;
 
+      --surface:#ffffff;
       --text:#0b1220;
       --muted:#5c6f86;
       --border: rgba(11,42,74,.10);
@@ -42,92 +38,46 @@
         linear-gradient(180deg, var(--sky), var(--bg));
     }
 
-    .wrap{
-      max-width: 1080px;
-      margin: 0 auto;
-      padding: 22px 14px 28px;
-    }
+    .wrap{max-width:1080px;margin:0 auto;padding:22px 14px 28px;}
 
-    /* Header */
     .topbar{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:12px;
-      padding: 18px 18px;
-      border: 1px solid rgba(255,255,255,.60);
-      border-radius: 20px;
-      background: linear-gradient(135deg, rgba(255,255,255,.88), rgba(255,255,255,.70));
-      box-shadow: var(--shadow);
+      display:flex;align-items:center;justify-content:space-between;gap:12px;
+      padding:18px 18px;
+      border:1px solid rgba(255,255,255,.60);
+      border-radius:20px;
+      background:linear-gradient(135deg, rgba(255,255,255,.88), rgba(255,255,255,.70));
+      box-shadow:var(--shadow);
       backdrop-filter: blur(10px);
-      position:relative;
-      overflow:hidden;
+      position:relative; overflow:hidden;
     }
     .topbar:before{
-      content:"";
-      position:absolute;
-      inset:-60%;
+      content:""; position:absolute; inset:-60%;
       background: radial-gradient(circle at 20% 20%, rgba(40,140,255,.18), transparent 55%);
       transform: rotate(12deg);
     }
 
-    .brand{
-      display:flex;
-      align-items:center;
-      gap:12px;
-      min-width:0;
-      position:relative;
-      z-index:1;
-    }
-
+    .brand{display:flex;align-items:center;gap:12px;min-width:0;position:relative;z-index:1;}
     .logo{
-      width:46px;height:46px;
-      border-radius: 16px;
+      width:46px;height:46px;border-radius:16px;
       background: linear-gradient(135deg, var(--navy), var(--navy2));
-      display:grid;
-      place-items:center;
+      display:grid;place-items:center;
       box-shadow: 0 18px 32px rgba(11,42,74,.24);
-      flex:0 0 auto;
-      position:relative;
-      overflow:hidden;
+      position:relative;overflow:hidden;flex:0 0 auto;
     }
     .logo:after{
-      content:"";
-      position:absolute;
-      inset:-40%;
+      content:""; position:absolute; inset:-40%;
       background: radial-gradient(circle at 35% 25%, rgba(255,255,255,.25), transparent 55%);
       transform: rotate(18deg);
     }
-    .logo svg{width:22px;height:22px;fill:#fff; position:relative; z-index:1}
+    .logo svg{width:22px;height:22px;fill:#fff;position:relative;z-index:1;}
+    .brand h1{margin:0;font-size:16px;letter-spacing:.2px;line-height:1.1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    .brand .sub{font-size:12px;color:var(--muted);margin-top:4px;}
 
-    .brand h1{
-      margin:0;
-      font-size:16px;
-      letter-spacing:.2px;
-      line-height:1.1;
-      white-space:nowrap;
-      overflow:hidden;
-      text-overflow:ellipsis;
-    }
-    .brand .sub{
-      font-size:12px;
-      color:var(--muted);
-      margin-top:4px;
-    }
-
-    /* Layout */
     .grid{
-      display:grid;
-      grid-template-columns: 1.10fr .90fr;
-      gap: 14px;
-      margin-top: 14px;
-      align-items:start;
+      display:grid;grid-template-columns: 1.10fr .90fr;gap:14px;margin-top:14px;align-items:start;
     }
-    @media(max-width: 920px){
-      .grid{grid-template-columns:1fr}
-    }
+    @media(max-width: 920px){ .grid{grid-template-columns:1fr} }
 
-    /* Card */
     .card{
       background: rgba(255,255,255,.90);
       border: 1px solid rgba(255,255,255,.60);
@@ -135,197 +85,107 @@
       box-shadow: var(--shadow2);
       padding: 16px;
       backdrop-filter: blur(10px);
-      position:relative;
-      overflow:hidden;
+      position:relative;overflow:hidden;
     }
     .card:before{
-      content:"";
-      position:absolute;
-      inset:-40%;
+      content:""; position:absolute; inset:-40%;
       background: radial-gradient(circle at 30% 15%, rgba(40,140,255,.10), transparent 55%);
       pointer-events:none;
     }
     .card > *{ position:relative; z-index:1; }
 
-    .card h2{
-      margin:0 0 8px 0;
-      font-size:14px;
-      letter-spacing:.3px;
-      color:#0b223c;
-    }
-    .muted{color:var(--muted); font-size:13px}
-    .small{font-size:12px; color:var(--muted)}
+    .card h2{margin:0 0 8px 0;font-size:14px;letter-spacing:.3px;color:#0b223c;}
+    .muted{color:var(--muted);font-size:13px}
+    .small{font-size:12px;color:var(--muted)}
 
     .searchRow{
-      display:grid;
-      grid-template-columns: 1fr 156px;
-      gap: 10px;
-      margin-top: 10px;
+      display:grid;grid-template-columns: 1fr 156px;gap:10px;margin-top:10px;
     }
-    @media(max-width:520px){
-      .searchRow{grid-template-columns:1fr}
-    }
+    @media(max-width:520px){ .searchRow{grid-template-columns:1fr} }
 
     input{
-      width:100%;
-      padding: 12px 14px;
-      border-radius: 16px;
-      border: 1px solid rgba(11,42,74,.14);
+      width:100%;padding:12px 14px;border-radius:16px;
+      border:1px solid rgba(11,42,74,.14);
       background: linear-gradient(180deg, rgba(255,255,255,.92), rgba(247,251,255,.92));
-      color: var(--text);
-      font-size: 15px;
+      font-size:15px;
       box-shadow: inset 0 1px 0 rgba(255,255,255,.85);
     }
-    input:focus{outline:3px solid var(--ring); border-color: transparent}
+    input:focus{outline:3px solid var(--ring); border-color: transparent;}
 
     .btn{
-      border:none;
-      border-radius: 16px;
-      padding: 12px 14px;
+      border:none;border-radius:16px;padding:12px 14px;
       background: linear-gradient(135deg, var(--navy), var(--navy2));
-      color:#fff;
-      font-size:15px;
-      cursor:pointer;
+      color:#fff;font-size:15px;cursor:pointer;
       box-shadow: 0 18px 26px rgba(11,42,74,.18);
-      letter-spacing:.2px;
-      position:relative;
-      overflow:hidden;
+      position:relative;overflow:hidden;
     }
     .btn:before{
-      content:"";
-      position:absolute;
-      inset:-80%;
+      content:""; position:absolute; inset:-80%;
       background: radial-gradient(circle at 30% 30%, rgba(255,255,255,.20), transparent 55%);
       transform: rotate(18deg);
     }
-    .btn span{position:relative; z-index:1}
-    .btn:disabled{
-      opacity:.6;
-      cursor:not-allowed;
-      box-shadow:none;
-    }
+    .btn span{position:relative;z-index:1}
+    .btn:disabled{opacity:.6;cursor:not-allowed;box-shadow:none;}
 
-    /* Summary */
-    .summaryTop{
-      display:flex;
-      justify-content:space-between;
-      align-items:flex-start;
-      gap:10px;
-      margin-bottom: 12px;
-    }
-
-    .kv{
-      display:grid;
-      gap:6px;
-    }
-    .kv b{font-size:12px; letter-spacing:.2px; color:#0b223c}
+    .summaryTop{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:12px;}
+    .kv{display:grid;gap:6px;}
+    .kv b{font-size:12px;letter-spacing:.2px;color:#0b223c}
     .kv .value{font-size:14px}
 
     .badge{
-      display:inline-flex;
-      align-items:center;
-      gap:8px;
-      padding: 8px 12px;
-      border-radius: 999px;
-      font-size: 12px;
-      font-weight: 800;
-      white-space:nowrap;
-      border: 1px solid rgba(11,42,74,.12);
+      display:inline-flex;align-items:center;gap:8px;padding:8px 12px;border-radius:999px;
+      font-size:12px;font-weight:800;white-space:nowrap;
+      border:1px solid rgba(11,42,74,.12);
       background: rgba(255,255,255,.85);
       box-shadow: 0 12px 22px rgba(8,28,55,.08);
     }
     .dot{width:8px;height:8px;border-radius:999px;background: currentColor;opacity:.95}
-    .badge.ok{color: var(--ok)}
-    .badge.warn{color: var(--warn)}
-    .badge.bad{color: var(--bad)}
+    .badge.ok{color:var(--ok)}
+    .badge.warn{color:var(--warn)}
+    .badge.bad{color:var(--bad)}
 
-    .headline{
-      padding-top: 2px;
-      font-size: 18px;
-      font-weight: 900;
-      letter-spacing:.2px;
-      color:#0b223c;
-    }
+    .headline{padding-top:2px;font-size:18px;font-weight:900;letter-spacing:.2px;color:#0b223c;}
 
-    /* Timeline */
-    .timeline{
-      margin-top: 12px;
-      position:relative;
-      padding-left: 22px;
-    }
+    .timeline{margin-top:12px;position:relative;padding-left:22px;}
     .timeline:before{
-      content:"";
-      position:absolute;
-      left:10px;
-      top:2px;
-      bottom:2px;
-      width:2px;
+      content:"";position:absolute;left:10px;top:2px;bottom:2px;width:2px;
       background: linear-gradient(to bottom, rgba(11,42,74,.28), rgba(11,42,74,.06));
     }
 
     .event{
       position:relative;
-      padding: 12px 12px;
-      border-radius: 18px;
-      border: 1px solid rgba(11,42,74,.10);
+      padding:12px 12px;
+      border-radius:18px;
+      border:1px solid rgba(11,42,74,.10);
       background: linear-gradient(180deg, rgba(247,251,255,.92), rgba(255,255,255,.88));
-      margin-bottom: 10px;
+      margin-bottom:10px;
       box-shadow: 0 10px 18px rgba(8,28,55,.06);
     }
-
     .event:before{
-      content:"";
-      position:absolute;
-      left:-20px;
-      top: 18px;
-      width: 12px;
-      height: 12px;
-      border-radius: 999px;
-      background: #fff;
-      border: 3px solid rgba(40,140,255,.55);
+      content:"";position:absolute;left:-20px;top:18px;width:12px;height:12px;border-radius:999px;
+      background:#fff;border:3px solid rgba(40,140,255,.55);
       box-shadow: 0 0 0 4px rgba(40,140,255,.12);
     }
+    .event.isLatest{border-color: rgba(40,140,255,.35); box-shadow: 0 14px 26px rgba(8,28,55,.10);}
+    .event.isLatest:before{border-color: rgba(11,42,74,.55); box-shadow: 0 0 0 5px rgba(11,42,74,.12);}
 
-    .event .time{
-      font-size:12px;
-      color: var(--muted);
-      letter-spacing:.1px;
-    }
-    .event .text{
-      font-size:14px;
-      font-weight:800;
-      margin-top:6px;
-      line-height:1.35;
-      color:#0b223c;
-    }
+    .event .time{font-size:12px;color:var(--muted);}
+    .event .text{font-size:14px;font-weight:800;margin-top:6px;line-height:1.35;color:#0b223c;}
 
-    /* Footer */
-    .footer{
-      margin-top: 14px;
-      padding: 10px 6px 2px;
-      text-align:center;
-      color: var(--muted);
-      font-size: 12px;
-    }
-    .footer a{color: var(--muted); text-decoration:none}
+    .footer{margin-top:14px;padding:10px 6px 2px;text-align:center;color:var(--muted);font-size:12px;}
+    .footer a{color:var(--muted);text-decoration:none}
     .footer a:hover{text-decoration:underline}
 
     .errorBox{
-      border: 1px solid rgba(180,35,24,.22);
+      border:1px solid rgba(180,35,24,.22);
       background: rgba(180,35,24,.06);
       color: var(--bad);
-      border-radius: 16px;
-      padding: 10px 12px;
-      font-size: 13px;
+      border-radius:16px;
+      padding:10px 12px;
+      font-size:13px;
     }
 
-    .loading{
-      display:flex;
-      align-items:center;
-      gap:10px;
-      font-size:13px;
-      color:var(--muted);
-    }
+    .loading{display:flex;align-items:center;gap:10px;font-size:13px;color:var(--muted);}
     .spinner{
       width:16px;height:16px;border-radius:999px;
       border:2px solid rgba(11,42,74,.18);
@@ -374,7 +234,7 @@
       <div>
         <div class="card" id="history" style="display:none">
           <h2>ไทม์ไลน์สถานะ</h2>
-          <div class="muted">เหตุการณ์ล่าสุดอยู่ด้านบน</div>
+          <div class="muted">เหตุการณ์ล่าสุดอยู่ด้านบน (แสดงทั้งหมด)</div>
           <div class="timeline" id="timeline"></div>
         </div>
       </div>
@@ -393,77 +253,104 @@
   const history = $("history");
   const timeline = $("timeline");
   const btn = $("btn");
-
   $("year").textContent = String(new Date().getFullYear());
 
-  // Map input (TH/CN) -> Formal Thai (no CN shown)
-  function toThaiStatus(text){
-    const t = (text || "").trim();
+  // ----------------- Translate (CN/TH/EN) -> Formal Thai -----------------
+  function toThaiStatus(raw){
+    const t = (raw || "").trim();
     if(!t) return "-";
+    const hasCJK = /[\u4E00-\u9FFF]/.test(t);
 
-    // If contains Chinese, map only what we can; otherwise hide it.
-    if (/[\u4E00-\u9FFF]/.test(t)) {
-      if (/順利送達|配完|已送達|送達收件人|收件人/.test(t)) return "จัดส่งสำเร็จ";
-      if (/配送中|正在將包裹配送/.test(t)) return "อยู่ระหว่างการนำส่งถึงผู้รับ";
-      if (/清關|海關|通關方式|通關/.test(t)) return "ถึงศุลกากรและอยู่ระหว่างการตรวจสอบ";
-      if (/放行/.test(t)) return "ผ่านพิธีการศุลกากรเรียบร้อยแล้ว";
-      if (/出倉|集運倉出倉/.test(t)) return "พัสดุออกจากศูนย์คัดแยกต้นทางแล้ว";
-      return "กำลังดำเนินการ";
+    // Utility: detect common CN segments
+    const is = (re) => re.test(t);
+
+    // 1) Delivered
+    if (/จัดส่งสำเร็จ|การจัดส่งสำเร็จ|ถึงแล้ว|เซ็นรับ|รับพัสดุ/.test(t) || is(/順利送達|配完|已送達|送達收件人|收件人/)) {
+      return "จัดส่งสำเร็จ";
     }
 
-    if (/จัดส่งสำเร็จ|การจัดส่งสำเร็จ|ถึงแล้ว|เซ็นรับ|รับพัสดุ/.test(t)) return "จัดส่งสำเร็จ";
-    if (/อยู่ระหว่างการนำส่ง|อยู่ระหว่างการจัดส่ง|กำลังนำส่ง|กำลังจัดส่ง|คนขับรถ/.test(t)) return "อยู่ระหว่างการนำส่งถึงผู้รับ";
-    if (/ถึงศูนย์คัดแยกสินค้าปลายทาง|ถึงศูนย์คัดแยกปลายทาง|ถึงศูนย์ปลายทาง|ถึงสาขาปลายทาง/.test(t)) return "ถึงศูนย์คัดแยกปลายทางแล้ว";
-    if (/ผ่านพิธีการศุลกากร|ปล่อยพัสดุ|ผ่านการตรวจสอบโดยศุลกากร|ศุลกากรปล่อย/.test(t)) return "ผ่านพิธีการศุลกากรเรียบร้อยแล้ว";
-    if (/ถึงที่ทำการศุลกากร|อยู่ระหว่างการตรวจสอบของหน่วยงาน|ตรวจสอบเอกสาร|พิธีการศุลกากร/.test(t)) return "ถึงศุลกากรและอยู่ระหว่างการตรวจสอบ";
-    if (/อยู่ระหว่างการจัดส่งไปประเทศ\s*ไทย|อยู่ระหว่างการจัดส่งไปประเทศไทย|ขนส่งระหว่างประเทศ|ระหว่างประเทศ|ออกจากประเทศต้นทาง|กำลังออกจากประเทศต้นทาง/.test(t)) return "อยู่ระหว่างการขนส่งระหว่างประเทศ";
-    if (/ส่งมอบให้บริษัทขนส่งต่างประเทศ|รอส่งไปยังคลังสินค้า\s*ขาออก|เตรียมการจัดส่งไปต่างประเทศ|ส่งมอบให้ผู้ให้บริการขนส่งระหว่างประเทศ/.test(t)) return "ส่งมอบให้ผู้ให้บริการขนส่งระหว่างประเทศแล้ว";
-    if (/ออกจากศูนย์คัดแยกสินค้า|พัสดุถูกส่งต่อไปยังสาขาปลายทาง|ส่งต่อไปยังสาขาปลายทาง/.test(t)) return "พัสดุออกจากศูนย์คัดแยกต้นทางแล้ว";
-    if (/รับพัสดุแล้ว|รับพัสดุเข้าระบบ|กำลังเตรียมพัสดุ|ผู้ส่งกำลังเตรียมพัสดุ|เตรียมพัสดุ/.test(t)) return "รับพัสดุเข้าระบบเรียบร้อยแล้ว";
-    if (/นำมาถึงสาขาแล้ว|ถึงสาขาแล้ว|รอการรับเข้าระบบ|รอรับเข้าระบบ/.test(t)) return "พัสดุถึงสาขาต้นทางแล้ว (รอรับเข้าระบบ)";
+    // 2) Out for delivery
+    if (/อยู่ระหว่างการนำส่ง|กำลังนำส่ง|กำลังจัดส่ง|ออกนำส่ง/.test(t) || is(/配送中|正在將包裹配送/)) {
+      return "อยู่ระหว่างการนำส่งถึงผู้รับ";
+    }
 
-    return "กำลังดำเนินการ";
+    // 3) Arrived at destination facility
+    if (/ถึงสาขาปลายทาง|ถึงศูนย์ปลายทาง|ถึงศูนย์คัดแยกปลายทาง/.test(t) || is(/營業所|配送中心|目的地/)) {
+      return "พัสดุถึงศูนย์ปลายทางแล้ว";
+    }
+
+    // 4) Transit / transfer
+    if (/อยู่ระหว่างการขนส่ง|ระหว่างขนส่ง|ส่งต่อ|โอนถ่าย/.test(t) || is(/轉運中|轉運|途中|運送中/)) {
+      return "อยู่ระหว่างการขนส่ง";
+    }
+
+    // 5) Warehouse processing / picking / label / weight
+    if (
+      /คัดแยก|ตรวจน้ำหนัก|พิมพ์ใบปะหน้า|พิมพ์ฉลาก|กำลังเตรียม|เตรียมพัสดุ/.test(t) ||
+      is(/揀貨|打印|面單|重量.*審核|倉庫同事|等待打印/)
+    ) {
+      return "คลังสินค้ากำลังเตรียมพัสดุ";
+    }
+
+    // 6) Depart warehouse / outbound
+    if (/ออกจากคลัง|ออกจากศูนย์คัดแยก|ออกจากศูนย์/.test(t) || is(/出倉|出倉處理|集運倉出倉/)) {
+      return "พัสดุออกจากศูนย์คัดแยกแล้ว";
+    }
+
+    // 7) Customs (in progress)
+    if (
+      /อยู่ระหว่างพิธีการศุลกากร|ศุลกากร.*ตรวจสอบ|ถึงที่ทำการศุลกากร/.test(t) ||
+      is(/清關|海關|通關方式|通關/)
+    ) {
+      // Specific: C1
+      if (is(/通關方式C1/)) return "อยู่ระหว่างพิธีการศุลกากร (รูปแบบ C1)";
+      return "ถึงศุลกากรและอยู่ระหว่างการตรวจสอบ";
+    }
+
+    // 8) Released customs
+    if (/ปล่อยพัสดุ|ผ่านพิธีการศุลกากรเรียบร้อย/.test(t) || is(/放行/)) {
+      return "ผ่านพิธีการศุลกากรเรียบร้อยแล้ว";
+    }
+
+    // 9) Order received / record created
+    if (/รับคำสั่งซื้อแล้ว|สร้างรายการ|บันทึกข้อมูล|รับออเดอร์/.test(t) || is(/訂單已接收|下單成功|連線收單建檔/)) {
+      return "รับคำสั่งซื้อและสร้างรายการแล้ว";
+    }
+
+    // 10) Hold / business closed
+    if (/หยุดทำการ|หยุด|พัก|รอเปิดทำการ/.test(t) || is(/公司行號休息|暫置營業所|暫置保管/)) {
+      return "อยู่ระหว่างพักสถานะ/รอดำเนินการ ณ ศูนย์บริการ";
+    }
+
+    // 11) Problems / invalid
+    if (/ผิดพลาด|ยกเลิก|ตีกลับ|มีปัญหา/.test(t) || is(/不受理|錯單|查無|失敗|退回/)) {
+      return "พบปัญหาในการดำเนินการ (โปรดติดต่อเจ้าหน้าที่)";
+    }
+
+    // If Chinese but not recognized -> hide Chinese but keep useful meaning
+    if (hasCJK) return "อยู่ระหว่างดำเนินการ (รออัปเดตสถานะจากระบบ)";
+
+    // Thai/EN unknown -> show as is (already Thai)
+    return t;
   }
 
   // Badge classification
   function classify(th){
-    const s = (th || "").trim();
-    if (s === "จัดส่งสำเร็จ") return { cls:"ok", label:"จัดส่งสำเร็จ" };
-    if (s.includes("มีปัญหา")) return { cls:"bad", label:"มีปัญหา" };
-    return { cls:"warn", label:"อยู่ระหว่างดำเนินการ" };
+    if (th === "จัดส่งสำเร็จ") return { cls:"ok", label:"จัดส่งสำเร็จ" };
+    if (th.includes("พบปัญหา")) return { cls:"bad", label:"มีปัญหา" };
+    return { cls:"warn", label:"กำลังดำเนินการ" };
   }
 
-  // Main status: Delivered wins
-  function deriveMainStatus(data){
-    const events = Array.isArray(data?.events) ? data.events : [];
-    const mapped = events.map(e => toThaiStatus(e.status_th || ""));
-    if (mapped.includes("จัดส่งสำเร็จ")) return "จัดส่งสำเร็จ";
-    return toThaiStatus(data?.latest_status_th || "");
-  }
-
-  // Show ALL events, no limit; but remove consecutive duplicates
-  function pickAllEvents(rawEvents){
-    if(!Array.isArray(rawEvents)) return [];
-
-    const mapped = rawEvents.map(e => ({
-      ...e,
-      _th: toThaiStatus(e.status_th || ""),
-    }));
-
-    const out = [];
-    let last = "";
-    for(const e of mapped){
-      if(!e._th || e._th === "-") continue;
-      if(e._th === last) continue; // consecutive dedupe
-      last = e._th;
-      out.push(e);
-    }
-    return out;
+  // Use latest event as truth (topmost event is newest)
+  function getLatestThaiFromEvents(events){
+    if(!Array.isArray(events) || events.length === 0) return "-";
+    return toThaiStatus(events[0]?.status_th || "");
   }
 
   function renderSummary(data){
-    const mainTH = deriveMainStatus(data);
-    const cls = classify(mainTH);
+    const events = Array.isArray(data?.events) ? data.events : [];
+    const latestTH = getLatestThaiFromEvents(events) || toThaiStatus(data?.latest_status_th || "");
+    const cls = classify(latestTH);
 
     summary.style.display = "block";
     summary.innerHTML = `
@@ -472,7 +359,6 @@
           <div><b>เลขพัสดุ</b> <span class="value">${data.tracking_no || "-"}</span></div>
           <div><b>อัปเดตล่าสุด</b> <span class="value">${data.last_update || "-"}</span></div>
         </div>
-
         <span class="badge ${cls.cls}">
           <span class="dot"></span>
           ${cls.label}
@@ -480,13 +366,22 @@
       </div>
 
       <div class="muted">สถานะล่าสุด</div>
-      <div class="headline">${mainTH || "-"}</div>
+      <div class="headline">${latestTH || "-"}</div>
     `;
   }
 
+  // ✅ SHOW ALL events (no limit, no dedupe)
+  function mapAllEvents(rawEvents){
+    if(!Array.isArray(rawEvents)) return [];
+    return rawEvents.map(e => ({
+      ...e,
+      _th: toThaiStatus(e.status_th || ""),
+    }));
+  }
+
   function renderTimeline(events){
-    const items = (events || []).map(e => `
-      <div class="event">
+    const items = (events || []).map((e, idx) => `
+      <div class="event ${idx === 0 ? "isLatest" : ""}">
         <div class="time">${e.time || "-"}</div>
         <div class="text">${e._th || "-"}</div>
       </div>
@@ -533,7 +428,7 @@
 
       renderSummary(data);
 
-      const allEvents = pickAllEvents(data.events);
+      const allEvents = mapAllEvents(data.events);
       renderTimeline(allEvents);
 
       history.style.display = "block";

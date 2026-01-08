@@ -262,7 +262,7 @@
     }
     @keyframes spin{to{transform:rotate(360deg)}}
 
-    /* ===== Progress 1–9 (ใส่ให้ถูกตำแหน่งใน <style>) ===== */
+    /* ===== Progress 1–9 ===== */
     .progressWrap{
       margin-top: 12px;
       padding: 12px 12px;
@@ -270,6 +270,7 @@
       border-radius: 14px;
       background: linear-gradient(180deg, rgba(15,95,191,.06), transparent);
     }
+
     .progressHead{
       display:flex;
       align-items:center;
@@ -291,6 +292,7 @@
       border-radius: 999px;
       white-space:nowrap;
     }
+
     .progressBar{
       position:relative;
       height:10px;
@@ -305,6 +307,7 @@
       border-radius:999px;
       transition: width .35s ease;
     }
+
     .progressDots{
       display:flex;
       justify-content:space-between;
@@ -323,15 +326,20 @@
       border-color: rgba(15,95,191,.6);
       box-shadow: 0 0 0 4px rgba(15,95,191,.15), 0 8px 18px rgba(2,6,23,.08);
     }
+
+    /* เรียง label 1→9 แบบอ่านง่าย: แถวบน 1-5, แถวล่าง 6-9 */
     .progressLabels{
       display:grid;
-      grid-template-columns: repeat(3, 1fr);
+      grid-template-columns: repeat(5, 1fr);
       gap:6px 10px;
       margin-top: 10px;
       font-size:12px;
       color: var(--muted);
     }
     .progressLabels b{ color: var(--text); font-weight:700; }
+    @media (max-width: 520px){
+      .progressLabels{ grid-template-columns: repeat(3, 1fr); }
+    }
   </style>
 </head>
 
@@ -372,8 +380,8 @@
 
       <div>
         <div class="card" id="history" style="display:none">
-          <h2>ไทม์ไลน์สถานะ</h2>
-          <div class="muted">เหตุการณ์ล่าสุดอยู่ด้านบน</div>
+          <h2>ไทม์ไลน์สถานะ (สำคัญ)</h2>
+          <div class="muted">เหตุการณ์ล่าสุดอยู่ด้านบน (แสดงไม่เกิน 10 รายการ)</div>
           <div class="timeline" id="timeline"></div>
         </div>
       </div>
@@ -395,7 +403,7 @@
 
   $("year").textContent = String(new Date().getFullYear());
 
-  // ===== 1) แปลงสถานะ (จีน/ไทย) -> ไทยมาตรฐาน เพื่อไม่ให้โชว์จีน =====
+  // ---------- Status mapping (Chinese/Thai -> Thai standard) ----------
   function isDeliveredText(text){
     const t = (text || "");
     return (
@@ -408,45 +416,36 @@
     const t = (text || "").trim();
     if(!t) return "-";
 
-    // Delivered
     if (isDeliveredText(t)) return "จัดส่งสำเร็จ";
 
-    // Out for delivery
     if (/配送中|正在將包裹配送/.test(t) || t.includes("กำลังจัดส่ง")) return "กำลังจัดส่งถึงผู้รับ";
 
-    // Transit
-    if (/轉運|運送|途中/.test(t) || t.includes("ระหว่างการขนส่ง") || t.includes("กำลังขนส่ง")) return "อยู่ระหว่างการขนส่งระหว่างประเทศ";
+    if (/轉運|運送|途中/.test(t) || t.includes("ระหว่างการขนส่ง") || t.includes("กำลังขนส่ง")) {
+      return "อยู่ระหว่างการขนส่งระหว่างประเทศ";
+    }
 
-    // Customs
     if (/放行/.test(t)) return "ศุลกากรอนุญาตให้ปล่อยพัสดุ";
     if (/清關|海關|通關方式|通關/.test(t) || t.includes("ศุลกากร")) return "อยู่ระหว่างพิธีการศุลกากร";
 
-    // Warehouse out
     if (/出倉|集運倉出倉/.test(t) || t.includes("ออกจากคลัง")) return "พัสดุออกจากคลังต้นทาง";
 
-    // Warehouse processing / order
     if (/訂單|下單|建檔/.test(t) || t.includes("รับคำสั่งซื้อ")) return "รับคำสั่งซื้อแล้ว";
-    if (/揀貨|打印|重量|面單/.test(t) || t.includes("คลังสินค้า")) return "คลังสินค้ากำลังเตรียมพัสดุ";
+    if (/揀貨|打印|重量|面單/.test(t) || t.includes("คลังสินค้า") || t.includes("เตรียมพัสดุ")) return "คลังสินค้ากำลังเตรียมพัสดุ";
 
-    // Problems / hold
     if (/不受理|錯單|查無|失敗|退回/.test(t) || t.includes("มีปัญหา") || t.includes("ผิดพลาด")) return "มีปัญหาในการจัดส่ง";
     if (/休息/.test(t) || t.includes("หยุด")) return "ผู้รับ/บริษัทหยุดทำการ";
 
-    // ถ้ายังมีจีนอยู่และไม่เข้าเงื่อนไข ให้ไม่โชว์จีน
     if (/[\u4E00-\u9FFF]/.test(t)) return "กำลังดำเนินการ";
-
-    // fallback ไทยเดิม
     return t;
   }
 
-  // ถ้าใน events มี delivered ให้สรุปเป็น delivered เสมอ
   function deriveMainStatus(data){
     const events = Array.isArray(data?.events) ? data.events : [];
     if (events.some(e => isDeliveredText(e.status_th))) return "จัดส่งสำเร็จ";
     return toThaiStatus(data?.latest_status_th || "");
   }
 
-  // ===== 2) Badge classification (ใช้กับไทยมาตรฐาน) =====
+  // ---------- Badge classification ----------
   function classify(th){
     const s = (th || "").toLowerCase();
 
@@ -462,7 +461,7 @@
     return { cls:"warn", label:"กำลังดำเนินการ" };
   }
 
-  // ===== 3) Progress 1–9 (ใส่ให้ถูกต้องใน <script>) =====
+  // ---------- Progress 1–9 ----------
   const STEPS_9 = [
     "รับคำสั่งซื้อแล้ว",
     "คลังสินค้ากำลังเตรียมพัสดุ",
@@ -510,6 +509,7 @@
         <div><b>7</b> ศูนย์ปลายทาง</div>
         <div><b>8</b> ออกนำส่ง</div>
         <div><b>9</b> สำเร็จ</div>
+        <div></div>
       </div>
     `;
 
@@ -530,9 +530,74 @@
     `;
   }
 
-  // ===== 4) Render Summary + Progress =====
+  // ---------- Timeline: pick important events, dedupe, limit 10 ----------
+  const IMPORTANT_ORDER = [
+    { key:"delivered", match: (raw, th)=> isDeliveredText(raw) || th === "จัดส่งสำเร็จ" },
+    { key:"out_for_delivery", match: (raw, th)=> th.includes("กำลังจัดส่ง") },
+    { key:"dest_facility", match: (raw, th)=> th.includes("ศูนย์ปลายทาง") },
+    { key:"released", match: (raw, th)=> th.includes("ปล่อยพัสดุ") },
+    { key:"customs", match: (raw, th)=> th.includes("พิธีการศุลกากร") },
+    { key:"transit", match: (raw, th)=> th.includes("ขนส่งระหว่างประเทศ") || th.includes("อยู่ระหว่างการขนส่ง") },
+    { key:"warehouse_out", match: (raw, th)=> th.includes("ออกจากคลัง") },
+    { key:"warehouse", match: (raw, th)=> th.includes("คลังสินค้า") || th.includes("เตรียมพัสดุ") },
+    { key:"order", match: (raw, th)=> th.includes("รับคำสั่งซื้อ") },
+    { key:"hold", match: (raw, th)=> th.includes("หยุดทำการ") },
+    { key:"issue", match: (raw, th)=> th.includes("มีปัญหา") },
+  ];
+
+  function dedupeByThaiConsecutive(events){
+    const out = [];
+    let last = "";
+    for(const e of events){
+      const th = e._th || toThaiStatus(e.status_th || "");
+      if(th === last) continue;
+      last = th;
+      out.push(e);
+    }
+    return out;
+  }
+
+  function pickImportantEvents(rawEvents, limit = 10){
+    if(!Array.isArray(rawEvents)) return [];
+
+    const mapped = rawEvents.map(e => ({
+      ...e,
+      _raw: (e.status_th || "").trim(),
+      _th: toThaiStatus(e.status_th || ""),
+    }));
+
+    const deduped = dedupeByThaiConsecutive(mapped);
+
+    const seen = new Set();
+    const picked = [];
+
+    for(const e of deduped){
+      const grp = IMPORTANT_ORDER.find(g => g.match(e._raw, e._th));
+      if(!grp) continue;
+      if(seen.has(grp.key)) continue;
+      seen.add(grp.key);
+      picked.push({ ...e, _group: grp.key });
+      if(picked.length >= limit) break;
+    }
+
+    // เติม fallback ถ้าน้อยเกินไป (กันซ้ำตาม time+th)
+    if(picked.length < Math.min(limit, 6)){
+      const used = new Set(picked.map(x => `${x.time}|${x._th}`));
+      for(const e of deduped){
+        const k = `${e.time}|${e._th}`;
+        if(used.has(k)) continue;
+        used.add(k);
+        picked.push(e);
+        if(picked.length >= limit) break;
+      }
+    }
+
+    return picked.slice(0, limit);
+  }
+
+  // ---------- Render ----------
   function renderSummary(data){
-    const mainTH = deriveMainStatus(data);      // ✅ ใช้สถานะไทยมาตรฐาน
+    const mainTH = deriveMainStatus(data);
     const cls = classify(mainTH);
     const stepIndex = statusToStepIndex(mainTH);
 
@@ -561,10 +626,9 @@
     `;
   }
 
-  // ===== 5) Timeline: แสดงไทยเท่านั้น =====
   function renderTimeline(events){
     const items = (events || []).map(e => {
-      const thTH = toThaiStatus(e.status_th || "-");
+      const thTH = e._th || toThaiStatus(e.status_th || "-");
       return `
         <div class="event">
           <div class="time">${e.time || "-"}</div>
@@ -613,7 +677,10 @@
       }
 
       renderSummary(data);
-      renderTimeline(data.events);
+
+      const important = pickImportantEvents(data.events, 10);
+      renderTimeline(important);
+
       history.style.display = "block";
     }catch(e){
       setError(String(e));

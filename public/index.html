@@ -248,7 +248,7 @@
   </div>
 
   <!-- ✅ SCRIPT ใหม่ (รวมแล้ว): ใช้แทน <script> เดิมทั้งก้อนได้เลย -->
-  <script>
+<script>
   const $ = (id) => document.getElementById(id);
   const summary = $("summary");
   const history = $("history");
@@ -259,16 +259,13 @@
   // ----------------- Translate (CN/TH/EN) -> Thai (ตาม mapping ที่แปะมา) -----------------
   function toThaiStatus(raw){
     const t0 = (raw || "").trim();
-    if(!t0) return "-";
+    if(!t0) return "";
 
     const hasCJK = /[\u4E00-\u9FFF]/.test(t0);
-    if(!hasCJK) return t0; // ถ้าไม่ใช่จีน (ไทย/อังกฤษ) คืนค่าเดิม
+    if(!hasCJK) return t0; // ไทย/อังกฤษ คืนค่าเดิม
 
-    // normalize ลดความเสี่ยงเรื่องช่องว่าง/ขึ้นบรรทัด
     const t = t0.replace(/\s+/g, " ").trim();
 
-    // ✅ mapping เรียง "ตามที่คุณแปะมา" และไม่เรียงใหม่
-    // ใช้ includes เพื่อรองรับข้อความที่มี "-" ">" "," "!" ปน
     const rules = [
       { key: "配完-配完>順利送達>白河營業所", th: "พัสดุถึงผู้รับเรียบร้อยแล้ว" },
       { key: "順利送達>白河營業所>包裹已經送達收件人", th: "จัดส่งสำเร็จ" },
@@ -285,10 +282,7 @@
       { key: "連線收單建檔", th: "ระบบรับออเดอร์และบันทึกข้อมูลเรียบร้อยแล้ว" },
       { key: "通關方式C1", th: "พิธีการศุลกากรแบบ C1" },
       { key: "放行", th: "ผ่านพิธีการศุลกากรแล้ว" },
-      {
-        key: "由於海關系統查無此包裹申報人資料",
-        th: "ระบบศุลกากรไม่พบข้อมูลผู้ยื่นสำแดง กรุณาลงทะเบียน EZ WAY"
-      },
+      { key: "由於海關系統查無此包裹申報人資料", th: "ระบบศุลกากรไม่พบข้อมูลผู้ยื่นสำแดง กรุณาลงทะเบียน EZ WAY" },
       { key: "不受理不可補正之錯單", th: "ข้อมูลออเดอร์ไม่ถูกต้อง ระบบไม่สามารถดำเนินการได้" },
       { key: "訂單已接收", th: "ระบบรับคำสั่งซื้อเรียบร้อยแล้ว" },
       { key: "您的貨物已准備從集運倉出倉", th: "สินค้าของคุณเตรียมออกจากคลังรวมสินค้า" },
@@ -298,14 +292,14 @@
       { key: "您已下單成功", th: "พัสดุผู้ส่งได้รับแล้ว  รอการดำเนินการจากคลังสินค้า" },
     ];
 
-    // ✅ ให้รายการ “ท้ายกว่า” override รายการก่อนหน้า (แก้คำแปลซ้ำได้)
+    // ✅ ให้รายการท้ายกว่า override รายการก่อนหน้า
     let out = "";
     for(const r of rules){
       if (t.includes(r.key)) out = r.th;
     }
     if(out) return out;
 
-    // Fallback: เป็นจีนแต่ไม่ตรง mapping
+    // ✅ จีนไม่ตรง mapping -> ไม่แสดง
     return "";
   }
 
@@ -318,10 +312,10 @@
 
   // Use latest event as truth (topmost event is newest)
   function getLatestThaiFromEvents(events){
-  if(!Array.isArray(events) || events.length === 0) return "-";
-  const th = toThaiStatus(events[0]?.status_th || "");
-  return th || "-"; // ✅ ถ้าว่าง ให้แสดง "-" แทนในส่วนสรุป
-}
+    if(!Array.isArray(events) || events.length === 0) return "-";
+    const th = toThaiStatus(events[0]?.status_th || "");
+    return th || "-";
+  }
 
   function renderSummary(data){
     const events = Array.isArray(data?.events) ? data.events : [];
@@ -346,40 +340,36 @@
     `;
   }
 
-  // ✅ SHOW ALL events (no limit, no dedupe)
+  // ✅ SHOW ALL events แต่: (1) ไม่โชว์อันว่าง (2) ไม่ซ้ำ
   function mapAllEvents(rawEvents){
-  if(!Array.isArray(rawEvents)) return [];
+    if(!Array.isArray(rawEvents)) return [];
 
-  const seen = new Set();
-  let lastText = null;
-  const out = [];
+    const seen = new Set();
+    let lastText = null;
+    const out = [];
 
-  for (const e of rawEvents){
-    const th = toThaiStatus(e.status_th || "");
+    for (const e of rawEvents){
+      const th = toThaiStatus(e.status_th || "");
+      if(!th) continue; // ไม่โชว์จีนที่ไม่ตรง mapping
 
-    // 1) ตัด event ที่ไม่มีข้อความ (fallback = "")
-    if(!th) continue;
+      const time = (e.time || "").trim();
+      const key = `${time}||${th}`;
+      if(seen.has(key)) continue;
+      seen.add(key);
 
-    // 2) ตัดซ้ำแบบเป๊ะ (เวลา + ข้อความ)
-    const time = (e.time || "").trim();
-    const key = `${time}||${th}`;
-    if(seen.has(key)) continue;
-    seen.add(key);
+      if(lastText === th) continue; // ตัดซ้ำติดกัน
+      lastText = th;
 
-    // 3) ตัดซ้ำติดกัน (กัน spam ข้อความเดิมรัว ๆ)
-    if(lastText === th) continue;
-    lastText = th;
-
-    out.push({ ...e, _th: th });
+      out.push({ ...e, _th: th });
+    }
+    return out;
   }
-
-  return out;
 
   function renderTimeline(events){
     const items = (events || []).map((e, idx) => `
       <div class="event ${idx === 0 ? "isLatest" : ""}">
         <div class="time">${e.time || "-"}</div>
-        <div class="text">${e._th || "-"}</div>
+        <div class="text">${e._th}</div>
       </div>
     `).join("");
 
@@ -437,6 +427,7 @@
 
   $("btn").addEventListener("click", run);
   $("no").addEventListener("keydown", (e) => { if(e.key === "Enter") run(); });
-</script>
+  </script>
 </body>
 </html>
+

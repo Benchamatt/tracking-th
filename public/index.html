@@ -249,193 +249,173 @@
 
   <!-- ✅ SCRIPT ใหม่ (รวมแล้ว): ใช้แทน <script> เดิมทั้งก้อนได้เลย -->
   <script>
-    const $ = (id) => document.getElementById(id);
-    const summary = $("summary");
-    const history = $("history");
-    const timeline = $("timeline");
-    const btn = $("btn");
-    $("year").textContent = String(new Date().getFullYear());
+  const $ = (id) => document.getElementById(id);
+  const summary = $("summary");
+  const history = $("history");
+  const timeline = $("timeline");
+  const btn = $("btn");
+  $("year").textContent = String(new Date().getFullYear());
 
-    // ----------------- CN/TH/EN -> Thai (ตาม mapping ที่คุณให้มา) -----------------
-    function toThaiStatus(raw){
-      const t = (raw || "").trim();
-      if(!t) return "-";
+  // ----------------- Translate (CN/TH/EN) -> Thai (ตาม mapping ที่แปะมา) -----------------
+  function toThaiStatus(raw){
+    const t0 = (raw || "").trim();
+    if(!t0) return "-";
 
-      const hasCJK = /[\u4E00-\u9FFF]/.test(t);
+    const hasCJK = /[\u4E00-\u9FFF]/.test(t0);
+    if(!hasCJK) return t0; // ถ้าไม่ใช่จีน (ไทย/อังกฤษ) คืนค่าเดิม
 
-      // ไม่ใช่จีน -> คืนค่าเดิม (ใช้กับสถานะไทย/อังกฤษ)
-      if(!hasCJK) return t;
+    // normalize ลดความเสี่ยงเรื่องช่องว่าง/ขึ้นบรรทัด
+    const t = t0.replace(/\s+/g, " ").trim();
 
-      // Priority rules: เฉพาะเจาะจงก่อน (เพราะข้อความจริงมักยาวและมี ">" "-" "," ปน)
-      const rules = [
-        // EZ WAY (ยาว) ต้องมาก่อนคำทั่วไป
-        {
-          test: (s) =>
-            s.includes("由於海關系統查無此包裹申報人資料") ||
-            (s.includes("EZ WAY") && s.includes("海關") && s.includes("查無")),
-          th: "ระบบศุลกากรไม่พบข้อมูลผู้ยื่นสำแดง กรุณาลงทะเบียน EZ WAY"
-        },
+    // ✅ mapping เรียง "ตามที่คุณแปะมา" และไม่เรียงใหม่
+    // ใช้ includes เพื่อรองรับข้อความที่มี "-" ">" "," "!" ปน
+    const rules = [
+      { key: "配完-配完>順利送達>白河營業所", th: "พัสดุถึงผู้รับเรียบร้อยแล้ว" },
+      { key: "順利送達>白河營業所>包裹已經送達收件人", th: "จัดส่งสำเร็จ" },
+      { key: "配送中-配送中>白河營業所", th: "อยู่ระหว่างการจัดส่ง" },
+      { key: "配送中>白河營業所>SD正在將包裹配送到收件人途中", th: "พนักงานกำลังนำพัสดุไปส่งให้ผู้รับ" },
+      { key: "暫置營業所,暫置營業所>暫置保管中国联络络黑猫宅急便412-8888)>白河營業所", th: "พัสดุถูกพักไว้ชั่วคราวที่สาขา" },
+      { key: "公司行號休息-公司行號休息>白河營業所", th: "สาขาปลายทางหยุดทำการ" },
+      { key: "配送中-配送中>白河營業所", th: "อยู่ระหว่างการนำส่งไปที่สาขาปลายทาง" },
+      { key: "配送中>白河營業所>SD正在將包裹配送到收件人途中", th: "อยู่ระหว่างนำส่งไปยังสาขาปลายทาง" },
+      { key: "轉運中-轉運中>已集貸>北三特服二所", th: "อยู่ระหว่างการขนส่งไปยังศูนย์กระจายสินค้า" },
+      { key: "已集貨>北三特販二所>SD已經至寄件人指定地點收到包裹", th: "รวบรวมสินค้าเรียบร้อย" },
+      { key: "出倉處理", th: "กำลังดำเนินการนำสินค้าออกจากคลัง" },
+      { key: "貨物在目的地國家海關清關中", th: "สินค้ากำลังผ่านพิธีการศุลกากรในประเทศปลายทาง" },
+      { key: "連線收單建檔", th: "ระบบรับออเดอร์และบันทึกข้อมูลเรียบร้อยแล้ว" },
+      { key: "通關方式C1", th: "พิธีการศุลกากรแบบ C1" },
+      { key: "放行", th: "ผ่านพิธีการศุลกากรแล้ว" },
+      {
+        key: "由於海關系統查無此包裹申報人資料",
+        th: "ระบบศุลกากรไม่พบข้อมูลผู้ยื่นสำแดง กรุณาลงทะเบียน EZ WAY"
+      },
+      { key: "不受理不可補正之錯單", th: "ข้อมูลออเดอร์ไม่ถูกต้อง ระบบไม่สามารถดำเนินการได้" },
+      { key: "訂單已接收", th: "ระบบรับคำสั่งซื้อเรียบร้อยแล้ว" },
+      { key: "您的貨物已准備從集運倉出倉", th: "สินค้าของคุณเตรียมออกจากคลังรวมสินค้า" },
+      { key: "貨物已經完成重量二次審核", th: "ตรวจสอบน้ำหนักสินค้าเรียบร้อย" },
+      { key: "已經打印好地址面單", th: "พิมพ์ใบปะหน้าที่อยู่เรียบร้อยแล้ว" },
+      { key: "倉庫同事已揀貸,等待打印地址面單", th: "แพ็กสินค้าเรียบร้อย กำลังเตรียมจัดส่ง" },
+      { key: "您已下單成功", th: "พัสดุผู้ส่งได้รับแล้ว  รอการดำเนินการจากคลังสินค้า" },
+    ];
 
-        // ปัญหาเฉพาะ
-        { test: (s) => s.includes("不受理不可補正之錯單"), th: "ข้อมูลออเดอร์ไม่ถูกต้อง ระบบไม่สามารถดำเนินการได้" },
+    // ✅ ให้รายการ “ท้ายกว่า” override รายการก่อนหน้า (แก้คำแปลซ้ำได้)
+    let out = "";
+    for(const r of rules){
+      if (t.includes(r.key)) out = r.th;
+    }
+    if(out) return out;
 
-        // ศุลกากรประเทศปลายทาง
-        { test: (s) => s.includes("貨物在目的地國家海關清關中"), th: "สินค้ากำลังผ่านพิธีการศุลกากรในประเทศปลายทาง" },
+    // Fallback: เป็นจีนแต่ไม่ตรง mapping
+    return "อยู่ระหว่างดำเนินการ (รออัปเดตสถานะจากระบบ)";
+  }
 
-        // จัดส่งสำเร็จ (ประโยคละเอียด)
-        { test: (s) => s.includes("包裹已經送達收件人"), th: "จัดส่งสำเร็จ" },
+  // Badge classification
+  function classify(th){
+    if (th === "จัดส่งสำเร็จ" || th === "พัสดุถึงผู้รับเรียบร้อยแล้ว") return { cls:"ok", label:"จัดส่งสำเร็จ" };
+    if (th.includes("ไม่พบข้อมูล") || th.includes("ไม่สามารถ") || th.includes("ผิด") || th.includes("ศุลกากรไม่พบข้อมูล")) return { cls:"bad", label:"มีปัญหา" };
+    return { cls:"warn", label:"กำลังดำเนินการ" };
+  }
 
-        // 配完 / 順利送達 (ตามที่คุณแปะ)
-        { test: (s) => s.includes("順利送達") || s.includes("配完"), th: "พัสดุถึงผู้รับเรียบร้อยแล้ว" },
+  // Use latest event as truth (topmost event is newest)
+  function getLatestThaiFromEvents(events){
+    if(!Array.isArray(events) || events.length === 0) return "-";
+    return toThaiStatus(events[0]?.status_th || "");
+  }
 
-        // SD กำลังนำส่งถึงผู้รับ
-        { test: (s) => s.includes("SD正在將包裹配送到收件人途中"), th: "พนักงานกำลังนำพัสดุไปส่งให้ผู้รับ" },
+  function renderSummary(data){
+    const events = Array.isArray(data?.events) ? data.events : [];
+    const latestTH = getLatestThaiFromEvents(events) || toThaiStatus(data?.latest_status_th || "");
+    const cls = classify(latestTH);
 
-        // พัก/หยุดทำการ
-        { test: (s) => s.includes("暫置營業所") || s.includes("暫置保管"), th: "พัสดุถูกพักไว้ชั่วคราวที่สาขา" },
-        { test: (s) => s.includes("公司行號休息"), th: "สาขาปลายทางหยุดทำการ" },
+    summary.style.display = "block";
+    summary.innerHTML = `
+      <div class="summaryTop">
+        <div class="kv">
+          <div><b>เลขพัสดุ</b> <span class="value">${data.tracking_no || "-"}</span></div>
+          <div><b>อัปเดตล่าสุด</b> <span class="value">${data.last_update || "-"}</span></div>
+        </div>
+        <span class="badge ${cls.cls}">
+          <span class="dot"></span>
+          ${cls.label}
+        </span>
+      </div>
 
-        // ขนส่ง/รวบรวม
-        { test: (s) => s.includes("轉運中"), th: "อยู่ระหว่างการขนส่งไปยังศูนย์กระจายสินค้า" },
-        { test: (s) => s.includes("SD已經至寄件人指定地點收到包裹") || s.includes("已集貨"), th: "รวบรวมสินค้าเรียบร้อย" },
+      <div class="muted">สถานะล่าสุด</div>
+      <div class="headline">${latestTH || "-"}</div>
+    `;
+  }
 
-        // ออกจากคลัง/เตรียมออกจากคลังรวมสินค้า
-        { test: (s) => s.includes("出倉處理"), th: "กำลังดำเนินการนำสินค้าออกจากคลัง" },
-        { test: (s) => s.includes("您的貨物已准備從集運倉出倉"), th: "สินค้าของคุณเตรียมออกจากคลังรวมสินค้า" },
+  // ✅ SHOW ALL events (no limit, no dedupe)
+  function mapAllEvents(rawEvents){
+    if(!Array.isArray(rawEvents)) return [];
+    return rawEvents.map(e => ({
+      ...e,
+      _th: toThaiStatus(e.status_th || ""),
+    }));
+  }
 
-        // น้ำหนัก/พิมพ์ใบปะหน้า/แพ็ก
-        { test: (s) => s.includes("貨物已經完成重量二次審核"), th: "ตรวจสอบน้ำหนักสินค้าเรียบร้อย" },
-        { test: (s) => s.includes("已經打印好地址面單"), th: "พิมพ์ใบปะหน้าที่อยู่เรียบร้อยแล้ว" },
-        { test: (s) => s.includes("倉庫同事已揀貸,等待打印地址面單"), th: "แพ็กสินค้าเรียบร้อย กำลังเตรียมจัดส่ง" },
+  function renderTimeline(events){
+    const items = (events || []).map((e, idx) => `
+      <div class="event ${idx === 0 ? "isLatest" : ""}">
+        <div class="time">${e.time || "-"}</div>
+        <div class="text">${e._th || "-"}</div>
+      </div>
+    `).join("");
 
-        // ออเดอร์
-        { test: (s) => s.includes("連線收單建檔"), th: "ระบบรับออเดอร์และบันทึกข้อมูลเรียบร้อยแล้ว" },
-        { test: (s) => s.includes("訂單已接收"), th: "ระบบรับคำสั่งซื้อเรียบร้อยแล้ว" },
-        { test: (s) => s.includes("您已下單成功"), th: "พัสดุผู้ส่งได้รับแล้ว  รอการดำเนินการจากคลังสินค้า" },
+    timeline.innerHTML = items || `<div class="muted" style="padding:10px 0">ไม่มีข้อมูล</div>`;
+  }
 
-        // ศุลกากร C1 / ปล่อยของ
-        { test: (s) => s.includes("通關方式C1"), th: "พิธีการศุลกากรแบบ C1" },
-        { test: (s) => s.includes("放行"), th: "ผ่านพิธีการศุลกากรแล้ว" },
+  function setLoading(){
+    summary.style.display = "block";
+    history.style.display = "none";
+    summary.innerHTML = `
+      <div class="loading">
+        <span class="spinner" aria-hidden="true"></span>
+        <div>
+          <div style="font-weight:800;color:#0b223c">กำลังค้นหา...</div>
+          <div class="small">โปรดรอสักครู่</div>
+        </div>
+      </div>
+    `;
+  }
 
-        // 配送中 (ปล่อยท้าย เพื่อไม่ทับ SD…)
-        { test: (s) => s.includes("配送中"), th: "อยู่ระหว่างการจัดส่ง" },
-      ];
+  function setError(msg){
+    summary.style.display = "block";
+    history.style.display = "none";
+    summary.innerHTML = `<div class="errorBox"><b>ไม่สำเร็จ:</b> ${msg || "เกิดข้อผิดพลาด"}</div>`;
+  }
 
-      for(const r of rules){
-        if(r.test(t)) return r.th;
+  async function run(){
+    const no = $("no").value.trim();
+    if(!no){ alert("กรุณากรอกเลขพัสดุ"); return; }
+
+    btn.disabled = true;
+    setLoading();
+
+    try{
+      const r = await fetch(`/api/track?no=${encodeURIComponent(no)}`);
+      const data = await r.json();
+
+      if(!r.ok){
+        setError(data.error || "ไม่พบข้อมูล");
+        return;
       }
 
-      // จีนแต่ไม่รู้จัก
-      return "อยู่ระหว่างดำเนินการ (รออัปเดตสถานะจากระบบ)";
+      renderSummary(data);
+
+      const allEvents = mapAllEvents(data.events);
+      renderTimeline(allEvents);
+
+      history.style.display = "block";
+    }catch(e){
+      setError(String(e));
+    }finally{
+      btn.disabled = false;
     }
+  }
 
-    // Badge classification
-    function classify(th){
-      if (th === "จัดส่งสำเร็จ" || th === "พัสดุถึงผู้รับเรียบร้อยแล้ว") return { cls:"ok", label:"จัดส่งสำเร็จ" };
-      if (th.includes("ไม่พบข้อมูล") || th.includes("ไม่สามารถ") || th.includes("ผิด") || th.includes("ศุลกากรไม่พบข้อมูล")) return { cls:"bad", label:"มีปัญหา" };
-      return { cls:"warn", label:"กำลังดำเนินการ" };
-    }
-
-    // Use latest event as truth (topmost event is newest)
-    function getLatestThaiFromEvents(events){
-      if(!Array.isArray(events) || events.length === 0) return "-";
-      return toThaiStatus(events[0]?.status_th || "");
-    }
-
-    function renderSummary(data){
-      const events = Array.isArray(data?.events) ? data.events : [];
-      const latestTH = getLatestThaiFromEvents(events) || toThaiStatus(data?.latest_status_th || "");
-      const cls = classify(latestTH);
-
-      summary.style.display = "block";
-      summary.innerHTML = `
-        <div class="summaryTop">
-          <div class="kv">
-            <div><b>เลขพัสดุ</b> <span class="value">${data.tracking_no || "-"}</span></div>
-            <div><b>อัปเดตล่าสุด</b> <span class="value">${data.last_update || "-"}</span></div>
-          </div>
-          <span class="badge ${cls.cls}">
-            <span class="dot"></span>
-            ${cls.label}
-          </span>
-        </div>
-
-        <div class="muted">สถานะล่าสุด</div>
-        <div class="headline">${latestTH || "-"}</div>
-      `;
-    }
-
-    // ✅ SHOW ALL events (no limit, no dedupe)
-    function mapAllEvents(rawEvents){
-      if(!Array.isArray(rawEvents)) return [];
-      return rawEvents.map(e => ({
-        ...e,
-        _th: toThaiStatus(e.status_th || ""),
-      }));
-    }
-
-    function renderTimeline(events){
-      const items = (events || []).map((e, idx) => `
-        <div class="event ${idx === 0 ? "isLatest" : ""}">
-          <div class="time">${e.time || "-"}</div>
-          <div class="text">${e._th || "-"}</div>
-        </div>
-      `).join("");
-
-      timeline.innerHTML = items || `<div class="muted" style="padding:10px 0">ไม่มีข้อมูล</div>`;
-    }
-
-    function setLoading(){
-      summary.style.display = "block";
-      history.style.display = "none";
-      summary.innerHTML = `
-        <div class="loading">
-          <span class="spinner" aria-hidden="true"></span>
-          <div>
-            <div style="font-weight:800;color:#0b223c">กำลังค้นหา...</div>
-            <div class="small">โปรดรอสักครู่</div>
-          </div>
-        </div>
-      `;
-    }
-
-    function setError(msg){
-      summary.style.display = "block";
-      history.style.display = "none";
-      summary.innerHTML = `<div class="errorBox"><b>ไม่สำเร็จ:</b> ${msg || "เกิดข้อผิดพลาด"}</div>`;
-    }
-
-    async function run(){
-      const no = $("no").value.trim();
-      if(!no){ alert("กรุณากรอกเลขพัสดุ"); return; }
-
-      btn.disabled = true;
-      setLoading();
-
-      try{
-        const r = await fetch(`/api/track?no=${encodeURIComponent(no)}`);
-        const data = await r.json();
-
-        if(!r.ok){
-          setError(data.error || "ไม่พบข้อมูล");
-          return;
-        }
-
-        renderSummary(data);
-
-        const allEvents = mapAllEvents(data.events);
-        renderTimeline(allEvents);
-
-        history.style.display = "block";
-      }catch(e){
-        setError(String(e));
-      }finally{
-        btn.disabled = false;
-      }
-    }
-
-    $("btn").addEventListener("click", run);
-    $("no").addEventListener("keydown", (e) => { if(e.key === "Enter") run(); });
-  </script>
+  $("btn").addEventListener("click", run);
+  $("no").addEventListener("keydown", (e) => { if(e.key === "Enter") run(); });
+</script>
 </body>
 </html>

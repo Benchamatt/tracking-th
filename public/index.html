@@ -347,12 +347,14 @@
 
   // ✅ SHOW ALL events (no limit, no dedupe)
   function mapAllEvents(rawEvents){
-    if(!Array.isArray(rawEvents)) return [];
-    return rawEvents.map(e => ({
+  if(!Array.isArray(rawEvents)) return [];
+  return rawEvents
+    .map(e => ({
       ...e,
       _th: toThaiStatus(e.status_th || ""),
-    }));
-  }
+    }))
+    .filter(e => e._th); // ❗ ตัด event ที่ไม่มีข้อความ
+}
 
   function renderTimeline(events){
     const items = (events || []).map((e, idx) => `

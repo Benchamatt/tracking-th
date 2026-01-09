@@ -337,10 +337,13 @@
     return th || "-";
   }
 
-  function renderSummary(data){
-    const events = Array.isArray(data?.events) ? data.events : [];
-    const latestTH = getLatestThaiFromEvents(events);
-    const badge = classify(latestTH);
+ renderSummary(data);
+
+const allEvents = mapAllEvents(data.events); // มี dedupe + ตัดว่างแล้ว
+renderTimeline(allEvents);
+
+history.style.display = "block";
+
 
     summary.style.display = "block";
 

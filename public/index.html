@@ -306,7 +306,7 @@
     if(out) return out;
 
     // Fallback: เป็นจีนแต่ไม่ตรง mapping
-    return "อยู่ระหว่างดำเนินการ (รออัปเดตสถานะจากระบบ)";
+    return "";
   }
 
   // Badge classification
@@ -318,9 +318,10 @@
 
   // Use latest event as truth (topmost event is newest)
   function getLatestThaiFromEvents(events){
-    if(!Array.isArray(events) || events.length === 0) return "-";
-    return toThaiStatus(events[0]?.status_th || "");
-  }
+  if(!Array.isArray(events) || events.length === 0) return "-";
+  const th = toThaiStatus(events[0]?.status_th || "");
+  return th || "-"; // ✅ ถ้าว่าง ให้แสดง "-" แทนในส่วนสรุป
+}
 
   function renderSummary(data){
     const events = Array.isArray(data?.events) ? data.events : [];
@@ -348,13 +349,31 @@
   // ✅ SHOW ALL events (no limit, no dedupe)
   function mapAllEvents(rawEvents){
   if(!Array.isArray(rawEvents)) return [];
-  return rawEvents
-    .map(e => ({
-      ...e,
-      _th: toThaiStatus(e.status_th || ""),
-    }))
-    .filter(e => e._th); // ❗ ตัด event ที่ไม่มีข้อความ
-}
+
+  const seen = new Set();
+  let lastText = null;
+  const out = [];
+
+  for (const e of rawEvents){
+    const th = toThaiStatus(e.status_th || "");
+
+    // 1) ตัด event ที่ไม่มีข้อความ (fallback = "")
+    if(!th) continue;
+
+    // 2) ตัดซ้ำแบบเป๊ะ (เวลา + ข้อความ)
+    const time = (e.time || "").trim();
+    const key = `${time}||${th}`;
+    if(seen.has(key)) continue;
+    seen.add(key);
+
+    // 3) ตัดซ้ำติดกัน (กัน spam ข้อความเดิมรัว ๆ)
+    if(lastText === th) continue;
+    lastText = th;
+
+    out.push({ ...e, _th: th });
+  }
+
+  return out;
 
   function renderTimeline(events){
     const items = (events || []).map((e, idx) => `

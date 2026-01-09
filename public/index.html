@@ -1,3 +1,4 @@
+```html
 <!doctype html>
 <html lang="th">
 <head>
@@ -132,8 +133,10 @@
     .kv b{font-size:12px;letter-spacing:.2px;color:#0b223c}
     .kv .value{font-size:14px}
 
+    /* ✅ ซ่อน/ไม่ใช้ badge สีส้มแล้ว แต่คงสไตล์ไว้เผื่อคุณอยากเปิดกลับ */
     .badge{
-      display:inline-flex;align-items:center;gap:8px;padding:8px 12px;border-radius:999px;
+      display:none; /* ✅ ไม่แสดง badge เลย */
+      align-items:center;gap:8px;padding:8px 12px;border-radius:999px;
       font-size:12px;font-weight:800;white-space:nowrap;
       border:1px solid rgba(11,42,74,.12);
       background: rgba(255,255,255,.85);
@@ -166,6 +169,7 @@
       background:#fff;border:3px solid rgba(40,140,255,.55);
       box-shadow: 0 0 0 4px rgba(40,140,255,.12);
     }
+    /* ✅ ไฮไลท์สถานะล่าสุด */
     .event.isLatest{border-color: rgba(40,140,255,.35); box-shadow: 0 14px 26px rgba(8,28,55,.10);}
     .event.isLatest:before{border-color: rgba(11,42,74,.55); box-shadow: 0 0 0 5px rgba(11,42,74,.12);}
 
@@ -255,99 +259,77 @@
   const btn = $("btn");
   $("year").textContent = String(new Date().getFullYear());
 
-  // ----------------- CN -> TH (เฉพาะ mapping ที่ให้มาเท่านั้น) -----------------
-function toThaiStatus(raw){
-  const t0 = (raw || "").trim();
-  if(!t0) return "";
+  // ----------------- CN -> TH (ใช้เฉพาะ mapping ที่ให้มา) -----------------
+  // กติกา:
+  // - ถ้าเป็นจีน: แปลเฉพาะที่อยู่ใน rules / ถ้าไม่ตรง -> คืน "" (ไม่แสดง)
+  // - ถ้าไม่ใช่จีน (ไทย/อังกฤษ): คืนค่าเดิม (แสดงได้ เพื่อให้ timeline ครบ)
+  function toThaiStatus(raw){
+    const t0 = (raw || "").trim();
+    if(!t0) return "";
 
-  const hasCJK = /[\u4E00-\u9FFF]/.test(t0);
-  if(!hasCJK) return t0; // ✅ ไทย/อังกฤษ -> แสดงตามเดิม
+    const hasCJK = /[\u4E00-\u9FFF]/.test(t0);
+    if(!hasCJK) return t0; // ✅ ไทย/อังกฤษ แสดงตามเดิม
 
-  const t = t0.replace(/\s+/g, " ").trim();
+    const t = t0.replace(/\s+/g, " ").trim();
 
-  const rules = [
-    { key: "X2頻繁進口扣稅", th: "การนำเข้าแบบถี่ (X2) มีการเรียกเก็บภาษี" },
-    { key: "通關方式C3", th: "พิธีการศุลกากรแบบ C3" },
-    { key: "不受理不可補正之錯單", th: "ข้อมูลออเดอร์ไม่ถูกต้อง ระบบไม่สามารถดำเนินการได้" },
-    { key: "由於海關系統查無此包裹申報人資料，請確認申報人是否已註冊過EZ WAY。 若尚未註冊，請於完成註冊後，至個人資料維護介面截圖申報人名、電話號碼及身分證號，並提交給威名客服，海關受理資料後約1~2個工作天放行。", th: "ระบบศุลกากรไม่พบข้อมูลผู้ยื่นสำแดง กรุณาลงทะเบียน EZ WAY" },
+    const rules = [
+      { key: "X2頻繁進口扣稅", th: "การนำเข้าแบบถี่ (X2) มีการเรียกเก็บภาษี" },
+      { key: "通關方式C3", th: "พิธีการศุลกากรแบบ C3" },
+      { key: "不受理不可補正之錯單", th: "ข้อมูลออเดอร์ไม่ถูกต้อง ระบบไม่สามารถดำเนินการได้" },
+      {
+        key: "由於海關系統查無此包裹申報人資料，請確認申報人是否已註冊過EZ WAY。 若尚未註冊，請於完成註冊後，至個人資料維護介面截圖申報人名、電話號碼及身分證號，並提交給威名客服，海關受理資料後約1~2個工作天放行。",
+        th: "ระบบศุลกากรไม่พบข้อมูลผู้ยื่นสำแดง กรุณาลงทะเบียน EZ WAY"
+      },
 
-    { key: "配完-配完>順利送達>白河營業所", th: "พัสดุถึงผู้รับเรียบร้อยแล้ว" },
-    { key: "順利送達>白河營業所>包裹已經送達收件人", th: "จัดส่งสำเร็จ" },
+      { key: "配完-配完>順利送達>白河營業所", th: "พัสดุถึงผู้รับเรียบร้อยแล้ว" },
+      { key: "順利送達>白河營業所>包裹已經送達收件人", th: "จัดส่งสำเร็จ" },
 
-    { key: "配送中-配送中>白河營業所", th: "อยู่ระหว่างการจัดส่ง" },
-    { key: "配送中>白河營業所>SD正在將包裹配送到收件人途中", th: "พนักงานกำลังนำพัสดุไปส่งให้ผู้รับ" },
+      { key: "配送中-配送中>白河營業所", th: "อยู่ระหว่างการจัดส่ง" },
+      { key: "配送中>白河營業所>SD正在將包裹配送到收件人途中", th: "พนักงานกำลังนำพัสดุไปส่งให้ผู้รับ" },
 
-    { key: "暫置營業所,暫置營業所>暫置保管中国联络络黑猫宅急便412-8888)>白河營業所", th: "พัสดุถูกพักไว้ชั่วคราวที่สาขา" },
-    { key: "公司行號休息-公司行號休息>白河營業所", th: "สาขาปลายทางหยุดทำการ" },
+      { key: "暫置營業所,暫置營業所>暫置保管中国联络络黑猫宅急便412-8888)>白河營業所", th: "พัสดุถูกพักไว้ชั่วคราวที่สาขา" },
+      { key: "公司行號休息-公司行號休息>白河營業所", th: "สาขาปลายทางหยุดทำการ" },
 
-    { key: "配送中-配送中>白河營業所", th: "อยู่ระหว่างการนำส่งไปที่สาขาปลายทาง" },
-    { key: "配送中>白河營業所>SD正在將包裹配送到收件人途中", th: "อยู่ระหว่างนำส่งไปยังสาขาปลายทาง" },
+      { key: "配送中-配送中>白河營業所", th: "อยู่ระหว่างการนำส่งไปที่สาขาปลายทาง" },
+      { key: "配送中>白河營業所>SD正在將包裹配送到收件人途中", th: "อยู่ระหว่างนำส่งไปยังสาขาปลายทาง" },
 
-    { key: "轉運中-轉運中>已集貸>北三特服二所", th: "อยู่ระหว่างการขนส่งไปยังศูนย์กระจายสินค้า" },
-    { key: "已集貨>北三特販二所>SD已經至寄件人指定地點收到包裹", th: "รวบรวมสินค้าเรียบร้อย" },
+      { key: "轉運中-轉運中>已集貸>北三特服二所", th: "อยู่ระหว่างการขนส่งไปยังศูนย์กระจายสินค้า" },
+      { key: "已集貨>北三特販二所>SD已經至寄件人指定地點收到包裹", th: "รวบรวมสินค้าเรียบร้อย" },
 
-    { key: "出倉處理", th: "กำลังดำเนินการนำสินค้าออกจากคลัง" },
-    { key: "貨物在目的地國家海關清關中", th: "สินค้ากำลังผ่านพิธีการศุลกากรในประเทศปลายทาง" },
-    { key: "連線收單建檔", th: "ระบบรับออเดอร์และบันทึกข้อมูลเรียบร้อยแล้ว" },
-    { key: "通關方式C1", th: "พิธีการศุลกากรแบบ C1" },
-    { key: "放行", th: "ผ่านพิธีการศุลกากรแล้ว" },
-    { key: "由於海關系統查無此包裹申報人資料", th: "ระบบศุลกากรไม่พบข้อมูลผู้ยื่นสำแดง กรุณาลงทะเบียน EZ WAY" },
-    { key: "訂單已接收", th: "ระบบรับคำสั่งซื้อเรียบร้อยแล้ว" },
-    { key: "您的貨物已准備從集運倉出倉", th: "สินค้าของคุณเตรียมออกจากคลังรวมสินค้า" },
-    { key: "貨物已經完成重量二次審核", th: "ตรวจสอบน้ำหนักสินค้าเรียบร้อย" },
-    { key: "已經打印好地址面單", th: "พิมพ์ใบปะหน้าที่อยู่เรียบร้อยแล้ว" },
-    { key: "倉庫同事已揀貸,等待打印地址面單", th: "แพ็กสินค้าเรียบร้อย กำลังเตรียมจัดส่ง" },
-    { key: "您已下單成功", th: "พัสดุผู้ส่งได้รับแล้ว  รอการดำเนินการจากคลังสินค้า" },
-  ];
+      { key: "出倉處理", th: "กำลังดำเนินการนำสินค้าออกจากคลัง" },
+      { key: "貨物在目的地國家海關清關中", th: "สินค้ากำลังผ่านพิธีการศุลกากรในประเทศปลายทาง" },
+      { key: "連線收單建檔", th: "ระบบรับออเดอร์และบันทึกข้อมูลเรียบร้อยแล้ว" },
+      { key: "通關方式C1", th: "พิธีการศุลกากรแบบ C1" },
+      { key: "放行", th: "ผ่านพิธีการศุลกากรแล้ว" },
+      { key: "由於海關系統查無此包裹申報人資料", th: "ระบบศุลกากรไม่พบข้อมูลผู้ยื่นสำแดง กรุณาลงทะเบียน EZ WAY" },
+      { key: "訂單已接收", th: "ระบบรับคำสั่งซื้อเรียบร้อยแล้ว" },
+      { key: "您的貨物已准備從集運倉出倉", th: "สินค้าของคุณเตรียมออกจากคลังรวมสินค้า" },
+      { key: "貨物已經完成重量二次審核", th: "ตรวจสอบน้ำหนักสินค้าเรียบร้อย" },
+      { key: "已經打印好地址面單", th: "พิมพ์ใบปะหน้าที่อยู่เรียบร้อยแล้ว" },
+      { key: "倉庫同事已揀貸,等待打印地址面單", th: "แพ็กสินค้าเรียบร้อย กำลังเตรียมจัดส่ง" },
+      { key: "您已下單成功", th: "พัสดุผู้ส่งได้รับแล้ว  รอการดำเนินการจากคลังสินค้า" },
+    ];
 
-  let out = "";
-  for(const r of rules){
-    if(t.includes(r.key)) out = r.th;
-  }
-  return out || ""; // ✅ จีนไม่ตรง mapping -> ไม่แสดง
-}
-
-function mapAllEvents(rawEvents){
-  if(!Array.isArray(rawEvents)) return [];
-
-  const seen = new Set();
-  let lastText = null;
-  const out = [];
-
-  for (const e of rawEvents){
-    const raw = e.status_th || e.status || e.latest_status_th || "";
-    const th = toThaiStatus(raw);
-
-    // ซ่อนเฉพาะกรณี "จีนไม่ตรง mapping" (ซึ่ง toThaiStatus จะคืน "")
-    if(!th) continue;
-
-    const time = (e.time || "").trim();
-    const key = `${time}||${th}`;
-    if(seen.has(key)) continue;
-    seen.add(key);
-
-    if(lastText === th) continue;
-    lastText = th;
-
-    out.push({ ...e, _th: th });
+    // ✅ ให้รายการ “ท้ายกว่า” override รายการก่อนหน้า (กรณี key ซ้ำ)
+    let out = "";
+    for(const r of rules){
+      if(t.includes(r.key)) out = r.th;
+    }
+    return out || ""; // ✅ จีนไม่ตรง mapping -> ไม่แสดง
   }
 
-  return out;
-}
+  // ----------------- สรุปสถานะล่าสุด: อิงจาก timeline (ตัวแรกที่แปลแล้วไม่ว่าง) -----------------
+  function getLatestThaiFromEvents(events){
+    if(!Array.isArray(events) || events.length === 0) return "-";
+    for(const e of events){
+      const raw = e.status_th || e.status || e.latest_status_th || "";
+      const th = toThaiStatus(raw);
+      if(th) return th; // ✅ เอาอันล่าสุดที่ “แสดงได้จริง”
+    }
+    return "-";
+  }
 
-
-  function renderSummary(data){
-    const events = Array.isArray(data?.events) ? data.events : [];
-    const latestTH = getLatestThaiFromEvents(events);
-    const badge = classify(latestTH);
-
-    const badgeHtml = badge ? `
-      <span class="badge ${badge.cls}">
-        <span class="dot"></span>
-        ${badge.label}
-      </span>
-    ` : "";
-
+  function renderSummary(data, latestTH){
     summary.style.display = "block";
     summary.innerHTML = `
       <div class="summaryTop">
@@ -355,15 +337,15 @@ function mapAllEvents(rawEvents){
           <div><b>เลขพัสดุ</b> <span class="value">${data.tracking_no || "-"}</span></div>
           <div><b>อัปเดตล่าสุด</b> <span class="value">${data.last_update || "-"}</span></div>
         </div>
-        ${badgeHtml}
+        <span class="badge"><span class="dot"></span></span>
       </div>
 
       <div class="muted">สถานะล่าสุด</div>
-      <div class="headline">${latestTH}</div>
+      <div class="headline">${latestTH || "-"}</div>
     `;
   }
 
-  // ✅ ไทม์ไลน์: ตัดอันว่าง + ตัดซ้ำ (เวลา+ข้อความ) + ตัดซ้ำติดกัน
+  // ----------------- Timeline: แสดงทั้งหมด + ไม่ซ้ำ + ซ่อนจีนที่ไม่ตรง mapping -----------------
   function mapAllEvents(rawEvents){
     if(!Array.isArray(rawEvents)) return [];
 
@@ -372,19 +354,25 @@ function mapAllEvents(rawEvents){
     const out = [];
 
     for (const e of rawEvents){
-      const th = toThaiStatus(e.status_th || "");
-      if(!th) continue; // ✅ นอก mapping ไม่แสดง
+      const raw = e.status_th || e.status || e.latest_status_th || "";
+      const th = toThaiStatus(raw);
+
+      // ซ่อนเฉพาะกรณี "จีนไม่ตรง mapping" (th จะเป็น "")
+      if(!th) continue;
 
       const time = (e.time || "").trim();
+      // กันซ้ำแบบเป๊ะ: เวลา + ข้อความ
       const key = `${time}||${th}`;
       if(seen.has(key)) continue;
       seen.add(key);
 
+      // กันซ้ำติดกัน (ข้อความเดิมรัว ๆ)
       if(lastText === th) continue;
       lastText = th;
 
       out.push({ ...e, _th: th });
     }
+
     return out;
   }
 
@@ -435,11 +423,17 @@ function mapAllEvents(rawEvents){
         return;
       }
 
-      renderSummary(data);
-
+      // 1) ทำ timeline ก่อน (แสดงทั้งหมด + ไม่ซ้ำ + ซ่อนจีนที่ไม่ตรง mapping)
       const allEvents = mapAllEvents(data.events);
-      renderTimeline(allEvents);
 
+      // 2) เอาสถานะล่าสุดจาก timeline จริง (ตัวบนสุดของ timeline)
+      const latestTH = allEvents[0]?._th || getLatestThaiFromEvents(data.events);
+
+      // 3) แสดงสรุป (ไม่มี badge สีส้ม)
+      renderSummary(data, latestTH);
+
+      // 4) แสดง timeline และโชว์การ์ด
+      renderTimeline(allEvents);
       history.style.display = "block";
     }catch(e){
       setError(String(e));
@@ -453,3 +447,4 @@ function mapAllEvents(rawEvents){
 </script>
 </body>
 </html>
+```

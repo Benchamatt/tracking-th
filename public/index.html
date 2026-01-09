@@ -247,7 +247,6 @@
     </div>
   </div>
 
-  <!-- ✅ SCRIPT ใหม่ (รวมแล้ว): ใช้แทน <script> เดิมทั้งก้อนได้เลย -->
 <script>
   const $ = (id) => document.getElementById(id);
   const summary = $("summary");
@@ -256,98 +255,83 @@
   const btn = $("btn");
   $("year").textContent = String(new Date().getFullYear());
 
-  // ----------------- CN -> TH (ใช้เฉพาะ mapping ที่ให้มา) -----------------
+  // ----------------- CN -> TH (เฉพาะ mapping ที่ให้มาเท่านั้น) -----------------
   function toThaiStatus(raw){
     const t0 = (raw || "").trim();
     if(!t0) return "";
 
-    // ถ้าไม่ใช่จีน (ไทย/อังกฤษ) -> ไม่แสดง (ตามโจทย์ที่ให้ยึดจีนที่ขึ้น)
     const hasCJK = /[\u4E00-\u9FFF]/.test(t0);
-    if(!hasCJK) return "";
+    if(!hasCJK) return ""; // ✅ ไม่ใช่จีน -> ไม่แสดง
 
     const t = t0.replace(/\s+/g, " ").trim();
 
-    // ✅ ใส่ mapping ตามประโยคจีนที่คุณให้มา (ไม่ต้องเรียงลำดับ)
     const rules = [
       { key: "X2頻繁進口扣稅", th: "การนำเข้าแบบถี่ (X2) มีการเรียกเก็บภาษี" },
       { key: "通關方式C3", th: "พิธีการศุลกากรแบบ C3" },
-
       { key: "不受理不可補正之錯單", th: "ข้อมูลออเดอร์ไม่ถูกต้อง ระบบไม่สามารถดำเนินการได้" },
-
-      // EZ WAY (ใส่ทั้งแบบยาวและแบบขึ้นต้น เผื่อข้อความจริงต่างกันเล็กน้อย)
       { key: "由於海關系統查無此包裹申報人資料，請確認申報人是否已註冊過EZ WAY。 若尚未註冊，請於完成註冊後，至個人資料維護介面截圖申報人名、電話號碼及身分證號，並提交給威名客服，海關受理資料後約1~2個工作天放行。", th: "ระบบศุลกากรไม่พบข้อมูลผู้ยื่นสำแดง กรุณาลงทะเบียน EZ WAY" },
-      { key: "由於海關系統查無此包裹申報人資料", th: "ระบบศุลกากรไม่พบข้อมูลผู้ยื่นสำแดง กรุณาลงทะเบียน EZ WAY" },
+
+      { key: "配完-配完>順利送達>白河營業所", th: "พัสดุถึงผู้รับเรียบร้อยแล้ว" },
+      { key: "順利送達>白河營業所>包裹已經送達收件人", th: "จัดส่งสำเร็จ" },
 
       { key: "配送中-配送中>白河營業所", th: "อยู่ระหว่างการจัดส่ง" },
       { key: "配送中>白河營業所>SD正在將包裹配送到收件人途中", th: "พนักงานกำลังนำพัสดุไปส่งให้ผู้รับ" },
+
       { key: "暫置營業所,暫置營業所>暫置保管中国联络络黑猫宅急便412-8888)>白河營業所", th: "พัสดุถูกพักไว้ชั่วคราวที่สาขา" },
       { key: "公司行號休息-公司行號休息>白河營業所", th: "สาขาปลายทางหยุดทำการ" },
 
-      // รายการซ้ำกันในที่ส่งมา (ใส่ได้ ไม่เป็นไร)
+      // (ซ้ำ key เดิมได้ ไม่เป็นไร)
       { key: "配送中-配送中>白河營業所", th: "อยู่ระหว่างการนำส่งไปที่สาขาปลายทาง" },
       { key: "配送中>白河營業所>SD正在將包裹配送到收件人途中", th: "อยู่ระหว่างนำส่งไปยังสาขาปลายทาง" },
 
       { key: "轉運中-轉運中>已集貸>北三特服二所", th: "อยู่ระหว่างการขนส่งไปยังศูนย์กระจายสินค้า" },
       { key: "已集貨>北三特販二所>SD已經至寄件人指定地點收到包裹", th: "รวบรวมสินค้าเรียบร้อย" },
+
       { key: "出倉處理", th: "กำลังดำเนินการนำสินค้าออกจากคลัง" },
       { key: "貨物在目的地國家海關清關中", th: "สินค้ากำลังผ่านพิธีการศุลกากรในประเทศปลายทาง" },
       { key: "連線收單建檔", th: "ระบบรับออเดอร์และบันทึกข้อมูลเรียบร้อยแล้ว" },
       { key: "通關方式C1", th: "พิธีการศุลกากรแบบ C1" },
       { key: "放行", th: "ผ่านพิธีการศุลกากรแล้ว" },
-
-      // (ซ้ำอีกครั้งตามที่คุณแปะมา)
       { key: "由於海關系統查無此包裹申報人資料", th: "ระบบศุลกากรไม่พบข้อมูลผู้ยื่นสำแดง กรุณาลงทะเบียน EZ WAY" },
-      { key: "不受理不可補正之錯單", th: "ข้อมูลออเดอร์ไม่ถูกต้อง ระบบไม่สามารถดำเนินการได้" },
-
       { key: "訂單已接收", th: "ระบบรับคำสั่งซื้อเรียบร้อยแล้ว" },
       { key: "您的貨物已准備從集運倉出倉", th: "สินค้าของคุณเตรียมออกจากคลังรวมสินค้า" },
       { key: "貨物已經完成重量二次審核", th: "ตรวจสอบน้ำหนักสินค้าเรียบร้อย" },
       { key: "已經打印好地址面單", th: "พิมพ์ใบปะหน้าที่อยู่เรียบร้อยแล้ว" },
       { key: "倉庫同事已揀貸,等待打印地址面單", th: "แพ็กสินค้าเรียบร้อย กำลังเตรียมจัดส่ง" },
+      { key: "您已下單成功", th: "พัสดุผู้ส่งได้รับแล้ว  รอการดำเนินการจากคลังสินค้า" },
     ];
 
-    // ✅ ไม่ต้องเรียง แต่ให้ “อิงจากประโยคจีนที่ขึ้น” -> ใช้ includes และให้ตัวที่ match ทีหลัง override ได้
+    // ✅ match แบบ includes และให้ตัวท้าย override ได้
     let out = "";
     for(const r of rules){
       if(t.includes(r.key)) out = r.th;
     }
-
-    // ถ้าไม่อยู่ใน mapping -> ไม่แสดง
-    return out || "";
+    return out || ""; // ✅ ไม่ตรง mapping -> ไม่แสดง
   }
 
-  // ----------------- Badge: ไม่มีสีส้ม (warn) -----------------
+  // ✅ ไม่มี “สีส้ม” (warn) อีกต่อไป
   function classify(th){
-    // เขียว: สำเร็จ
-    if (th === "จัดส่งสำเร็จ" || th.includes("ถึงผู้รับ") ) return { cls:"ok", label:"จัดส่งสำเร็จ" };
-
-    // แดง: ปัญหา (ปรับ keyword ได้ตามจริง)
-    if (th.includes("ไม่พบ") || th.includes("ไม่สามารถ") || th.includes("ผิด") || th.includes("ภาษี")) {
-      return { cls:"bad", label:"มีปัญหา" };
-    }
-
-    // ไม่ให้มีสีส้ม
-    return null;
+    if (!th || th === "-") return null;
+    if (th === "จัดส่งสำเร็จ" || th.includes("ถึงผู้รับ")) return { cls:"ok", label:"จัดส่งสำเร็จ" };
+    if (th.includes("ไม่พบ") || th.includes("ไม่สามารถ") || th.includes("ผิด") || th.includes("ภาษี")) return { cls:"bad", label:"มีปัญหา" };
+    return null; // ✅ ไม่แสดง badge สีส้ม
   }
 
-  // ✅ ใช้ “เหตุการณ์ล่าสุด” เป็นคำตอบ (events[0] คือใหม่สุด)
+  // ✅ หาสถานะล่าสุด “ที่แปลได้จริง” (ไล่จากบนลงล่าง)
   function getLatestThaiFromEvents(events){
     if(!Array.isArray(events) || events.length === 0) return "-";
-    const th = toThaiStatus(events[0]?.status_th || "");
-    return th || "-";
+    for (const e of events){
+      const th = toThaiStatus(e?.status_th || "");
+      if(th) return th;
+    }
+    return "-";
   }
 
- renderSummary(data);
+  function renderSummary(data){
+    const events = Array.isArray(data?.events) ? data.events : [];
+    const latestTH = getLatestThaiFromEvents(events);
+    const badge = classify(latestTH);
 
-const allEvents = mapAllEvents(data.events); // มี dedupe + ตัดว่างแล้ว
-renderTimeline(allEvents);
-
-history.style.display = "block";
-
-
-    summary.style.display = "block";
-
-    // ✅ ถ้าไม่มี badge (คือกรณีกำลังดำเนินการ) -> ไม่แสดงแบดจ์เลย
     const badgeHtml = badge ? `
       <span class="badge ${badge.cls}">
         <span class="dot"></span>
@@ -355,6 +339,7 @@ history.style.display = "block";
       </span>
     ` : "";
 
+    summary.style.display = "block";
     summary.innerHTML = `
       <div class="summaryTop">
         <div class="kv">
@@ -367,6 +352,42 @@ history.style.display = "block";
       <div class="muted">สถานะล่าสุด</div>
       <div class="headline">${latestTH}</div>
     `;
+  }
+
+  // ✅ ไทม์ไลน์: ตัดอันว่าง + ตัดซ้ำ (เวลา+ข้อความ) + ตัดซ้ำติดกัน
+  function mapAllEvents(rawEvents){
+    if(!Array.isArray(rawEvents)) return [];
+
+    const seen = new Set();
+    let lastText = null;
+    const out = [];
+
+    for (const e of rawEvents){
+      const th = toThaiStatus(e.status_th || "");
+      if(!th) continue; // ✅ นอก mapping ไม่แสดง
+
+      const time = (e.time || "").trim();
+      const key = `${time}||${th}`;
+      if(seen.has(key)) continue;
+      seen.add(key);
+
+      if(lastText === th) continue;
+      lastText = th;
+
+      out.push({ ...e, _th: th });
+    }
+    return out;
+  }
+
+  function renderTimeline(events){
+    const items = (events || []).map((e, idx) => `
+      <div class="event ${idx === 0 ? "isLatest" : ""}">
+        <div class="time">${e.time || "-"}</div>
+        <div class="text">${e._th}</div>
+      </div>
+    `).join("");
+
+    timeline.innerHTML = items || `<div class="muted" style="padding:10px 0">ไม่มีข้อมูล</div>`;
   }
 
   function setLoading(){
@@ -405,13 +426,12 @@ history.style.display = "block";
         return;
       }
 
-      // ✅ แสดงเฉพาะ “สถานะล่าสุด”
       renderSummary(data);
 
-      // ✅ ไม่แสดงไทม์ไลน์ / ไม่แสดงรายการทั้งหมด
-      history.style.display = "none";
-      if(timeline) timeline.innerHTML = "";
+      const allEvents = mapAllEvents(data.events);
+      renderTimeline(allEvents);
 
+      history.style.display = "block";
     }catch(e){
       setError(String(e));
     }finally{
@@ -422,5 +442,5 @@ history.style.display = "block";
   $("btn").addEventListener("click", run);
   $("no").addEventListener("keydown", (e) => { if(e.key === "Enter") run(); });
 </script>
-
-
+</body>
+</html>

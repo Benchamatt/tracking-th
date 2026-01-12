@@ -15,7 +15,6 @@
       --surface:#ffffff;
       --text:#0b1220;
       --muted:#5c6f86;
-      --border: rgba(11,42,74,.10);
 
       --ok:#0b7a5a;
       --warn:#d07b12;
@@ -132,19 +131,7 @@
     .kv b{font-size:12px;letter-spacing:.2px;color:#0b223c}
     .kv .value{font-size:14px}
 
-    /* ซ่อน badge (เก็บสไตล์ไว้เผื่อเปิดใช้ภายหลัง) */
-    .badge{
-      display:none;
-      align-items:center;gap:8px;padding:8px 12px;border-radius:999px;
-      font-size:12px;font-weight:800;white-space:nowrap;
-      border:1px solid rgba(11,42,74,.12);
-      background: rgba(255,255,255,.85);
-      box-shadow: 0 12px 22px rgba(8,28,55,.08);
-    }
-    .dot{width:8px;height:8px;border-radius:999px;background: currentColor;opacity:.95}
-    .badge.ok{color:var(--ok)}
-    .badge.warn{color:var(--warn)}
-    .badge.bad{color:var(--bad)}
+    .badge{display:none;}
 
     .headline{padding-top:2px;font-size:18px;font-weight:900;letter-spacing:.2px;color:#0b223c;}
 
@@ -226,7 +213,7 @@
           </div>
 
           <div style="margin-top:10px" class="small">
-            หมายเหตุ: ระบบแสดงผลเป็นภาษาไทย และเรียงเหตุการณ์ล่าสุดก่อน
+            หมายเหตุ: เรียงเหตุการณ์ล่าสุดก่อน และแสดงทั้งหมด
           </div>
         </div>
 
@@ -257,7 +244,7 @@
   const btn = $("btn");
   $("year").textContent = String(new Date().getFullYear());
 
-  // ✅ แสดงเฉพาะสถานะที่อยู่ใน rules เท่านั้น / นอกเหนือจากนี้ไม่แสดง
+  // ✅ แปลเฉพาะที่อยู่ใน rules / นอกเหนือจากนั้น "แสดงข้อความเดิม"
   function toThaiStatus(raw){
     const t0 = (raw || "").trim();
     if(!t0) return "";
@@ -303,18 +290,9 @@
     for(const r of rules){
       if(t.includes(r.key)) out = r.th; // ท้าย override หน้า
     }
-    return out; // ✅ ไม่ match = "" (ไม่แสดง)
-  }
 
-  // ✅ สถานะล่าสุด (เอาเฉพาะที่ match จริง)
-  function getLatestThaiFromEvents(events){
-    if(!Array.isArray(events) || events.length === 0) return "-";
-    for(const e of events){
-      const raw = e.status_th || e.status || e.latest_status_th || "";
-      const th = toThaiStatus(raw);
-      if(th) return th;
-    }
-    return "-";
+    // ✅ ถ้าไม่ match ให้แสดงข้อความเดิมจาก API
+    return out || t0;
   }
 
   function renderSummary(data, latestTH){
@@ -333,7 +311,7 @@
     `;
   }
 
-  // ✅ Timeline: แสดงเฉพาะที่ match + กันซ้ำจริง ๆ (เวลา+ข้อความ)
+  // ✅ แสดงทั้งหมด + กันซ้ำแบบ "เวลา+ข้อความ" (เพื่อไม่ให้ซ้ำจริง ๆ)
   function mapAllEvents(rawEvents){
     if(!Array.isArray(rawEvents)) return [];
 
@@ -342,15 +320,15 @@
 
     for (const e of rawEvents){
       const raw = e.status_th || e.status || e.latest_status_th || "";
-      const th = toThaiStatus(raw);
-      if(!th) continue; // ✅ นอกเหนือจาก rules ไม่แสดง
+      const text = toThaiStatus(raw);
+      if(!text) continue;
 
       const time = (e.time || "").trim() || "-";
-      const key = `${time}||${th}`;
+      const key = `${time}||${text}`;
       if(seen.has(key)) continue;
       seen.add(key);
 
-      out.push({ ...e, _th: th });
+      out.push({ ...e, _th: text });
     }
     return out;
   }
@@ -402,13 +380,9 @@
         return;
       }
 
-      // 1) filter + map เฉพาะที่ match rules
       const allEvents = mapAllEvents(data.events);
+      const latestTH = allEvents[0]?._th || "-";
 
-      // 2) สถานะล่าสุด: เอาจาก timeline ที่ filter แล้ว (ถ้าไม่มีให้เป็น "-")
-      const latestTH = allEvents[0]?._th || getLatestThaiFromEvents(data.events);
-
-      // 3) render
       renderSummary(data, latestTH);
       renderTimeline(allEvents);
       history.style.display = "block";

@@ -191,7 +191,7 @@
           </div>
 
           <div style="margin-top:10px" class="small">
-            หมายเหตุ: แสดงเฉพาะสถานะที่ตรงกับ rules เท่านั้น (ไม่ตรง = ไม่แสดง) และแยกกลุ่ม ต้นทาง / ศุลกากร / ปลายทาง
+            หมายเหตุ: อิง “จีนจาก API (e.status)” เท่านั้น, ตรง rules เท่านั้นถึงจะแสดง และแยกกลุ่ม ต้นทาง / ศุลกากร / ปลายทาง
           </div>
         </div>
 
@@ -201,7 +201,7 @@
       <div>
         <div class="card" id="history" style="display:none">
           <h2>ไทม์ไลน์สถานะ</h2>
-          <div class="muted">แยกกลุ่มตามรายการที่กำหนด</div>
+          <div class="muted">เรียงกลุ่ม: ต้นทาง → ศุลกากร → ปลายทาง</div>
           <div class="timeline" id="timeline"></div>
         </div>
       </div>
@@ -222,58 +222,50 @@
   const btn = $("btn");
   $("year").textContent = String(new Date().getFullYear());
 
-  // ===== RULES (แสดงเฉพาะที่ match) =====
-  const RULES = [
-    // ต้นทาง (คลัง)
-    { key: "您已下單成功", th: "สร้างออเดอร์การจัดส่งเรียบร้อย", group: "ต้นทาง" },
-    { key: "您已下單成功!請等待倉庫人員作業出貨", th: "สร้างออเดอร์การจัดส่งเรียบร้อย", group: "ต้นทาง" },
-    { key: "倉庫同事已揀貸 等待打印地址面單", th: "แพ็คกิ้งพัสดุเรียบร้อยแล้ว", group: "ต้นทาง" },
-    { key: "您的貨物已准備從集運倉出倉", th: "พัสดุของคุณออกคลัง เพื่อเตรียมส่งไปยังสนามบินแล้ว", group: "ต้นทาง" },
-    { key: "已經打印好地址面單", th: "พิมพ์ใบปะหน้าที่อยู่เรียบร้อยแล้ว", group: "ต้นทาง" },
-
-    // ศุลกากร
-    { key: "連線收單建檔", th: "ระบบศุลกากรรับและบันทึกข้อมูลเรียบร้อยแล้ว", group: "ศุลกากร" },
-    { key: "出倉處理", th: "กำลังดำเนินการนำสินค้าออกจากคลัง", group: "ศุลกากร" },
-    { key: "貨物在目的地國家海關清關中", th: "พัสดุอยู่ระหว่างการเดินพิธีการศุลกากรในประเทศปลายทาง", group: "ศุลกากร" },
-    { key: "通關方式C1", th: "พิธีการศุลกากรแบบ C1", group: "ศุลกากร" },
-    { key: "通關方式C2", th: "พิธีการศุลกากรแบบ C2", group: "ศุลกากร" },
-    { key: "通關方式C3", th: "พิธีการศุลกากรแบบ C3", group: "ศุลกากร" },
-    { key: "放行", th: "พัสดุผ่านพิธีการศุลกากรเรียบร้อยแล้ว", group: "ศุลกากร" },
-    { key: "不受理不可補正之錯單", th: "ข้อมูลที่ใช้เดินพิธีการไม่สอดคล้องกัน โปรดติดต่อเจ้าหน้าที่", group: "ศุลกากร" },
-    {
-      key: "由於海關系統查無此包裹申報人資料",
-      th: "เนื่องจากระบบศุลกากรไม่พบข้อมูลผู้เดินพิธีการ โปรดตรวจสอบว่าผู้รับพัสดุได้ลงทะเบียนกับ EZ WAY แล้วหรือไม่ หากยังไม่ได้ลงทะเบียนโปรดลงทะเบียนให้เรียบร้อย ถ่ายภาพหน้าจอให้ติดชื่อ/หมายเลขโทรศัพท์และหมายเลขบัตรประชาชนของผู้เดินพิธีการ แล้วส่งให้เจ้าหน้าที่ลูกค้าสัมพันธ์ของ Weiming หลังจากได้รับข้อมูลแล้ว พัสดุจะได้รับการปล่อยภายในประมาณ 1-2 วันทำการ",
-      group: "ศุลกากร"
-    },
-
-    // ปลายทาง
-    { key: "轉運中-轉運中>已集貸>北三特服二所", th: "อยู่ระหว่างการขนส่งไปยังศูนย์ย่อย(สาขาปลายทาง)", group: "ปลายทาง" },
-    { key: "配送中-配送中>白河營業所", th: "อยู่ระหว่างการจัดส่ง", group: "ปลายทาง" },
-    { key: "配送中>白河營業所>SD正在將包裹配送到收件人途中", th: "อยู่ระหว่างการจัดส่ง", group: "ปลายทาง" },
-    { key: "公司行號休息-公司行號休息>白河營業所", th: "จัดส่งไม่สำเร็จเนื่องจากบริษัทหยุดทำการ", group: "ปลายทาง" },
-    { key: "暫置營業所,暫置營業所>暫置保管", th: "พัสดุถูกพักไว้ชั่วคราวที่สาขา", group: "ปลายทาง" },
-    { key: "配完-配完>順利送達>白河營業所", th: "พัสดุถึงผู้รับเรียบร้อยแล้ว", group: "ปลายทาง" },
-    { key: "順利送達>白河營業所>包裹已經送達收件人", th: "จัดส่งสำเร็จ", group: "ปลายทาง" },
-
-    // ไทยที่ API ส่งมา (ถ้ามี)
-    { key: "สั่งซื้อสำเร็จ", th: "พัสดุผู้ส่งได้รับแล้ว  รอการดำเนินการจากคลังสินค้า", group: "ต้นทาง" },
-    { key: "รอคลังสินค้าดำเนินการ", th: "พัสดุผู้ส่งได้รับแล้ว  รอการดำเนินการจากคลังสินค้า", group: "ต้นทาง" },
-  ];
-
   function normalize(s){
     return (s || "").replace(/\s+/g, " ").trim();
   }
 
+  // ===== เรียงกลุ่มตามที่ต้องการ =====
+  const GROUP_ORDER = ["ต้นทาง", "ศุลกากร", "ปลายทาง"];
+  const GROUP_RANK = Object.fromEntries(GROUP_ORDER.map((g, i) => [g, i]));
+
+  // ===== RULES (จีนจาก API เท่านั้น; ไม่ตรง = ไม่แสดง) =====
+  const RULES = [
+    // ต้นทาง(คลังสินค้า)
+    { key: "您的貨物已准備從集運倉出倉", th: "พัสดุของคุณออกคลัง เพื่อเตรียมส่งไปยังสนามบินแล้ว", group: "ต้นทาง" },
+    { key: "已經打印好地址面單", th: "พิมพ์ใบปะหน้าที่อยู่เรียบร้อยแล้ว", group: "ต้นทาง" },
+    { key: "您已下單成功!請等待倉庫人員作業出貨", th: "สร้างออเดอร์การจัดส่งเรียบร้อย", group: "ต้นทาง" },
+
+    // ศุลกากร
+    { key: "貨物在目的地國家海關清關中", th: "พัสดุอยู่ระหว่างการเดินพิธีการศุลกากรในประเทศปลายทาง", group: "ศุลกากร" },
+    { key: "連線收單建檔", th: "ระบบศุลกากรรับและบันทึกข้อมูลเรียบร้อยแล้ว", group: "ศุลกากร" },
+    { key: "通關方式C1", th: "พิธีการศุลกากรแบบ C1", group: "ศุลกากร" },
+    { key: "放行", th: "พัสดุผ่านพิธีการศุลกากรเรียบร้อยแล้ว", group: "ศุลกากร" },
+    {
+      key: "由於海關系統查無此包裹申報人資料",
+      th: "เนื่องจากระบบศุลกากรไม่พบข้อมูลผู้เดินพิธีการ โปรดตรวจสอบว่าผู้รับพัสดุได้ลงทะเบียนกับ EZ WAY แล้วหรือไม่ หากยังไม่ได้ลงทะเบียนโปรดลงทะเบียนให้เรียบร้อย ถ่ายภาพหน้าจอให้ติดชื่อ/หมายเลขโทรศัพท์และหมายเลขบัตรประชาชนของผู้เดินพิธีการ แล้วส่งให้เจ้าหน้าที่ลูกค้าสัมพันธ์ของWeiming หลังจากได้รับข้อมูลแล้ว พัสดุจะได้รับการปล่อยภายในประมาณ 1-2 วันทำการ",
+      group: "ศุลกากร"
+    },
+    { key: "不受理不可補正之錯單", th: "ข้อมูลที่ใช้เดินพิธีการไม่สอดคล้องกัน โปรดติดต่อเจ้าหน้าที่", group: "ศุลกากร" },
+
+    // ปลายทาง
+    { key: "配完-配完>順利送達>白河營業所", th: "พัสดุถึงผู้รับเรียบร้อยแล้ว", group: "ปลายทาง" },
+    { key: "配送中-配送中>白河營業所", th: "อยู่ระหว่างจัดส่ง", group: "ปลายทาง" },
+    { key: "公司行號休息-公司行號休息>白河營業所", th: "จัดส่งไม่สำเร็จเนื่องจากบริษัทหยุดทำการ", group: "ปลายทาง" },
+    { key: "轉運中-轉運中>已集貸>北三特服二所", th: "อยู่ระหว่างการขนส่งไปยังศูนย์ย่อย(สาขาปลายทาง)", group: "ปลายทาง" },
+  ];
+
   // match -> {text, group} / no match -> null
-  function mapStatus(raw){
-    const t = normalize(raw);
+  function mapStatusFromChineseOnly(rawCN){
+    const t = normalize(rawCN);
     if(!t) return null;
 
     let out = null;
     for(const r of RULES){
       if(t.includes(r.key)) out = { text: r.th, group: r.group };
     }
-    return out;
+    return out; // ไม่ตรง = null
   }
 
   function setLoading(){
@@ -309,57 +301,54 @@
     `;
   }
 
-  // ✅ จุดแก้หลักอยู่ที่นี่:
-  // ลอง match "หลายฟิลด์" โดยให้จีนมาก่อน เพื่อไม่ให้ status_th (ไทย) มาบัง
+  // ✅ ใช้จีนจาก API (e.status) เท่านั้น + กันซ้ำไม่พังแม้ time ว่าง + เรียงกลุ่ม
   function mapAllEvents(rawEvents){
     if(!Array.isArray(rawEvents)) return [];
 
     const seen = new Set();
     const out = [];
 
-    for(const e of rawEvents){
-      // ลองหลายช่อง: จีนก่อน → ไทยทีหลัง
-      const candidates = [
-        e.status,            // มักเป็นจีน
-        e.latest_status_th,  // บาง API ใส่จีน/ไทยปน
-        e.status_th          // ไทย (ให้ไว้ท้ายสุดเพื่อไม่บังจีน)
-      ];
+    rawEvents.forEach((e, idx) => {
+      const mapped = mapStatusFromChineseOnly(e.status); // ✅ จีนเท่านั้น
+      if(!mapped) return; // ไม่ตรง = ไม่แสดง
 
-      let mapped = null;
-      for(const c of candidates){
-        mapped = mapStatus(c);
-        if(mapped) break; // match แล้วหยุด
-      }
+      const timeText = normalize(e.time);          // แสดงผล
+      const timeKey  = timeText || `idx:${idx}`;   // กันซ้ำกรณี time ว่าง
 
-      if(!mapped) continue; // ไม่ match -> ไม่แสดง
-
-      const time = normalize(e.time) || "-";
-      const dedupeKey = `${time}||${mapped.group}||${mapped.text}`;
-      if(seen.has(dedupeKey)) continue;
+      const dedupeKey = `${timeKey}||${mapped.group}||${mapped.text}`;
+      if(seen.has(dedupeKey)) return;
       seen.add(dedupeKey);
 
-      out.push({ time, text: mapped.text, group: mapped.group });
-    }
+      out.push({ idx, time: timeText || "-", text: mapped.text, group: mapped.group });
+    });
+
+    // ✅ เรียงกลุ่ม: ต้นทาง → ศุลกากร → ปลายทาง
+    // และคงลำดับภายในกลุ่มตาม API (idx)
+    out.sort((a, b) => {
+      const ga = GROUP_RANK[a.group] ?? 999;
+      const gb = GROUP_RANK[b.group] ?? 999;
+      if(ga !== gb) return ga - gb;
+      return a.idx - b.idx;
+    });
 
     return out;
   }
 
   function renderTimeline(events){
-    const groups = ["ต้นทาง", "ศุลกากร", "ปลายทาง"];
+    let html = "";
 
-    const html = groups.map(g => {
+    for(const g of GROUP_ORDER){
       const items = events.filter(e => e.group === g);
-      if(items.length === 0) return "";
-      return `
-        <div class="sectionTitle">${g}</div>
-        ${items.map((e, idx) => `
-          <div class="event ${idx === 0 && g === items[0]?.group ? "" : ""}">
-            <div class="time">${e.time}</div>
-            <div class="text">${e.text}</div>
-          </div>
-        `).join("")}
-      `;
-    }).join("");
+      if(items.length === 0) continue;
+
+      html += `<div class="sectionTitle">${g}</div>`;
+      html += items.map((e) => `
+        <div class="event">
+          <div class="time">${e.time}</div>
+          <div class="text">${e.text}</div>
+        </div>
+      `).join("");
+    }
 
     timeline.innerHTML = html || `<div class="muted" style="padding:10px 0">ไม่มีสถานะที่ตรงกับรายการที่กำหนด</div>`;
   }
@@ -380,10 +369,17 @@
         return;
       }
 
+      // 1) เก็บตามลำดับ API ก่อน (ไว้หา “ล่าสุดจริง”)
+      const matchedByApi = [];
+      (Array.isArray(data.events) ? data.events : []).forEach((e) => {
+        const m = mapStatusFromChineseOnly(e.status);
+        if(m) matchedByApi.push(m.text);
+      });
+
       const allEvents = mapAllEvents(data.events);
 
-      // สถานะล่าสุด = ตัวแรกที่ match (สมมุติ API ส่งล่าสุดก่อน)
-      const latestTH = allEvents[0]?.text || "-";
+      // “ล่าสุด” เอาตามลำดับ API (ล่าสุดก่อน) ไม่ใช่ตามกลุ่ม
+      const latestTH = matchedByApi[0] || "-";
 
       renderSummary(data, latestTH);
       renderTimeline(allEvents);

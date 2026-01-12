@@ -21,515 +21,129 @@
       --ok:#0f766e;
       --warn:#b45309;
       --bad:#b91c1c;
-
-      --badge-bg: rgba(15, 95, 191, 0.10);
-      --badge-text: #0f5fbf;
-
-      --ring: rgba(15,95,191,.25);
     }
 
     *{box-sizing:border-box}
-    html,body{height:100%}
     body{
       margin:0;
       font-family: system-ui, -apple-system, "Segoe UI", Tahoma, sans-serif;
-      background: radial-gradient(1200px 600px at 20% -10%, rgba(15,95,191,.10), transparent 60%),
-                  radial-gradient(1000px 500px at 90% 0%, rgba(15,95,191,.08), transparent 55%),
-                  var(--bg);
+      background: var(--bg);
       color:var(--text);
     }
 
-    .wrap{
-      max-width: 980px;
-      margin: 0 auto;
-      padding: 20px 14px 28px;
-    }
-
-    .topbar{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:12px;
-      padding: 14px 16px;
-      border:1px solid var(--border);
-      border-radius: 16px;
-      background: linear-gradient(135deg, rgba(15,95,191,.12), rgba(15,95,191,.04));
-      box-shadow: var(--shadow);
-    }
-
-    .brand{
-      display:flex;
-      align-items:center;
-      gap:10px;
-      min-width:0;
-    }
-
-    .logo{
-      width:40px;height:40px;
-      border-radius: 12px;
-      background: linear-gradient(135deg, var(--brand), var(--brand-2));
-      display:grid;
-      place-items:center;
-      box-shadow: 0 10px 18px rgba(15,95,191,.25);
-      flex:0 0 auto;
-    }
-    .logo svg{width:22px;height:22px;fill:#fff}
-
-    .brand h1{
-      margin:0;
-      font-size:16px;
-      letter-spacing:.2px;
-      line-height:1.1;
-      white-space:nowrap;
-      overflow:hidden;
-      text-overflow:ellipsis;
-    }
-    .brand .sub{
-      font-size:12px;
-      color:var(--muted);
-      margin-top:2px;
-    }
-
-    .grid{
-      display:grid;
-      grid-template-columns: 1.1fr .9fr;
-      gap: 14px;
-      margin-top: 14px;
-    }
-    @media(max-width: 860px){
-      .grid{grid-template-columns:1fr}
-    }
-
-    .card{
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      box-shadow: var(--shadow);
-      padding: 16px;
-      overflow:hidden;
-    }
-
-    .card h2{
-      margin:0 0 8px 0;
-      font-size:14px;
-      letter-spacing:.2px;
-    }
-    .muted{color:var(--muted); font-size:13px}
-    .small{font-size:12px; color:var(--muted)}
-
-    .searchRow{
-      display:grid;
-      grid-template-columns: 1fr 132px;
-      gap: 10px;
-      margin-top: 10px;
-    }
-    @media(max-width:520px){
-      .searchRow{grid-template-columns:1fr}
-    }
-
-    input{
-      width:100%;
-      padding: 12px 14px;
-      border-radius: 14px;
-      border: 1px solid var(--border);
-      background: var(--surface-2);
-      color: var(--text);
-      font-size: 15px;
-    }
-    input:focus{outline:3px solid var(--ring); border-color: transparent}
-
-    .btn{
-      border:none;
-      border-radius: 14px;
-      padding: 12px 14px;
-      background: linear-gradient(135deg, var(--brand), var(--brand-2));
-      color:#fff;
-      font-size:15px;
-      cursor:pointer;
-      box-shadow: 0 12px 18px rgba(15,95,191,.22);
-    }
-    .btn:disabled{
-      opacity:.6;
-      cursor:not-allowed;
-      box-shadow:none;
-    }
-
-    .summaryTop{
-      display:flex;
-      justify-content:space-between;
-      align-items:flex-start;
-      gap:10px;
-      margin-bottom: 10px;
-    }
-
-    .kv{
-      display:grid;
-      gap:6px;
-    }
-    .kv b{font-size:13px}
-    .kv .value{font-size:14px}
-
-    .badge{
-      display:inline-flex;
-      align-items:center;
-      gap:8px;
-      padding: 8px 10px;
-      border-radius: 999px;
-      background: var(--badge-bg);
-      color: var(--badge-text);
-      border: 1px solid rgba(15,95,191,.18);
-      font-size: 12px;
-      font-weight: 600;
-      white-space:nowrap;
-    }
-    .dot{width:8px;height:8px;border-radius:999px;background: currentColor;opacity:.9}
-
-    .badge.ok{background: rgba(15,118,110,.12); color: var(--ok); border-color: rgba(15,118,110,.25)}
-    .badge.warn{background: rgba(180,83,9,.12); color: var(--warn); border-color: rgba(180,83,9,.25)}
-    .badge.bad{background: rgba(185,28,28,.12); color: var(--bad); border-color: rgba(185,28,28,.25)}
-
-    .timeline{
-      margin-top: 12px;
-      position:relative;
-      padding-left: 18px;
-    }
-    .timeline:before{
-      content:"";
-      position:absolute;
-      left:7px;
-      top:2px;
-      bottom:2px;
-      width:2px;
-      background: linear-gradient(to bottom, rgba(15,95,191,.35), rgba(15,95,191,.08));
-    }
-
-    .event{
-      position:relative;
-      padding: 10px 10px 10px 12px;
-      border-radius: 14px;
-      border: 1px solid var(--border);
-      background: var(--surface-2);
-      margin-bottom: 10px;
-    }
-    .event:before{
-      content:"";
-      position:absolute;
-      left:-18px;
-      top: 16px;
-      width: 12px;
-      height: 12px;
-      border-radius: 999px;
-      background: var(--surface);
-      border: 3px solid rgba(15,95,191,.55);
-      box-shadow: 0 0 0 3px rgba(15,95,191,.10);
-    }
-
-    .event .time{font-size:12px; color: var(--muted)}
-    .event .text{font-size:14px; font-weight:600; margin-top:4px}
-
-    .footer{
-      margin-top: 14px;
-      padding: 12px 6px 2px;
-      text-align:center;
-      color: var(--muted);
-      font-size: 12px;
-    }
-    .footer a{color: var(--muted); text-decoration:none}
-    .footer a:hover{text-decoration:underline}
-
-    .errorBox{
-      border: 1px solid rgba(185,28,28,.25);
-      background: rgba(185,28,28,.08);
-      color: var(--bad);
-      border-radius: 14px;
-      padding: 10px 12px;
-      font-size: 13px;
-    }
-
-    .loading{
-      display:flex;
-      align-items:center;
-      gap:10px;
-      font-size:13px;
-      color:var(--muted);
-    }
-    .spinner{
-      width:16px;height:16px;border-radius:999px;
-      border:2px solid rgba(15,95,191,.25);
-      border-top-color: rgba(15,95,191,.85);
-      animation: spin 0.9s linear infinite;
-    }
-    @keyframes spin{to{transform:rotate(360deg)}}
+    .wrap{max-width:980px;margin:auto;padding:20px}
+    .card{background:#fff;border:1px solid var(--border);border-radius:16px;padding:16px;margin-bottom:14px}
+    .btn{padding:12px;border-radius:12px;border:none;background:var(--brand);color:#fff;cursor:pointer}
+    .timeline{padding-left:18px}
+    .event{background:var(--surface-2);padding:10px;border-radius:12px;margin-bottom:10px}
+    .time{font-size:12px;color:var(--muted)}
+    .text{font-weight:600}
   </style>
 </head>
 
 <body>
-  <div class="wrap" id="app">
-    <div class="topbar">
-      <div class="brand">
-        <div class="logo" aria-hidden="true" title="Weiming">
-          <svg viewBox="0 0 24 24">
-            <path d="M20 8h-3V4H3v13h2.1a2.9 2.9 0 0 0 5.8 0h4.2a2.9 2.9 0 0 0 5.8 0H23v-5l-3-4zM6.5 19a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zm10 0a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zM17 12V9h2l2 3h-4z"/>
-          </svg>
-        </div>
-        <div style="min-width:0">
-          <h1>Weiming Tracking</h1>
-          <div class="sub">ระบบตรวจสอบสถานะพัสดุ</div>
-        </div>
-      </div>
-    </div>
-
-    <div class="grid">
-      <div>
-        <div class="card">
-          <h2>ค้นหาเลขพัสดุ</h2>
-          <div class="muted">กรอกเลขพัสดุ แล้วกด “ค้นหา”</div>
-
-          <div class="searchRow">
-            <input id="no" placeholder="เลขพัสดุ" inputmode="numeric" autocomplete="off" />
-            <button class="btn" id="btn">ค้นหา</button>
-          </div>
-
-          <div style="margin-top:10px" class="small">
-            หมายเหตุ: ระบบแสดงผลเป็นภาษาไทย และเรียงเหตุการณ์ล่าสุดก่อน
-          </div>
-        </div>
-
-        <div class="card" id="summary" style="display:none"></div>
-      </div>
-
-      <div>
-        <div class="card" id="history" style="display:none">
-          <h2>ไทม์ไลน์สถานะ</h2>
-          <div class="muted">เหตุการณ์ล่าสุดอยู่ด้านบน</div>
-          <div class="timeline" id="timeline"></div>
-        </div>
-      </div>
-    </div>
-
-    <div class="footer">
-      © <span id="year"></span> Weiming Tracking. All rights reserved.
-      <span class="muted"> | </span>
-      <a href="https://line.me/R/ti/p/@wmex" target="_blank" rel="noopener noreferrer">ติดต่อผ่าน LINE</a>
-    </div>
+<div class="wrap">
+  <div class="card">
+    <h2>ค้นหาเลขพัสดุ</h2>
+    <input id="no" placeholder="เลขพัสดุ" />
+    <button id="btn" class="btn">ค้นหา</button>
   </div>
 
+  <div class="card" id="summary" style="display:none"></div>
+
+  <div class="card" id="history" style="display:none">
+    <h3>ไทม์ไลน์สถานะ</h3>
+    <div id="timeline" class="timeline"></div>
+  </div>
+</div>
+
 <script>
-  const $ = (id) => document.getElementById(id);
+/* ---------- helpers ---------- */
+const $ = id => document.getElementById(id);
+const summary = $("summary");
+const history = $("history");
+const timeline = $("timeline");
+const btn = $("btn");
+const noEl = $("no");
 
-  const summary = $("summary");
-  const history = $("history");
-  const timeline = $("timeline");
-  const btn = $("btn");
-  const noEl = $("no");
+/* ---------- mapping ---------- */
+const STATUS_MAP = [
+  { zh:"配送中", th:"อยู่ระหว่างจัดส่ง" },
+  { zh:"配完", th:"พัสดุถึงผู้รับเรียบร้อยแล้ว" },
+  { zh:"公司行號休息", th:"จัดส่งไม่สำเร็จเนื่องจากบริษัทหยุดทำการ" },
+  { zh:"轉運中", th:"อยู่ระหว่างการขนส่งไปยังศูนย์ย่อย(สาขาปลายทาง)" },
+  { zh:"海關清關", th:"พัสดุอยู่ระหว่างการเดินพิธีการศุลกากร" },
+  { zh:"連線收單建檔", th:"ระบบศุลกากรรับและบันทึกข้อมูลเรียบร้อยแล้ว" },
+  { zh:"通關方式C1", th:"พิธีการศุลกากรแบบ C1" },
+  { zh:"放行", th:"พัสดุผ่านพิธีการศุลกากรเรียบร้อยแล้ว" },
+  { zh:"不受理不可補正之錯單", th:"ข้อมูลพิธีการไม่ถูกต้อง โปรดติดต่อเจ้าหน้าที่" },
+  { zh:"訂單已接收", th:"ระบบรับคำสั่งเรียบร้อยแล้ว" },
+  { zh:"已經打印好地址面單", th:"พิมพ์ใบปะหน้าที่อยู่เรียบร้อยแล้ว" },
+  { zh:"已准備從集運倉出倉", th:"พัสดุออกจากคลังแล้ว" },
+  { zh:"EZ WAY", th:"โปรดตรวจสอบการลงทะเบียน EZ WAY" }
+];
 
-  const yearEl = $("year");
-  if (yearEl) yearEl.textContent = String(new Date().getFullYear());
-
-  // Mapping จีน -> ไทย
-  const STATUS_MAP = [
-    { zh: "配完-配完>順利送達>白河營業所", th: "พัสดุถึงผู้รับเรียบร้อยแล้ว" },
-    { zh: "配送中-配送中>白河營業所", th: "อยู่ระหว่างจัดส่ง" },
-    { zh: "公司行號休息-公司行號休息>白河營業所", th: "จัดส่งไม่สำเร็จเนื่องจากบริษัทหยุดทำการ" },
-    { zh: "轉運中-轉運中>已集貸>北三特服二所", th: "อยู่ระหว่างการขนส่งไปยังศูนย์ย่อย(สาขาปลายทาง)" },
-    { zh: "貨物在目的地國家海關清關中", th: "พัสดุอยู่ระหว่างการเดินพิธีการศุลกากรในประเทศปลายทาง" },
-    { zh: "連線收單建檔", th: "ระบบศุลกากรรับและบันทึกข้อมูลเรียบร้อยแล้ว" },
-    { zh: "通關方式C1", th: "พิธีการศุลกากรแบบ C1" },
-    { zh: "通關方式C2", th: "พิธีการศุลกากรแบบ C2" },
-    { zh: "通關方式C3", th: "พิธีการศุลกากรแบบ C3" },
-    { zh: "放行", th: "พัสดุผ่านพิธีการศุลกากรเรียบร้อยแล้ว" },
-    {
-      zh: "由於海關系統查無此包裹申報人資料，請確認申報人是否已註冊過EZ WAY。 若尚未註冊，請於完成註冊後，至個人資料維護介面截圖申報人名、電話號碼及身分證號，並提交給威名客服，海關受理資料後約1~2個工作天放行",
-      th: "เนื่องจากระบบศุลกากรไม่พบข้อมูลผู้เดินพิธีการ โปรดตรวจสอบว่าผู้รับพัสดุได้ลงทะเบียนกับ EZ WAY แล้วหรือไม่ หากยังไม่ได้ลงทะเบียนโปรดลงทะเบียนให้เรียบร้อย ถ่ายภาพหน้าจอให้ติดชื่อ/หมายเลขโทรศัพท์และหมายเลขบัตรประชาชนของผู้เดินพิธีการ แล้วส่งให้เจ้าหน้าที่ลูกค้าสัมพันธ์ของ Weiming หลังจากได้รับข้อมูลแล้ว พัสดุจะได้รับการปล่อยภายในประมาณ 1-2 วันทำการ"
-    },
-    { zh: "不受理不可補正之錯單", th: "ข้อมูลที่ใช้เดินพิธีการไม่สอดคล้องกัน โปรดติดต่อเจ้าหน้าที่" },
-    { zh: "您的貨物已准備從集運倉出倉", th: "พัสดุของคุณออกคลัง เพื่อเตรียมส่งไปยังสนามบินแล้ว" },
-    { zh: "已經打印好地址面單", th: "พิมพ์ใบปะหน้าที่อยู่เรียบร้อยแล้ว" },
-    { zh: "您已下單成功!請等待倉庫人員作業出貨", th: "สร้างออเดอร์การจัดส่งเรียบร้อย" },
-  ];
-
- function normalizeZh(s) {
-  return (s || "")
-    .replace(/[“”]/g, '"')
-    .replace(/\s+/g, " ")
-    .trim();
+function normalize(s){
+  return (s||"").replace(/\s+/g," ").trim();
 }
 
-// ดึงข้อความจีนออกจากข้อความผสม เช่น "กำลังดำเนินการ (不受理不可補正之錯單)"
-function extractZh(mixed) {
-  const s = normalizeZh(mixed);
-
-  const m = s.match(/\(([^)]+)\)/);
-  if (m && m[1]) return normalizeZh(m[1]);
-
-  return s;
+function extractZh(s){
+  const m = normalize(s).match(/\(([^)]+)\)/);
+  return m ? m[1] : normalize(s);
 }
 
-function toThaiStatus(status_th, status_zh_or_mixed) {
-  // 1) บังคับใช้ mapping จากจีนก่อน
-  const zhRaw = extractZh(status_zh_or_mixed);
+function toThaiStatus(status_th, mixed){
+  const zh = extractZh(mixed);
 
-  if (zhRaw) {
-    // exact
-    const exact = STATUS_MAP.find(x => normalizeZh(x.zh) === zhRaw);
-    if (exact) return exact.th;
-
-    // contains
-    const loose = STATUS_MAP.find(x => zhRaw.includes(normalizeZh(x.zh)));
-    if (loose) return loose.th;
-
-    // keyword match (สำคัญ)
-    const keywordMap = [
-      { k: "配送中", th: "อยู่ระหว่างจัดส่ง" },
-      { k: "配完", th: "พัสดุถึงผู้รับเรียบร้อยแล้ว" },
-      { k: "公司行號休息", th: "จัดส่งไม่สำเร็จเนื่องจากบริษัทหยุดทำการ" },
-      { k: "轉運中", th: "อยู่ระหว่างการขนส่งไปยังศูนย์ย่อย(สาขาปลายทาง)" },
-      { k: "海關清關", th: "พัสดุอยู่ระหว่างการเดินพิธีการศุลกากรในประเทศปลายทาง" },
-      { k: "連線收單建檔", th: "ระบบศุลกากรรับและบันทึกข้อมูลเรียบร้อยแล้ว" },
-      { k: "通關方式C1", th: "พิธีการศุลกากรแบบ C1" },
-      { k: "放行", th: "พัสดุผ่านพิธีการศุลกากรเรียบร้อยแล้ว" },
-      { k: "不受理不可補正之錯單", th: "ข้อมูลที่ใช้เดินพิธีการไม่สอดคล้องกัน โปรดติดต่อเจ้าหน้าที่" },
-      { k: "訂單已接收", th: "ระบบรับคำสั่งและบันทึกข้อมูลเรียบร้อยแล้ว" },
-      { k: "已經打印好地址面單", th: "พิมพ์ใบปะหน้าที่อยู่เรียบร้อยแล้ว" },
-      { k: "已准備從集運倉出倉", th: "พัสดุของคุณออกคลัง เพื่อเตรียมส่งไปยังสนามบินแล้ว" },
-      { k: "您已下單成功", th: "สร้างออเดอร์การจัดส่งเรียบร้อย" },
-      { k: "EZ WAY", th: "โปรดตรวจสอบการลงทะเบียน EZ WAY เพื่อรอปล่อยของ 1-2 วันทำการ" },
-    ];
-
-    const kw = keywordMap.find(x => zhRaw.includes(x.k));
-    if (kw) return kw.th;
+  for (const m of STATUS_MAP){
+    if (zh.includes(m.zh)) return m.th;
   }
 
-  // 2) fallback ใช้ไทยจาก API
-  const th = (status_th || "").trim();
-  if (th) return th;
-
+  if (status_th) return status_th;
   return "กำลังดำเนินการ";
 }
 
-  function classify(th){
-    const s = (th || "").toLowerCase();
+/* ---------- render ---------- */
+function renderSummary(data){
+  const mixed = data.latest_status || data.latest_status_th || "";
+  const th = toThaiStatus(data.latest_status_th, mixed);
 
-    if (s.includes("ถึงแล้ว") || s.includes("จัดส่งสำเร็จ") || s.includes("เซ็นรับ") || s.includes("รับพัสดุ") || s.includes("ถึงผู้รับ")) {
-      return { cls:"ok", label:"ถึงแล้ว" };
-    }
-    if (s.includes("ตีกลับ") || s.includes("ไม่สำเร็จ") || s.includes("ผิดพลาด") || s.includes("ยกเลิก") || s.includes("ปัญหา")) {
-      return { cls:"bad", label:"มีปัญหา" };
-    }
-    if (s.includes("กำลัง") || s.includes("ระหว่าง") || s.includes("ขนส่ง") || s.includes("ส่งต่อ") || s.includes("ออกจาก") || s.includes("กำลังดำเนินการ")) {
-      return { cls:"warn", label:"กำลังขนส่ง" };
-    }
-    return { cls:"warn", label:"กำลังดำเนินการ" };
-  }
+  summary.style.display="block";
+  summary.innerHTML = `
+    <b>เลขพัสดุ:</b> ${data.tracking_no}<br>
+    <b>สถานะล่าสุด:</b> ${th}
+  `;
+}
 
-  function renderSummary(data){
-  const mixedLatest =
-  data.latest_status_zh ||
-  data.latest_status ||
-  data.latest_status_cn ||
-  data.latest_status_th ||
-  "";
-
-const latestTh = toThaiStatus(data.latest_status_th, mixedLatest);
-
-    const cls = classify(latestTh);
-
-    if (!summary) return;
-    summary.style.display = "block";
-    summary.innerHTML = `
-      <div class="summaryTop">
-        <div class="kv">
-          <div><b>เลขพัสดุ</b> <span class="value">${data.tracking_no || data.no || "-"}</span></div>
-          <div><b>อัปเดตล่าสุด</b> <span class="value">${data.last_update || data.updated_at || "-"}</span></div>
-        </div>
-
-        <span class="badge ${cls.cls}">
-          <span class="dot"></span>
-          ${cls.label}
-        </span>
-      </div>
-
-      <div style="display:flex;flex-direction:column;gap:6px">
-        <div class="muted">สถานะล่าสุด</div>
-        <div style="font-size:18px;font-weight:700;letter-spacing:.2px">
-          ${latestTh || "-"}
-        </div>
+function renderTimeline(events){
+  timeline.innerHTML = (events||[]).map(e=>{
+    const mixed = e.status || e.status_th || "";
+    const th = toThaiStatus(e.status_th, mixed);
+    return `
+      <div class="event">
+        <div class="time">${e.time||"-"}</div>
+        <div class="text">${th}</div>
       </div>
     `;
-  }
+  }).join("");
 
-  function renderTimeline(events){
-    if (!timeline) return;
+  history.style.display="block";
+}
 
-    const items = (events || []).map(e => {
-      const latestZh = data.latest_status_zh || data.latest_status || data.latest_status_cn || "";
-      const latestTh = toThaiStatus(data.latest_status_th, latestZh);
+/* ---------- run ---------- */
+async function run(){
+  const no = noEl.value.trim();
+  if (!no) return alert("กรุณากรอกเลขพัสดุ");
 
+  const r = await fetch(`/api/track?no=${encodeURIComponent(no)}`);
+  const data = await r.json();
 
-      return `
-        <div class="event">
-          <div class="time">${e.time || e.datetime || "-"}</div>
-          <div class="text">${th}</div>
-        </div>
-      `;
-    }).join("");
+  renderSummary(data);
+  renderTimeline(data.events);
+}
 
-    timeline.innerHTML = items || `<div class="muted" style="padding:10px 0">ไม่มีข้อมูล</div>`;
-  }
-
-  function setLoading(){
-    if (!summary) return;
-    summary.style.display = "block";
-    if (history) history.style.display = "none";
-
-    summary.innerHTML = `
-      <div class="loading">
-        <span class="spinner" aria-hidden="true"></span>
-        <div>
-          <div style="font-weight:600">กำลังค้นหา...</div>
-          <div class="small">โปรดรอสักครู่</div>
-        </div>
-      </div>
-    `;
-  }
-
-  function setError(msg){
-    if (!summary) return;
-    summary.style.display = "block";
-    if (history) history.style.display = "none";
-    summary.innerHTML = `<div class="errorBox"><b>ไม่สำเร็จ:</b> ${msg || "เกิดข้อผิดพลาด"}</div>`;
-  }
-
-  async function run(){
-    if (!noEl) return;
-
-    const no = noEl.value.trim();
-    if(!no){ alert("กรุณากรอกเลขพัสดุ"); return; }
-
-    if (btn) btn.disabled = true;
-    setLoading();
-
-    try{
-      const r = await fetch(`/api/track?no=${encodeURIComponent(no)}`);
-      const data = await r.json();
-
-      if(!r.ok){
-        setError(data.error || "ไม่พบข้อมูล");
-        return;
-      }
-
-      renderSummary(data);
-      renderTimeline(data.events);
-      if (history) history.style.display = "block";
-    }catch(e){
-      setError(String(e));
-    }finally{
-      if (btn) btn.disabled = false;
-    }
-  }
-
-  if (btn) btn.addEventListener("click", run);
-  if (noEl) noEl.addEventListener("keydown", (e) => { if(e.key === "Enter") run(); });
+btn.addEventListener("click", run);
+noEl.addEventListener("keydown", e=>{ if(e.key==="Enter") run(); });
 </script>
 </body>
 </html>

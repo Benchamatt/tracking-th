@@ -1,13 +1,332 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Weiming Tracking</title>
+
+  <style>
+    :root{
+      --bg:#f6f8fb;
+      --surface:#ffffff;
+      --surface-2:#f1f4f9;
+      --text:#0f172a;
+      --muted:#64748b;
+      --border:#e5e7eb;
+      --shadow: 0 10px 24px rgba(2, 6, 23, 0.08);
+
+      --brand:#0f5fbf;
+      --brand-2:#0a3f7a;
+
+      --ok:#0f766e;
+      --warn:#b45309;
+      --bad:#b91c1c;
+
+      --badge-bg: rgba(15, 95, 191, 0.10);
+      --badge-text: #0f5fbf;
+
+      --ring: rgba(15,95,191,.25);
+    }
+
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      font-family: system-ui, -apple-system, "Segoe UI", Tahoma, sans-serif;
+      background: radial-gradient(1200px 600px at 20% -10%, rgba(15,95,191,.10), transparent 60%),
+                  radial-gradient(1000px 500px at 90% 0%, rgba(15,95,191,.08), transparent 55%),
+                  var(--bg);
+      color:var(--text);
+    }
+
+    .wrap{
+      max-width: 980px;
+      margin: 0 auto;
+      padding: 20px 14px 28px;
+    }
+
+    .topbar{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      padding: 14px 16px;
+      border:1px solid var(--border);
+      border-radius: 16px;
+      background: linear-gradient(135deg, rgba(15,95,191,.12), rgba(15,95,191,.04));
+      box-shadow: var(--shadow);
+    }
+
+    .brand{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      min-width:0;
+    }
+
+    .logo{
+      width:40px;height:40px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, var(--brand), var(--brand-2));
+      display:grid;
+      place-items:center;
+      box-shadow: 0 10px 18px rgba(15,95,191,.25);
+      flex:0 0 auto;
+    }
+    .logo svg{width:22px;height:22px;fill:#fff}
+
+    .brand h1{
+      margin:0;
+      font-size:16px;
+      letter-spacing:.2px;
+      line-height:1.1;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+    .brand .sub{
+      font-size:12px;
+      color:var(--muted);
+      margin-top:2px;
+    }
+
+    .grid{
+      display:grid;
+      grid-template-columns: 1.1fr .9fr;
+      gap: 14px;
+      margin-top: 14px;
+    }
+    @media(max-width: 860px){
+      .grid{grid-template-columns:1fr}
+    }
+
+    .card{
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      box-shadow: var(--shadow);
+      padding: 16px;
+      overflow:hidden;
+    }
+
+    .card h2{
+      margin:0 0 8px 0;
+      font-size:14px;
+      letter-spacing:.2px;
+    }
+    .muted{color:var(--muted); font-size:13px}
+    .small{font-size:12px; color:var(--muted)}
+
+    .searchRow{
+      display:grid;
+      grid-template-columns: 1fr 132px;
+      gap: 10px;
+      margin-top: 10px;
+    }
+    @media(max-width:520px){
+      .searchRow{grid-template-columns:1fr}
+    }
+
+    input{
+      width:100%;
+      padding: 12px 14px;
+      border-radius: 14px;
+      border: 1px solid var(--border);
+      background: var(--surface-2);
+      color: var(--text);
+      font-size: 15px;
+    }
+    input:focus{outline:3px solid var(--ring); border-color: transparent}
+
+    .btn{
+      border:none;
+      border-radius: 14px;
+      padding: 12px 14px;
+      background: linear-gradient(135deg, var(--brand), var(--brand-2));
+      color:#fff;
+      font-size:15px;
+      cursor:pointer;
+      box-shadow: 0 12px 18px rgba(15,95,191,.22);
+    }
+    .btn:disabled{
+      opacity:.6;
+      cursor:not-allowed;
+      box-shadow:none;
+    }
+
+    .summaryTop{
+      display:flex;
+      justify-content:space-between;
+      align-items:flex-start;
+      gap:10px;
+      margin-bottom: 10px;
+    }
+
+    .kv{
+      display:grid;
+      gap:6px;
+    }
+    .kv b{font-size:13px}
+    .kv .value{font-size:14px}
+
+    .badge{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding: 8px 10px;
+      border-radius: 999px;
+      background: var(--badge-bg);
+      color: var(--badge-text);
+      border: 1px solid rgba(15,95,191,.18);
+      font-size: 12px;
+      font-weight: 600;
+      white-space:nowrap;
+    }
+    .dot{width:8px;height:8px;border-radius:999px;background: currentColor;opacity:.9}
+
+    .badge.ok{background: rgba(15,118,110,.12); color: var(--ok); border-color: rgba(15,118,110,.25)}
+    .badge.warn{background: rgba(180,83,9,.12); color: var(--warn); border-color: rgba(180,83,9,.25)}
+    .badge.bad{background: rgba(185,28,28,.12); color: var(--bad); border-color: rgba(185,28,28,.25)}
+
+    .timeline{
+      margin-top: 12px;
+      position:relative;
+      padding-left: 18px;
+    }
+    .timeline:before{
+      content:"";
+      position:absolute;
+      left:7px;
+      top:2px;
+      bottom:2px;
+      width:2px;
+      background: linear-gradient(to bottom, rgba(15,95,191,.35), rgba(15,95,191,.08));
+    }
+
+    .event{
+      position:relative;
+      padding: 10px 10px 10px 12px;
+      border-radius: 14px;
+      border: 1px solid var(--border);
+      background: var(--surface-2);
+      margin-bottom: 10px;
+    }
+    .event:before{
+      content:"";
+      position:absolute;
+      left:-18px;
+      top: 16px;
+      width: 12px;
+      height: 12px;
+      border-radius: 999px;
+      background: var(--surface);
+      border: 3px solid rgba(15,95,191,.55);
+      box-shadow: 0 0 0 3px rgba(15,95,191,.10);
+    }
+
+    .event .time{font-size:12px; color: var(--muted)}
+    .event .text{font-size:14px; font-weight:600; margin-top:4px}
+
+    .footer{
+      margin-top: 14px;
+      padding: 12px 6px 2px;
+      text-align:center;
+      color: var(--muted);
+      font-size: 12px;
+    }
+    .footer a{color: var(--muted); text-decoration:none}
+    .footer a:hover{text-decoration:underline}
+
+    .errorBox{
+      border: 1px solid rgba(185,28,28,.25);
+      background: rgba(185,28,28,.08);
+      color: var(--bad);
+      border-radius: 14px;
+      padding: 10px 12px;
+      font-size: 13px;
+    }
+
+    .loading{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      font-size:13px;
+      color:var(--muted);
+    }
+    .spinner{
+      width:16px;height:16px;border-radius:999px;
+      border:2px solid rgba(15,95,191,.25);
+      border-top-color: rgba(15,95,191,.85);
+      animation: spin 0.9s linear infinite;
+    }
+    @keyframes spin{to{transform:rotate(360deg)}}
+  </style>
+</head>
+
+<body>
+  <div class="wrap" id="app">
+    <div class="topbar">
+      <div class="brand">
+        <div class="logo" aria-hidden="true" title="Weiming">
+          <svg viewBox="0 0 24 24">
+            <path d="M20 8h-3V4H3v13h2.1a2.9 2.9 0 0 0 5.8 0h4.2a2.9 2.9 0 0 0 5.8 0H23v-5l-3-4zM6.5 19a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zm10 0a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zM17 12V9h2l2 3h-4z"/>
+          </svg>
+        </div>
+        <div style="min-width:0">
+          <h1>Weiming Tracking</h1>
+          <div class="sub">ระบบตรวจสอบสถานะพัสดุ</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid">
+      <div>
+        <div class="card">
+          <h2>ค้นหาเลขพัสดุ</h2>
+          <div class="muted">กรอกเลขพัสดุ แล้วกด “ค้นหา”</div>
+
+          <div class="searchRow">
+            <input id="no" placeholder="เลขพัสดุ" inputmode="numeric" autocomplete="off" />
+            <button class="btn" id="btn">ค้นหา</button>
+          </div>
+
+          <div style="margin-top:10px" class="small">
+            หมายเหตุ: ระบบแสดงผลเป็นภาษาไทย และเรียงเหตุการณ์ล่าสุดก่อน
+          </div>
+        </div>
+
+        <div class="card" id="summary" style="display:none"></div>
+      </div>
+
+      <div>
+        <div class="card" id="history" style="display:none">
+          <h2>ไทม์ไลน์สถานะ</h2>
+          <div class="muted">เหตุการณ์ล่าสุดอยู่ด้านบน</div>
+          <div class="timeline" id="timeline"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer">
+      © <span id="year"></span> Weiming Tracking. All rights reserved.
+      <span class="muted"> | </span>
+      <a href="https://line.me/R/ti/p/@wmex" target="_blank" rel="noopener noreferrer">ติดต่อผ่าน LINE</a>
+    </div>
+  </div>
+
 <script>
   const $ = (id) => document.getElementById(id);
+
   const summary = $("summary");
   const history = $("history");
   const timeline = $("timeline");
   const btn = $("btn");
+  const noEl = $("no");
 
-  $("year").textContent = String(new Date().getFullYear());
+  const yearEl = $("year");
+  if (yearEl) yearEl.textContent = String(new Date().getFullYear());
 
-  // 1) Mapping จีน -> ไทย (ตามที่คุณให้มา)
+  // Mapping จีน -> ไทย
   const STATUS_MAP = [
     { zh: "配完-配完>順利送達>白河營業所", th: "พัสดุถึงผู้รับเรียบร้อยแล้ว" },
     { zh: "配送中-配送中>白河營業所", th: "อยู่ระหว่างจัดส่ง" },
@@ -19,7 +338,7 @@
     { zh: "放行", th: "พัสดุผ่านพิธีการศุลกากรเรียบร้อยแล้ว" },
     {
       zh: "由於海關系統查無此包裹申報人資料，請確認申報人是否已註冊過EZ WAY。 若尚未註冊，請於完成註冊後，至個人資料維護介面截圖申報人名、電話號碼及身分證號，並提交給威名客服，海關受理資料後約1~2個工作天放行",
-      th: "เนื่องจากระบบศุลกากรไม่พบข้อมูลผู้เดินพิธีการ โปรดตรวจสอบว่าผู้รับพัสดุได้ลงทะเบียนกับ EZ WAY แล้วหรือไม่ หากยังไม่ได้ลงทะเบียนโปรดลงทะเบียนให้เรียบร้อย ถ่ายภาพหน้าจอให้ติดชื่อ/หมายเลขโทรศัพท์และหมายเลขบัตรประชาชนของผู้เดินพิธีการ แล้วส่งให้เจ้าหน้าที่ลูกค้าสัมพันธ์ของWeiming หลังจากได้รับข้อมูลแล้ว พัสดุจะได้รับการปล่อยภายในประมาณ 1-2 วันทำการ"
+      th: "เนื่องจากระบบศุลกากรไม่พบข้อมูลผู้เดินพิธีการ โปรดตรวจสอบว่าผู้รับพัสดุได้ลงทะเบียนกับ EZ WAY แล้วหรือไม่ หากยังไม่ได้ลงทะเบียนโปรดลงทะเบียนให้เรียบร้อย ถ่ายภาพหน้าจอให้ติดชื่อ/หมายเลขโทรศัพท์และหมายเลขบัตรประชาชนของผู้เดินพิธีการ แล้วส่งให้เจ้าหน้าที่ลูกค้าสัมพันธ์ของ Weiming หลังจากได้รับข้อมูลแล้ว พัสดุจะได้รับการปล่อยภายในประมาณ 1-2 วันทำการ"
     },
     { zh: "不受理不可補正之錯單", th: "ข้อมูลที่ใช้เดินพิธีการไม่สอดคล้องกัน โปรดติดต่อเจ้าหน้าที่" },
     { zh: "您的貨物已准備從集運倉出倉", th: "พัสดุของคุณออกคลัง เพื่อเตรียมส่งไปยังสนามบินแล้ว" },
@@ -27,7 +346,6 @@
     { zh: "您已下單成功!請等待倉庫人員作業出貨", th: "สร้างออเดอร์การจัดส่งเรียบร้อย" },
   ];
 
-  // 2) แปลงสถานะให้เป็นไทย: ถ้ามีไทยอยู่แล้วใช้ไทย, ถ้าเป็นจีนให้ map, ไม่ตรงก็คืนค่าต้นฉบับ
   function toThaiStatus(status_th, status_zh) {
     const th = (status_th || "").trim();
     if (th) return th;
@@ -38,12 +356,11 @@
     const exact = STATUS_MAP.find(x => x.zh === zh);
     if (exact) return exact.th;
 
-    // fallback เผื่อสถานะจีนมีข้อความต่อท้าย/ขึ้นต้น
     const loose = STATUS_MAP.find(x => zh.includes(x.zh));
-    return loose ? loose.th : zh;
+    // ไม่ให้โชว์จีนถ้าไม่เจอ mapping
+    return loose ? loose.th : "กำลังดำเนินการ";
   }
 
-  // Badge classification by Thai status
   function classify(th){
     const s = (th || "").toLowerCase();
 
@@ -60,12 +377,12 @@
   }
 
   function renderSummary(data){
-    // รองรับได้หลายชื่อ field เผื่อ API ของคุณส่งไม่เหมือนกัน
     const latestZh = data.latest_status_zh || data.latest_status || data.latest_status_cn || "";
     const latestTh = toThaiStatus(data.latest_status_th, latestZh);
 
     const cls = classify(latestTh);
 
+    if (!summary) return;
     summary.style.display = "block";
     summary.innerHTML = `
       <div class="summaryTop">
@@ -90,6 +407,8 @@
   }
 
   function renderTimeline(events){
+    if (!timeline) return;
+
     const items = (events || []).map(e => {
       const zh = e.status_zh || e.status || e.status_cn || "";
       const th = toThaiStatus(e.status_th, zh);
@@ -106,8 +425,10 @@
   }
 
   function setLoading(){
+    if (!summary) return;
     summary.style.display = "block";
-    history.style.display = "none";
+    if (history) history.style.display = "none";
+
     summary.innerHTML = `
       <div class="loading">
         <span class="spinner" aria-hidden="true"></span>
@@ -120,16 +441,19 @@
   }
 
   function setError(msg){
+    if (!summary) return;
     summary.style.display = "block";
-    history.style.display = "none";
+    if (history) history.style.display = "none";
     summary.innerHTML = `<div class="errorBox"><b>ไม่สำเร็จ:</b> ${msg || "เกิดข้อผิดพลาด"}</div>`;
   }
 
   async function run(){
-    const no = $("no").value.trim();
+    if (!noEl) return;
+
+    const no = noEl.value.trim();
     if(!no){ alert("กรุณากรอกเลขพัสดุ"); return; }
 
-    btn.disabled = true;
+    if (btn) btn.disabled = true;
     setLoading();
 
     try{
@@ -143,14 +467,16 @@
 
       renderSummary(data);
       renderTimeline(data.events);
-      history.style.display = "block";
+      if (history) history.style.display = "block";
     }catch(e){
       setError(String(e));
     }finally{
-      btn.disabled = false;
+      if (btn) btn.disabled = false;
     }
   }
 
-  btn.addEventListener("click", run);
-  $("no").addEventListener("keydown", (e) => { if(e.key === "Enter") run(); });
+  if (btn) btn.addEventListener("click", run);
+  if (noEl) noEl.addEventListener("keydown", (e) => { if(e.key === "Enter") run(); });
 </script>
+</body>
+</html>

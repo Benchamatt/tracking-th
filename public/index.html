@@ -132,6 +132,7 @@
     .kv b{font-size:12px;letter-spacing:.2px;color:#0b223c}
     .kv .value{font-size:14px}
 
+    /* ซ่อน badge (เก็บสไตล์ไว้เผื่อเปิดใช้ภายหลัง) */
     .badge{
       display:none;
       align-items:center;gap:8px;padding:8px 12px;border-radius:999px;
@@ -256,7 +257,7 @@
   const btn = $("btn");
   $("year").textContent = String(new Date().getFullYear());
 
-  // ✅ แสดงเฉพาะสถานะที่อยู่ใน rules เท่านั้น / นอกเหนือจากนั้นไม่แสดง
+  // ✅ แสดงเฉพาะสถานะที่อยู่ใน rules เท่านั้น / นอกเหนือจากนี้ไม่แสดง
   function toThaiStatus(raw){
     const t0 = (raw || "").trim();
     if(!t0) return "";
@@ -300,11 +301,12 @@
 
     let out = "";
     for(const r of rules){
-      if(t.includes(r.key)) out = r.th;
+      if(t.includes(r.key)) out = r.th; // ท้าย override หน้า
     }
-    return out; // ✅ ไม่ match = ""
+    return out; // ✅ ไม่ match = "" (ไม่แสดง)
   }
 
+  // ✅ สถานะล่าสุด (เอาเฉพาะที่ match จริง)
   function getLatestThaiFromEvents(events){
     if(!Array.isArray(events) || events.length === 0) return "-";
     for(const e of events){
@@ -331,7 +333,7 @@
     `;
   }
 
-  // ✅ แสดงเฉพาะที่ match + กันซ้ำจริง ๆ (เวลา+ข้อความ) / ไม่ตัดเพราะข้อความเหมือนกันเฉย ๆ
+  // ✅ Timeline: แสดงเฉพาะที่ match + กันซ้ำจริง ๆ (เวลา+ข้อความ)
   function mapAllEvents(rawEvents){
     if(!Array.isArray(rawEvents)) return [];
 
@@ -341,7 +343,7 @@
     for (const e of rawEvents){
       const raw = e.status_th || e.status || e.latest_status_th || "";
       const th = toThaiStatus(raw);
-      if(!th) continue; // ✅ ไม่ match = ไม่แสดง
+      if(!th) continue; // ✅ นอกเหนือจาก rules ไม่แสดง
 
       const time = (e.time || "").trim() || "-";
       const key = `${time}||${th}`;
@@ -350,7 +352,6 @@
 
       out.push({ ...e, _th: th });
     }
-
     return out;
   }
 
@@ -401,9 +402,13 @@
         return;
       }
 
+      // 1) filter + map เฉพาะที่ match rules
       const allEvents = mapAllEvents(data.events);
+
+      // 2) สถานะล่าสุด: เอาจาก timeline ที่ filter แล้ว (ถ้าไม่มีให้เป็น "-")
       const latestTH = allEvents[0]?._th || getLatestThaiFromEvents(data.events);
 
+      // 3) render
       renderSummary(data, latestTH);
       renderTimeline(allEvents);
       history.style.display = "block";

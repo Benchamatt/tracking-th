@@ -1,433 +1,76 @@
-<!doctype html>
-<html lang="th">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Weiming Tracking</title>
+function toThaiStatus(raw){
+  const t0 = (raw || "").trim();
+  if(!t0) return "";
 
-  <style>
-    :root{
-      --navy:#0b2a4a;
-      --navy2:#08345f;
-      --bg:#f3f7ff;
-      --sky:#eaf3ff;
+  const t = t0.replace(/\s+/g, " ").trim();
 
-      --surface:#ffffff;
-      --text:#0b1220;
-      --muted:#5c6f86;
-      --border: rgba(11,42,74,.10);
+  const rules = [
+    { key: "您已下單成功", th: "สร้างออเดอร์การจัดส่งเรียบร้อย" },
+    { key: "倉庫同事已揀貸 等待打印地址面單", th: "แพ็คกิ้งพัสดุเรียบร้อยแล้ว" },
+    { key: "您的貨物已准備從集運倉出倉", th: "พัสดุของคุณออกคลัง เพื่อเตรียมส่งไปยังสนามบินแล้ว" },
+    { key: "連線收單建檔", th: "ระบบศุลกากรรับและบันทึกข้อมูลเรียบร้อยแล้ว" },
 
-      --ok:#0b7a5a;
-      --warn:#d07b12;
-      --bad:#b42318;
+    { key: "出倉處理", th: "กำลังดำเนินการนำสินค้าออกจากคลัง" },
+    { key: "轉運中-轉運中>已集貸>北三特服二所", th: "อยู่ระหว่างการขนส่งไปยังศูนย์ย่อย(สาขาปลายทาง)" },
+    { key: "已集貨>北三特販二所>SD已經至寄件人指定地點收到包裹", th: "พัสดุอยู่ศูนย์คัดแยกพัสดุ" },
 
-      --shadow: 0 18px 42px rgba(8, 28, 55, .10);
-      --shadow2: 0 10px 22px rgba(8, 28, 55, .08);
-      --ring: rgba(11,42,74,.18);
-    }
+    { key: "貨物在目的地國家海關清關中", th: "พัสดุอยู่ระหว่างการเดินพิธีการศุลกากรในประเทศปลายทาง" },
+    { key: "通關方式C1", th: "พิธีการศุลกากรแบบ C1" },
+    { key: "通關方式C3", th: "พิธีการศุลกากรแบบ C3" },
+    { key: "通關方式C2", th: "พิธีการศุลกากรแบบ C2" },
+    { key: "放行", th: "พัสดุผ่านพิธีการศุลกากรเรียบร้อยแล้ว" },
 
-    *{box-sizing:border-box}
-    html,body{height:100%}
-    body{
-      margin:0;
-      font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Tahoma, sans-serif;
-      color:var(--text);
-      background:
-        radial-gradient(1200px 520px at 15% -8%, rgba(11,42,74,.18), transparent 60%),
-        radial-gradient(900px 460px at 90% 0%, rgba(40,140,255,.14), transparent 55%),
-        linear-gradient(180deg, var(--sky), var(--bg));
-    }
+    { key: "不受理不可補正之錯單", th: "ข้อมูลที่ใช้เดินพิธีการไม่สอดคล้องกัน โปรดติดต่อเจ้าหน้าที่" },
+    {
+      key: "由於海關系統查無此包裹申報人資料，請確認申報人是否已註冊過EZ WAY。 若尚未註冊，請於完成註冊後，至個人資料維護介面截圖申報人名、電話號碼及身分證號，並提交給威名客服，海關受理資料後約1~2個工作天放行。",
+      th: "เนื่องจากระบบศุลกากรไม่พบข้อมูลผู้เดินพิธีการ โปรดตรวจสอบว่าผู้รับพัสดุได้ลงทะเบียนกับ EZ WAY แล้วหรือไม่ หากยังไม่ได้ลงทะเบียนโปรดลงทะเบียนให้เรียบร้อย ถ่ายภาพหน้าจอให้ติดชื่อ/หมายเลขโทรศัพท์และหมายเลขบัตรประชาชนของผู้เดินพิธีการ แล้วส่งให้เจ้าหน้าที่ลูกค้าสัมพันธ์ของ Weiming หลังจากได้รับข้อมูลแล้ว พัสดุจะได้รับการปล่อยภายในประมาณ 1-2 วันทำการ"
+    },
 
-    .wrap{max-width:1080px;margin:0 auto;padding:22px 14px 28px;}
+    { key: "配送中-配送中>白河營業所", th: "อยู่ระหว่างการจัดส่ง" },
+    { key: "配送中>白河營業所>SD正在將包裹配送到收件人途中", th: "อยู่ระหว่างการจัดส่ง" },
 
-    .topbar{
-      display:flex;align-items:center;justify-content:space-between;gap:12px;
-      padding:18px 18px;
-      border:1px solid rgba(255,255,255,.60);
-      border-radius:20px;
-      background:linear-gradient(135deg, rgba(255,255,255,.88), rgba(255,255,255,.70));
-      box-shadow:var(--shadow);
-      backdrop-filter: blur(10px);
-      position:relative; overflow:hidden;
-    }
-    .topbar:before{
-      content:""; position:absolute; inset:-60%;
-      background: radial-gradient(circle at 20% 20%, rgba(40,140,255,.18), transparent 55%);
-      transform: rotate(12deg);
-    }
+    { key: "暫置營業所,暫置營業所>暫置保管中国联络络黑猫宅急便412-8888)>白河營業所", th: "พัสดุถูกพักไว้ชั่วคราวที่สาขา" },
+    { key: "公司行號休息-公司行號休息>白河營業所", th: "จัดส่งไม่สำเร็จเนื่องจากบริษัทหยุดทำการ" },
 
-    .brand{display:flex;align-items:center;gap:12px;min-width:0;position:relative;z-index:1;}
-    .logo{
-      width:46px;height:46px;border-radius:16px;
-      background: linear-gradient(135deg, var(--navy), var(--navy2));
-      display:grid;place-items:center;
-      box-shadow: 0 18px 32px rgba(11,42,74,.24);
-      position:relative;overflow:hidden;flex:0 0 auto;
-    }
-    .logo:after{
-      content:""; position:absolute; inset:-40%;
-      background: radial-gradient(circle at 35% 25%, rgba(255,255,255,.25), transparent 55%);
-      transform: rotate(18deg);
-    }
-    .logo svg{width:22px;height:22px;fill:#fff;position:relative;z-index:1;}
-    .brand h1{margin:0;font-size:16px;letter-spacing:.2px;line-height:1.1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-    .brand .sub{font-size:12px;color:var(--muted);margin-top:4px;}
+    { key: "配完-配完>順利送達>白河營業所", th: "พัสดุถึงผู้รับเรียบร้อยแล้ว" },
+    { key: "順利送達>白河營業所>包裹已經送達收件人", th: "จัดส่งสำเร็จ" },
 
-    .grid{
-      display:grid;grid-template-columns: 1.10fr .90fr;gap:14px;margin-top:14px;align-items:start;
-    }
-    @media(max-width: 920px){ .grid{grid-template-columns:1fr} }
+    { key: "สั่งซื้อสำเร็จ", th: "พัสดุผู้ส่งได้รับแล้ว  รอการดำเนินการจากคลังสินค้า" },
+    { key: "รอคลังสินค้าดำเนินการ", th: "พัสดุผู้ส่งได้รับแล้ว  รอการดำเนินการจากคลังสินค้า" },
+  ];
 
-    .card{
-      background: rgba(255,255,255,.90);
-      border: 1px solid rgba(255,255,255,.60);
-      border-radius: 20px;
-      box-shadow: var(--shadow2);
-      padding: 16px;
-      backdrop-filter: blur(10px);
-      position:relative;overflow:hidden;
-    }
-    .card:before{
-      content:""; position:absolute; inset:-40%;
-      background: radial-gradient(circle at 30% 15%, rgba(40,140,255,.10), transparent 55%);
-      pointer-events:none;
-    }
-    .card > *{ position:relative; z-index:1; }
-
-    .card h2{margin:0 0 8px 0;font-size:14px;letter-spacing:.3px;color:#0b223c;}
-    .muted{color:var(--muted);font-size:13px}
-    .small{font-size:12px;color:var(--muted)}
-
-    .searchRow{
-      display:grid;grid-template-columns: 1fr 156px;gap:10px;margin-top:10px;
-    }
-    @media(max-width:520px){ .searchRow{grid-template-columns:1fr} }
-
-    input{
-      width:100%;padding:12px 14px;border-radius:16px;
-      border:1px solid rgba(11,42,74,.14);
-      background: linear-gradient(180deg, rgba(255,255,255,.92), rgba(247,251,255,.92));
-      font-size:15px;
-      box-shadow: inset 0 1px 0 rgba(255,255,255,.85);
-    }
-    input:focus{outline:3px solid var(--ring); border-color: transparent;}
-
-    .btn{
-      border:none;border-radius:16px;padding:12px 14px;
-      background: linear-gradient(135deg, var(--navy), var(--navy2));
-      color:#fff;font-size:15px;cursor:pointer;
-      box-shadow: 0 18px 26px rgba(11,42,74,.18);
-      position:relative;overflow:hidden;
-    }
-    .btn:before{
-      content:""; position:absolute; inset:-80%;
-      background: radial-gradient(circle at 30% 30%, rgba(255,255,255,.20), transparent 55%);
-      transform: rotate(18deg);
-    }
-    .btn span{position:relative;z-index:1}
-    .btn:disabled{opacity:.6;cursor:not-allowed;box-shadow:none;}
-
-    .summaryTop{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:12px;}
-    .kv{display:grid;gap:6px;}
-    .kv b{font-size:12px;letter-spacing:.2px;color:#0b223c}
-    .kv .value{font-size:14px}
-
-    /* ✅ ซ่อน/ไม่ใช้ badge สีส้มแล้ว แต่คงสไตล์ไว้เผื่อคุณอยากเปิดกลับ */
-    .badge{
-      display:none; /* ✅ ไม่แสดง badge เลย */
-      align-items:center;gap:8px;padding:8px 12px;border-radius:999px;
-      font-size:12px;font-weight:800;white-space:nowrap;
-      border:1px solid rgba(11,42,74,.12);
-      background: rgba(255,255,255,.85);
-      box-shadow: 0 12px 22px rgba(8,28,55,.08);
-    }
-    .dot{width:8px;height:8px;border-radius:999px;background: currentColor;opacity:.95}
-    .badge.ok{color:var(--ok)}
-    .badge.warn{color:var(--warn)}
-    .badge.bad{color:var(--bad)}
-
-    .headline{padding-top:2px;font-size:18px;font-weight:900;letter-spacing:.2px;color:#0b223c;}
-
-    .timeline{margin-top:12px;position:relative;padding-left:22px;}
-    .timeline:before{
-      content:"";position:absolute;left:10px;top:2px;bottom:2px;width:2px;
-      background: linear-gradient(to bottom, rgba(11,42,74,.28), rgba(11,42,74,.06));
-    }
-
-    .event{
-      position:relative;
-      padding:12px 12px;
-      border-radius:18px;
-      border:1px solid rgba(11,42,74,.10);
-      background: linear-gradient(180deg, rgba(247,251,255,.92), rgba(255,255,255,.88));
-      margin-bottom:10px;
-      box-shadow: 0 10px 18px rgba(8,28,55,.06);
-    }
-    .event:before{
-      content:"";position:absolute;left:-20px;top:18px;width:12px;height:12px;border-radius:999px;
-      background:#fff;border:3px solid rgba(40,140,255,.55);
-      box-shadow: 0 0 0 4px rgba(40,140,255,.12);
-    }
-    /* ✅ ไฮไลท์สถานะล่าสุด */
-    .event.isLatest{border-color: rgba(40,140,255,.35); box-shadow: 0 14px 26px rgba(8,28,55,.10);}
-    .event.isLatest:before{border-color: rgba(11,42,74,.55); box-shadow: 0 0 0 5px rgba(11,42,74,.12);}
-
-    .event .time{font-size:12px;color:var(--muted);}
-    .event .text{font-size:14px;font-weight:800;margin-top:6px;line-height:1.35;color:#0b223c;}
-
-    .footer{margin-top:14px;padding:10px 6px 2px;text-align:center;color:var(--muted);font-size:12px;}
-    .footer a{color:var(--muted);text-decoration:none}
-    .footer a:hover{text-decoration:underline}
-
-    .errorBox{
-      border:1px solid rgba(180,35,24,.22);
-      background: rgba(180,35,24,.06);
-      color: var(--bad);
-      border-radius:16px;
-      padding:10px 12px;
-      font-size:13px;
-    }
-
-    .loading{display:flex;align-items:center;gap:10px;font-size:13px;color:var(--muted);}
-    .spinner{
-      width:16px;height:16px;border-radius:999px;
-      border:2px solid rgba(11,42,74,.18);
-      border-top-color: rgba(11,42,74,.85);
-      animation: spin 0.9s linear infinite;
-    }
-    @keyframes spin{to{transform:rotate(360deg)}}
-  </style>
-</head>
-
-<body>
-  <div class="wrap" id="app">
-    <div class="topbar">
-      <div class="brand">
-        <div class="logo" aria-hidden="true" title="Weiming">
-          <svg viewBox="0 0 24 24">
-            <path d="M20 8h-3V4H3v13h2.1a2.9 2.9 0 0 0 5.8 0h4.2a2.9 2.9 0 0 0 5.8 0H23v-5l-3-4zM6.5 19a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zm10 0a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zM17 12V9h2l2 3h-4z"/>
-          </svg>
-        </div>
-        <div style="min-width:0">
-          <h1>Weiming Tracking</h1>
-          <div class="sub">ระบบตรวจสอบสถานะพัสดุ</div>
-        </div>
-      </div>
-    </div>
-
-    <div class="grid">
-      <div>
-        <div class="card">
-          <h2>ค้นหาเลขพัสดุ</h2>
-          <div class="muted">กรอกเลขพัสดุ แล้วกด “ค้นหา”</div>
-
-          <div class="searchRow">
-            <input id="no" placeholder="เลขพัสดุ" inputmode="numeric" autocomplete="off" />
-            <button class="btn" id="btn"><span>ค้นหา</span></button>
-          </div>
-
-          <div style="margin-top:10px" class="small">
-            หมายเหตุ: ระบบแสดงผลเป็นภาษาไทย และเรียงเหตุการณ์ล่าสุดก่อน
-          </div>
-        </div>
-
-        <div class="card" id="summary" style="display:none"></div>
-      </div>
-
-      <div>
-        <div class="card" id="history" style="display:none">
-          <h2>ไทม์ไลน์สถานะ</h2>
-          <div class="muted">เหตุการณ์ล่าสุดอยู่ด้านบน (แสดงทั้งหมด)</div>
-          <div class="timeline" id="timeline"></div>
-        </div>
-      </div>
-    </div>
-
-    <div class="footer">
-      © <span id="year"></span> Weiming Tracking. All rights reserved.
-      <span class="muted"> | </span>
-      <a href="https://line.me/R/ti/p/@wmex" target="_blank" rel="noopener noreferrer">ติดต่อผ่าน LINE</a>
-    </div>
-  </div>
-
-<script>
-  const $ = (id) => document.getElementById(id);
-  const summary = $("summary");
-  const history = $("history");
-  const timeline = $("timeline");
-  const btn = $("btn");
-  $("year").textContent = String(new Date().getFullYear());
-
-  // ----------------- STRICT MAPPING: แสดงเฉพาะที่กำหนดเท่านั้น -----------------
-  // กติกาใหม่:
-  // - ถ้า match rules -> คืนคำไทย
-  // - ถ้าไม่ match -> คืน "" (ไม่แสดง) ไม่ว่าจีน/ไทย/อังกฤษ
-  function toThaiStatus(raw){
-    const t0 = (raw || "").trim();
-    if(!t0) return "";
-
-    const t = t0.replace(/\s+/g, " ").trim();
-
-    const rules = [
-      { key: "您已下單成功", th: "สร้างออเดอร์การจัดส่งเรียบร้อย" },
-      { key: "倉庫同事已揀貸 等待打印地址面單", th: "แพ็คกิ้งพัสดุเรียบร้อยแล้ว" },
-      { key: "您的貨物已准備從集運倉出倉", th: "พัสดุของคุณออกคลัง เพื่อเตรียมส่งไปยังสนามบินแล้ว" },
-      { key: "連線收單建檔", th: "ระบบศุลกากรรับและบันทึกข้อมูลเรียบร้อยแล้ว" },
-
-      { key: "出倉處理", th: "กำลังดำเนินการนำสินค้าออกจากคลัง" },
-      { key: "轉運中-轉運中>已集貸>北三特服二所", th: "อยู่ระหว่างการขนส่งไปยังศูนย์ย่อย(สาขาปลายทาง)" },
-      { key: "已集貨>北三特販二所>SD已經至寄件人指定地點收到包裹", th: "พัสดุอยู่ศูนย์คัดแยกพัสดุ" },
-
-      { key: "貨物在目的地國家海關清關中", th: "พัสดุอยู่ระหว่างการเดินพิธีการศุลกากรในประเทศปลายทาง" },
-      { key: "通關方式C1", th: "พิธีการศุลกากรแบบ C1" },
-      { key: "通關方式C3", th: "พิธีการศุลกากรแบบ C3" },
-      { key: "通關方式C2", th: "พิธีการศุลกากรแบบ C2" }, // ถ้าไม่มีข้อความนี้จริง ลบทิ้งได้
-      { key: "放行", th: "พัสดุผ่านพิธีการศุลกากรเรียบร้อยแล้ว" },
-
-      { key: "不受理不可補正之錯單", th: "ข้อมูลที่ใช้เดินพิธีการไม่สอดคล้องกัน โปรดติดต่อเจ้าหน้าที่" },
-      {
-        key: "由於海關系統查無此包裹申報人資料，請確認申報人是否已註冊過EZ WAY。 若尚未註冊，請於完成註冊後，至個人資料維護介面截圖申報人名、電話號碼及身分證號，並提交給威名客服，海關受理資料後約1~2個工作天放行。",
-        th: "เนื่องจากระบบศุลกากรไม่พบข้อมูลผู้เดินพิธีการ โปรดตรวจสอบว่าผู้รับพัสดุได้ลงทะเบียนกับ EZ WAY แล้วหรือไม่ หากยังไม่ได้ลงทะเบียนโปรดลงทะเบียนให้เรียบร้อย ถ่ายภาพหน้าจอให้ติดชื่อ/หมายเลขโทรศัพท์และหมายเลขบัตรประชาชนของผู้เดินพิธีการ แล้วส่งให้เจ้าหน้าที่ลูกค้าสัมพันธ์ของ Weiming หลังจากได้รับข้อมูลแล้ว พัสดุจะได้รับการปล่อยภายในประมาณ 1-2 วันทำการ"
-      },
-
-      { key: "配送中-配送中>白河營業所", th: "อยู่ระหว่างการจัดส่ง" },
-      { key: "配送中>白河營業所>SD正在將包裹配送到收件人途中", th: "อยู่ระหว่างการจัดส่ง" },
-
-      { key: "暫置營業所,暫置營業所>暫置保管中国联络络黑猫宅急便412-8888)>白河營業所", th: "พัสดุถูกพักไว้ชั่วคราวที่สาขา" },
-      { key: "公司行號休息-公司行號休息>白河營業所", th: "จัดส่งไม่สำเร็จเนื่องจากบริษัทหยุดทำการ" },
-
-      { key: "配完-配完>順利送達>白河營業所", th: "พัสดุถึงผู้รับเรียบร้อยแล้ว" },
-      { key: "順利送達>白河營業所>包裹已經送達收件人", th: "จัดส่งสำเร็จ" },
-
-      { key: "สั่งซื้อสำเร็จ", th: "พัสดุผู้ส่งได้รับแล้ว  รอการดำเนินการจากคลังสินค้า" },
-      { key: "รอคลังสินค้าดำเนินการ", th: "พัสดุผู้ส่งได้รับแล้ว  รอการดำเนินการจากคลังสินค้า" },
-    ];
-
-    // ให้ท้าย override หน้า (เหมือนเดิม)
-    let out = "";
-    for(const r of rules){
-      if(t.includes(r.key)) out = r.th;
-    }
-    return out; // ✅ ไม่ match = "" (ไม่แสดง)
+  // ท้าย override หน้า
+  let out = "";
+  for(const r of rules){
+    if(t.includes(r.key)) out = r.th;
   }
 
-  // ----------------- สรุปสถานะล่าสุด: เอาเฉพาะที่ match เท่านั้น -----------------
-  function getLatestThaiFromEvents(events){
-    if(!Array.isArray(events) || events.length === 0) return "-";
-    for(const e of events){
-      const raw = e.status_th || e.status || e.latest_status_th || "";
-      const th = toThaiStatus(raw);
-      if(th) return th;
-    }
-    return "-";
+  // ✅ ไม่ match = ไม่แสดง
+  return out;
+}
+
+function mapAllEvents(rawEvents){
+  if(!Array.isArray(rawEvents)) return [];
+
+  const seen = new Set();
+  const out = [];
+
+  for (const e of rawEvents){
+    const raw = e.status_th || e.status || e.latest_status_th || "";
+    const th = toThaiStatus(raw);
+
+    // ✅ ไม่ match => ไม่แสดง
+    if(!th) continue;
+
+    const time = (e.time || "").trim() || "-";
+    const key = `${time}||${th}`;
+
+    // ✅ กันซ้ำจริง ๆ (เวลา+ข้อความ)
+    if(seen.has(key)) continue;
+    seen.add(key);
+
+    out.push({ ...e, _th: th });
   }
 
-  function renderSummary(data, latestTH){
-    summary.style.display = "block";
-    summary.innerHTML = `
-      <div class="summaryTop">
-        <div class="kv">
-          <div><b>เลขพัสดุ</b> <span class="value">${data.tracking_no || "-"}</span></div>
-          <div><b>อัปเดตล่าสุด</b> <span class="value">${data.last_update || "-"}</span></div>
-        </div>
-        <span class="badge"><span class="dot"></span></span>
-      </div>
-
-      <div class="muted">สถานะล่าสุด</div>
-      <div class="headline">${latestTH || "-"}</div>
-    `;
-  }
-
-  // ----------------- Timeline: แสดงเฉพาะที่ match + ไม่ซ้ำ -----------------
-  function mapAllEvents(rawEvents){
-    if(!Array.isArray(rawEvents)) return [];
-
-    const seen = new Set();
-    let lastText = null;
-    const out = [];
-
-    for (const e of rawEvents){
-      const raw = e.status_th || e.status || e.latest_status_th || "";
-      const th = toThaiStatus(raw);
-
-      // ✅ ไม่ match => ไม่แสดง
-      if(!th) continue;
-
-      const time = (e.time || "").trim();
-      const key = `${time}||${th}`;
-      if(seen.has(key)) continue;
-      seen.add(key);
-
-      if(lastText === th) continue;
-      lastText = th;
-
-      out.push({ ...e, _th: th });
-    }
-    return out;
-  }
-
-  function renderTimeline(events){
-    const items = (events || []).map((e, idx) => `
-      <div class="event ${idx === 0 ? "isLatest" : ""}">
-        <div class="time">${e.time || "-"}</div>
-        <div class="text">${e._th}</div>
-      </div>
-    `).join("");
-
-    timeline.innerHTML = items || `<div class="muted" style="padding:10px 0">ไม่มีข้อมูล</div>`;
-  }
-
-  function setLoading(){
-    summary.style.display = "block";
-    history.style.display = "none";
-    summary.innerHTML = `
-      <div class="loading">
-        <span class="spinner" aria-hidden="true"></span>
-        <div>
-          <div style="font-weight:800;color:#0b223c">กำลังค้นหา...</div>
-          <div class="small">โปรดรอสักครู่</div>
-        </div>
-      </div>
-    `;
-  }
-
-  function setError(msg){
-    summary.style.display = "block";
-    history.style.display = "none";
-    summary.innerHTML = `<div class="errorBox"><b>ไม่สำเร็จ:</b> ${msg || "เกิดข้อผิดพลาด"}</div>`;
-  }
-
-  async function run(){
-    const no = $("no").value.trim();
-    if(!no){ alert("กรุณากรอกเลขพัสดุ"); return; }
-
-    btn.disabled = true;
-    setLoading();
-
-    try{
-      const r = await fetch(`/api/track?no=${encodeURIComponent(no)}`);
-      const data = await r.json();
-
-      if(!r.ok){
-        setError(data.error || "ไม่พบข้อมูล");
-        return;
-      }
-
-      const allEvents = mapAllEvents(data.events);
-      const latestTH = allEvents[0]?._th || getLatestThaiFromEvents(data.events);
-
-      renderSummary(data, latestTH);
-      renderTimeline(allEvents);
-      history.style.display = "block";
-    }catch(e){
-      setError(String(e));
-    }finally{
-      btn.disabled = false;
-    }
-  }
-
-  $("btn").addEventListener("click", run);
-  $("no").addEventListener("keydown", (e) => { if(e.key === "Enter") run(); });
-</script>
-</body>
-</html>
+  return out;
+}

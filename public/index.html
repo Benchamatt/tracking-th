@@ -335,6 +335,8 @@
     { zh: "貨物在目的地國家海關清關中", th: "พัสดุอยู่ระหว่างการเดินพิธีการศุลกากรในประเทศปลายทาง" },
     { zh: "連線收單建檔", th: "ระบบศุลกากรรับและบันทึกข้อมูลเรียบร้อยแล้ว" },
     { zh: "通關方式C1", th: "พิธีการศุลกากรแบบ C1" },
+    { zh: "通關方式C2", th: "พิธีการศุลกากรแบบ C2" },
+    { zh: "通關方式C3", th: "พิธีการศุลกากรแบบ C3" },
     { zh: "放行", th: "พัสดุผ่านพิธีการศุลกากรเรียบร้อยแล้ว" },
     {
       zh: "由於海關系統查無此包裹申報人資料，請確認申報人是否已註冊過EZ WAY。 若尚未註冊，請於完成註冊後，至個人資料維護介面截圖申報人名、電話號碼及身分證號，並提交給威名客服，海關受理資料後約1~2個工作天放行",
@@ -346,20 +348,64 @@
     { zh: "您已下單成功!請等待倉庫人員作業出貨", th: "สร้างออเดอร์การจัดส่งเรียบร้อย" },
   ];
 
-  function toThaiStatus(status_th, status_zh) {
-    const th = (status_th || "").trim();
-    if (th) return th;
+ function normalizeZh(s) {
+  return (s || "")
+    .replace(/[“”]/g, '"')
+    .replace(/\s+/g, " ")
+    .trim();
+}
 
-    const zh = (status_zh || "").trim();
-    if (!zh) return "-";
+// ดึงข้อความจีนออกจากข้อความผสม เช่น "กำลังดำเนินการ (不受理不可補正之錯單)"
+function extractZh(mixed) {
+  const s = normalizeZh(mixed);
 
-    const exact = STATUS_MAP.find(x => x.zh === zh);
+  const m = s.match(/\(([^)]+)\)/);
+  if (m && m[1]) return normalizeZh(m[1]);
+
+  return s;
+}
+
+function toThaiStatus(status_th, status_zh_or_mixed) {
+  // 1) บังคับใช้ mapping จากจีนก่อน
+  const zhRaw = extractZh(status_zh_or_mixed);
+
+  if (zhRaw) {
+    // exact
+    const exact = STATUS_MAP.find(x => normalizeZh(x.zh) === zhRaw);
     if (exact) return exact.th;
 
-    const loose = STATUS_MAP.find(x => zh.includes(x.zh));
-    // ไม่ให้โชว์จีนถ้าไม่เจอ mapping
-    return loose ? loose.th : "กำลังดำเนินการ";
+    // contains
+    const loose = STATUS_MAP.find(x => zhRaw.includes(normalizeZh(x.zh)));
+    if (loose) return loose.th;
+
+    // keyword match (สำคัญ)
+    const keywordMap = [
+      { k: "配送中", th: "อยู่ระหว่างจัดส่ง" },
+      { k: "配完", th: "พัสดุถึงผู้รับเรียบร้อยแล้ว" },
+      { k: "公司行號休息", th: "จัดส่งไม่สำเร็จเนื่องจากบริษัทหยุดทำการ" },
+      { k: "轉運中", th: "อยู่ระหว่างการขนส่งไปยังศูนย์ย่อย(สาขาปลายทาง)" },
+      { k: "海關清關", th: "พัสดุอยู่ระหว่างการเดินพิธีการศุลกากรในประเทศปลายทาง" },
+      { k: "連線收單建檔", th: "ระบบศุลกากรรับและบันทึกข้อมูลเรียบร้อยแล้ว" },
+      { k: "通關方式C1", th: "พิธีการศุลกากรแบบ C1" },
+      { k: "放行", th: "พัสดุผ่านพิธีการศุลกากรเรียบร้อยแล้ว" },
+      { k: "不受理不可補正之錯單", th: "ข้อมูลที่ใช้เดินพิธีการไม่สอดคล้องกัน โปรดติดต่อเจ้าหน้าที่" },
+      { k: "訂單已接收", th: "ระบบรับคำสั่งและบันทึกข้อมูลเรียบร้อยแล้ว" },
+      { k: "已經打印好地址面單", th: "พิมพ์ใบปะหน้าที่อยู่เรียบร้อยแล้ว" },
+      { k: "已准備從集運倉出倉", th: "พัสดุของคุณออกคลัง เพื่อเตรียมส่งไปยังสนามบินแล้ว" },
+      { k: "您已下單成功", th: "สร้างออเดอร์การจัดส่งเรียบร้อย" },
+      { k: "EZ WAY", th: "โปรดตรวจสอบการลงทะเบียน EZ WAY เพื่อรอปล่อยของ 1-2 วันทำการ" },
+    ];
+
+    const kw = keywordMap.find(x => zhRaw.includes(x.k));
+    if (kw) return kw.th;
   }
+
+  // 2) fallback ใช้ไทยจาก API
+  const th = (status_th || "").trim();
+  if (th) return th;
+
+  return "กำลังดำเนินการ";
+}
 
   function classify(th){
     const s = (th || "").toLowerCase();
@@ -377,8 +423,14 @@
   }
 
   function renderSummary(data){
-    const latestZh = data.latest_status_zh || data.latest_status || data.latest_status_cn || "";
-    const latestTh = toThaiStatus(data.latest_status_th, latestZh);
+  const mixedLatest =
+  data.latest_status_zh ||
+  data.latest_status ||
+  data.latest_status_cn ||
+  data.latest_status_th ||
+  "";
+
+const latestTh = toThaiStatus(data.latest_status_th, mixedLatest);
 
     const cls = classify(latestTh);
 
@@ -410,8 +462,9 @@
     if (!timeline) return;
 
     const items = (events || []).map(e => {
-      const zh = e.status_zh || e.status || e.status_cn || "";
-      const th = toThaiStatus(e.status_th, zh);
+      const latestZh = data.latest_status_zh || data.latest_status || data.latest_status_cn || "";
+      const latestTh = toThaiStatus(data.latest_status_th, latestZh);
+
 
       return `
         <div class="event">

@@ -1,219 +1,3 @@
-<!doctype html>
-<html lang="th">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Weiming Tracking</title>
-
-  <style>
-    :root{
-      --navy:#0b2a4a;
-      --navy2:#08345f;
-      --bg:#f3f7ff;
-      --sky:#eaf3ff;
-
-      --text:#0b1220;
-      --muted:#5c6f86;
-
-      --shadow: 0 18px 42px rgba(8, 28, 55, .10);
-      --shadow2: 0 10px 22px rgba(8, 28, 55, .08);
-      --ring: rgba(11,42,74,.18);
-    }
-
-    *{box-sizing:border-box}
-    html,body{height:100%}
-    body{
-      margin:0;
-      font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Tahoma, sans-serif;
-      color:var(--text);
-      background:
-        radial-gradient(1200px 520px at 15% -8%, rgba(11,42,74,.18), transparent 60%),
-        radial-gradient(900px 460px at 90% 0%, rgba(40,140,255,.14), transparent 55%),
-        linear-gradient(180deg, var(--sky), var(--bg));
-    }
-
-    .wrap{max-width:1080px;margin:0 auto;padding:22px 14px 28px;}
-
-    .topbar{
-      display:flex;align-items:center;justify-content:space-between;gap:12px;
-      padding:18px 18px;
-      border:1px solid rgba(255,255,255,.60);
-      border-radius:20px;
-      background:linear-gradient(135deg, rgba(255,255,255,.88), rgba(255,255,255,.70));
-      box-shadow:var(--shadow);
-      backdrop-filter: blur(10px);
-      position:relative; overflow:hidden;
-    }
-    .topbar:before{
-      content:""; position:absolute; inset:-60%;
-      background: radial-gradient(circle at 20% 20%, rgba(40,140,255,.18), transparent 55%);
-      transform: rotate(12deg);
-    }
-
-    .brand{display:flex;align-items:center;gap:12px;min-width:0;position:relative;z-index:1;}
-    .logo{
-      width:46px;height:46px;border-radius:16px;
-      background: linear-gradient(135deg, var(--navy), var(--navy2));
-      display:grid;place-items:center;
-      box-shadow: 0 18px 32px rgba(11,42,74,.24);
-      position:relative;overflow:hidden;flex:0 0 auto;
-    }
-    .logo:after{
-      content:""; position:absolute; inset:-40%;
-      background: radial-gradient(circle at 35% 25%, rgba(255,255,255,.25), transparent 55%);
-      transform: rotate(18deg);
-    }
-    .logo svg{width:22px;height:22px;fill:#fff;position:relative;z-index:1;}
-    .brand h1{margin:0;font-size:16px;letter-spacing:.2px;line-height:1.1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-    .brand .sub{font-size:12px;color:var(--muted);margin-top:4px;}
-
-    .grid{
-      display:grid;grid-template-columns: 1.10fr .90fr;gap:14px;margin-top:14px;align-items:start;
-    }
-    @media(max-width: 920px){ .grid{grid-template-columns:1fr} }
-
-    .card{
-      background: rgba(255,255,255,.90);
-      border: 1px solid rgba(255,255,255,.60);
-      border-radius: 20px;
-      box-shadow: var(--shadow2);
-      padding: 16px;
-      backdrop-filter: blur(10px);
-      position:relative;overflow:hidden;
-    }
-    .card:before{
-      content:""; position:absolute; inset:-40%;
-      background: radial-gradient(circle at 30% 15%, rgba(40,140,255,.10), transparent 55%);
-      pointer-events:none;
-    }
-    .card > *{ position:relative; z-index:1; }
-
-    .card h2{margin:0 0 8px 0;font-size:14px;letter-spacing:.3px;color:#0b223c;}
-    .muted{color:var(--muted);font-size:13px}
-    .small{font-size:12px;color:var(--muted)}
-
-    .searchRow{
-      display:grid;grid-template-columns: 1fr 156px;gap:10px;margin-top:10px;
-    }
-    @media(max-width:520px){ .searchRow{grid-template-columns:1fr} }
-
-    input{
-      width:100%;padding:12px 14px;border-radius:16px;
-      border:1px solid rgba(11,42,74,.14);
-      background: linear-gradient(180deg, rgba(255,255,255,.92), rgba(247,251,255,.92));
-      font-size:15px;
-      box-shadow: inset 0 1px 0 rgba(255,255,255,.85);
-    }
-    input:focus{outline:3px solid var(--ring); border-color: transparent;}
-
-    .btn{
-      border:none;border-radius:16px;padding:12px 14px;
-      background: linear-gradient(135deg, var(--navy), var(--navy2));
-      color:#fff;font-size:15px;cursor:pointer;
-      box-shadow: 0 18px 26px rgba(11,42,74,.18);
-      position:relative;overflow:hidden;
-    }
-    .btn:disabled{opacity:.6;cursor:not-allowed;box-shadow:none;}
-
-    .headline{padding-top:2px;font-size:18px;font-weight:900;letter-spacing:.2px;color:#0b223c;}
-
-    .timeline{margin-top:10px;}
-    .sectionTitle{
-      margin:14px 0 8px;
-      font-weight:900;
-      font-size:13px;
-      color:#0b223c;
-      letter-spacing:.2px;
-    }
-
-    .event{
-      position:relative;
-      padding:12px 12px;
-      border-radius:18px;
-      border:1px solid rgba(11,42,74,.10);
-      background: linear-gradient(180deg, rgba(247,251,255,.92), rgba(255,255,255,.88));
-      margin-bottom:10px;
-      box-shadow: 0 10px 18px rgba(8,28,55,.06);
-    }
-    .event.isLatest{border-color: rgba(40,140,255,.35); box-shadow: 0 14px 26px rgba(8,28,55,.10);}
-    .event .time{font-size:12px;color:var(--muted);}
-    .event .text{font-size:14px;font-weight:800;margin-top:6px;line-height:1.35;color:#0b223c;}
-
-    .loading{display:flex;align-items:center;gap:10px;font-size:13px;color:var(--muted);}
-    .spinner{
-      width:16px;height:16px;border-radius:999px;
-      border:2px solid rgba(11,42,74,.18);
-      border-top-color: rgba(11,42,74,.85);
-      animation: spin 0.9s linear infinite;
-    }
-    @keyframes spin{to{transform:rotate(360deg)}}
-
-    .errorBox{
-      border:1px solid rgba(180,35,24,.22);
-      background: rgba(180,35,24,.06);
-      color:#b42318;
-      border-radius:16px;
-      padding:10px 12px;
-      font-size:13px;
-    }
-
-    .footer{margin-top:14px;padding:10px 6px 2px;text-align:center;color:var(--muted);font-size:12px;}
-    .footer a{color:var(--muted);text-decoration:none}
-    .footer a:hover{text-decoration:underline}
-  </style>
-</head>
-
-<body>
-  <div class="wrap" id="app">
-    <div class="topbar">
-      <div class="brand">
-        <div class="logo" aria-hidden="true" title="Weiming">
-          <svg viewBox="0 0 24 24">
-            <path d="M20 8h-3V4H3v13h2.1a2.9 2.9 0 0 0 5.8 0h4.2a2.9 2.9 0 0 0 5.8 0H23v-5l-3-4zM6.5 19a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zm10 0a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zM17 12V9h2l2 3h-4z"/>
-          </svg>
-        </div>
-        <div style="min-width:0">
-          <h1>Weiming Tracking</h1>
-          <div class="sub">ระบบตรวจสอบสถานะพัสดุ</div>
-        </div>
-      </div>
-    </div>
-
-    <div class="grid">
-      <div>
-        <div class="card">
-          <h2>ค้นหาเลขพัสดุ</h2>
-          <div class="muted">กรอกเลขพัสดุ แล้วกด “ค้นหา”</div>
-
-          <div class="searchRow">
-            <input id="no" placeholder="เลขพัสดุ" inputmode="numeric" autocomplete="off" />
-            <button class="btn" id="btn"><span>ค้นหา</span></button>
-          </div>
-
-          <div style="margin-top:10px" class="small">
-            หมายเหตุ: อิง “จีนจาก API (e.status)” เท่านั้น, ตรง rules เท่านั้นถึงจะแสดง และแยกกลุ่ม ต้นทาง / ศุลกากร / ปลายทาง
-          </div>
-        </div>
-
-        <div class="card" id="summary" style="display:none"></div>
-      </div>
-
-      <div>
-        <div class="card" id="history" style="display:none">
-          <h2>ไทม์ไลน์สถานะ</h2>
-          <div class="muted">เรียงกลุ่ม: ต้นทาง → ศุลกากร → ปลายทาง</div>
-          <div class="timeline" id="timeline"></div>
-        </div>
-      </div>
-    </div>
-
-    <div class="footer">
-      © <span id="year"></span> Weiming Tracking. All rights reserved.
-      <span class="muted"> | </span>
-      <a href="https://line.me/R/ti/p/@wmex" target="_blank" rel="noopener noreferrer">ติดต่อผ่าน LINE</a>
-    </div>
-  </div>
-
 <script>
   const $ = (id) => document.getElementById(id);
   const summary = $("summary");
@@ -226,46 +10,63 @@
     return (s || "").replace(/\s+/g, " ").trim();
   }
 
+  function hasCJK(s){
+    return /[\u4E00-\u9FFF]/.test(s || "");
+  }
+
   // ===== เรียงกลุ่มตามที่ต้องการ =====
   const GROUP_ORDER = ["ต้นทาง", "ศุลกากร", "ปลายทาง"];
   const GROUP_RANK = Object.fromEntries(GROUP_ORDER.map((g, i) => [g, i]));
 
-  // ===== RULES (จีนจาก API เท่านั้น; ไม่ตรง = ไม่แสดง) =====
+  // ===== MAPPING: อิงตาม “รายการที่คุณให้” เท่านั้น (นอกเหนือ = ไม่แสดง) =====
   const RULES = [
-    // ต้นทาง(คลังสินค้า)
-    { key: "您的貨物已准備從集運倉出倉", th: "พัสดุของคุณออกคลัง เพื่อเตรียมส่งไปยังสนามบินแล้ว", group: "ต้นทาง" },
-    { key: "已經打印好地址面單", th: "พิมพ์ใบปะหน้าที่อยู่เรียบร้อยแล้ว", group: "ต้นทาง" },
-    { key: "您已下單成功!請等待倉庫人員作業出貨", th: "สร้างออเดอร์การจัดส่งเรียบร้อย", group: "ต้นทาง" },
+    // --- ปลายทาง ---
+    { key: "配完-配完>順利送達>白河營業所", th: "พัสดุถึงผู้รับเรียบร้อยแล้ว", group: "ปลายทาง" },
+    { key: "配送中-配送中>白河營業所", th: "อยู่ระหว่างจัดส่ง", group: "ปลายทาง" },
+    { key: "公司行號休息-公司行號休息>白河營業所", th: "จัดส่งไม่สำเร็จเนื่องจากบริษัทหยุดทำการ", group: "ปลายทาง" },
+    { key: "轉運中-轉運中>已集貸>北三特服二所", th: "อยู่ระหว่างการขนส่งไปยังศูนย์ย่อย(สาขาปลายทาง)", group: "ปลายทาง" },
 
-    // ศุลกากร
+    // --- ศุลกากร ---
     { key: "貨物在目的地國家海關清關中", th: "พัสดุอยู่ระหว่างการเดินพิธีการศุลกากรในประเทศปลายทาง", group: "ศุลกากร" },
     { key: "連線收單建檔", th: "ระบบศุลกากรรับและบันทึกข้อมูลเรียบร้อยแล้ว", group: "ศุลกากร" },
     { key: "通關方式C1", th: "พิธีการศุลกากรแบบ C1", group: "ศุลกากร" },
     { key: "放行", th: "พัสดุผ่านพิธีการศุลกากรเรียบร้อยแล้ว", group: "ศุลกากร" },
     {
+      // ให้ match จาก “ประโยคขึ้นต้น” ตามที่คุณให้ (ไม่ต้องทั้งยาว)
       key: "由於海關系統查無此包裹申報人資料",
       th: "เนื่องจากระบบศุลกากรไม่พบข้อมูลผู้เดินพิธีการ โปรดตรวจสอบว่าผู้รับพัสดุได้ลงทะเบียนกับ EZ WAY แล้วหรือไม่ หากยังไม่ได้ลงทะเบียนโปรดลงทะเบียนให้เรียบร้อย ถ่ายภาพหน้าจอให้ติดชื่อ/หมายเลขโทรศัพท์และหมายเลขบัตรประชาชนของผู้เดินพิธีการ แล้วส่งให้เจ้าหน้าที่ลูกค้าสัมพันธ์ของWeiming หลังจากได้รับข้อมูลแล้ว พัสดุจะได้รับการปล่อยภายในประมาณ 1-2 วันทำการ",
       group: "ศุลกากร"
     },
     { key: "不受理不可補正之錯單", th: "ข้อมูลที่ใช้เดินพิธีการไม่สอดคล้องกัน โปรดติดต่อเจ้าหน้าที่", group: "ศุลกากร" },
 
-    // ปลายทาง
-    { key: "配完-配完>順利送達>白河營業所", th: "พัสดุถึงผู้รับเรียบร้อยแล้ว", group: "ปลายทาง" },
-    { key: "配送中-配送中>白河營業所", th: "อยู่ระหว่างจัดส่ง", group: "ปลายทาง" },
-    { key: "公司行號休息-公司行號休息>白河營業所", th: "จัดส่งไม่สำเร็จเนื่องจากบริษัทหยุดทำการ", group: "ปลายทาง" },
-    { key: "轉運中-轉運中>已集貸>北三特服二所", th: "อยู่ระหว่างการขนส่งไปยังศูนย์ย่อย(สาขาปลายทาง)", group: "ปลายทาง" },
+    // --- ต้นทาง(คลังสินค้า) ---
+    { key: "您的貨物已准備從集運倉出倉", th: "พัสดุุของคุณออกคลัง เพื่อเตรียมส่งไปยังสนามบินแล้ว", group: "ต้นทาง" },
+    { key: "已經打印好地址面單", th: "พิมพ์ใบปะหน้าที่อยู่เรียบร้อยแล้ว", group: "ต้นทาง" },
+    { key: "您已下單成功!請等待倉庫人員作業出貨", th: "สร้างออเดอร์การจัดส่งเรียบร้อย", group: "ต้นทาง" },
   ];
 
   // match -> {text, group} / no match -> null
-  function mapStatusFromChineseOnly(rawCN){
+  function mapStatusByChinese(rawCN){
     const t = normalize(rawCN);
     if(!t) return null;
 
+    // ต้องตรง rules เท่านั้น
     let out = null;
     for(const r of RULES){
       if(t.includes(r.key)) out = { text: r.th, group: r.group };
     }
-    return out; // ไม่ตรง = null
+    return out;
+  }
+
+  // ✅ เลือก “ข้อความจีนจาก API” โดยไม่ยึด field เดียว
+  // แต่ยังคงเงื่อนไขว่า ต้องเป็นจีนเท่านั้น
+  function pickChineseFromEvent(e){
+    const fields = [e.status, e.latest_status_th, e.status_th];
+    for(const f of fields){
+      const t = normalize(f);
+      if(t && hasCJK(t)) return t;
+    }
+    return "";
   }
 
   function setLoading(){
@@ -301,7 +102,7 @@
     `;
   }
 
-  // ✅ ใช้จีนจาก API (e.status) เท่านั้น + กันซ้ำไม่พังแม้ time ว่าง + เรียงกลุ่ม
+  // ✅ สร้างรายการ + กันซ้ำ + เรียงกลุ่ม
   function mapAllEvents(rawEvents){
     if(!Array.isArray(rawEvents)) return [];
 
@@ -309,12 +110,14 @@
     const out = [];
 
     rawEvents.forEach((e, idx) => {
-      const mapped = mapStatusFromChineseOnly(e.status); // ✅ จีนเท่านั้น
-      if(!mapped) return; // ไม่ตรง = ไม่แสดง
+      const cn = pickChineseFromEvent(e);           // ✅ จีนจาก API
+      const mapped = mapStatusByChinese(cn);        // ✅ ตรง rules เท่านั้น
+      if(!mapped) return;
 
-      const timeText = normalize(e.time);          // แสดงผล
-      const timeKey  = timeText || `idx:${idx}`;   // กันซ้ำกรณี time ว่าง
+      const timeText = normalize(e.time);
+      const timeKey  = timeText || `idx:${idx}`;    // กันซ้ำแม้ time ว่าง
 
+      // กันซ้ำแบบเข้ม: กลุ่ม + ข้อความ + เวลา/idx
       const dedupeKey = `${timeKey}||${mapped.group}||${mapped.text}`;
       if(seen.has(dedupeKey)) return;
       seen.add(dedupeKey);
@@ -322,8 +125,8 @@
       out.push({ idx, time: timeText || "-", text: mapped.text, group: mapped.group });
     });
 
-    // ✅ เรียงกลุ่ม: ต้นทาง → ศุลกากร → ปลายทาง
-    // และคงลำดับภายในกลุ่มตาม API (idx)
+    // เรียงกลุ่ม: ต้นทาง → ศุลกากร → ปลายทาง
+    // ภายในกลุ่ม: คงลำดับตาม API (idx)
     out.sort((a, b) => {
       const ga = GROUP_RANK[a.group] ?? 999;
       const gb = GROUP_RANK[b.group] ?? 999;
@@ -336,13 +139,12 @@
 
   function renderTimeline(events){
     let html = "";
-
     for(const g of GROUP_ORDER){
       const items = events.filter(e => e.group === g);
       if(items.length === 0) continue;
 
       html += `<div class="sectionTitle">${g}</div>`;
-      html += items.map((e) => `
+      html += items.map(e => `
         <div class="event">
           <div class="time">${e.time}</div>
           <div class="text">${e.text}</div>
@@ -369,19 +171,19 @@
         return;
       }
 
-      // 1) เก็บตามลำดับ API ก่อน (ไว้หา “ล่าสุดจริง”)
-      const matchedByApi = [];
-      (Array.isArray(data.events) ? data.events : []).forEach((e) => {
-        const m = mapStatusFromChineseOnly(e.status);
-        if(m) matchedByApi.push(m.text);
-      });
+      // latest: เอาตาม “ลำดับ API” ก่อนจัดกลุ่ม
+      let latest = "-";
+      if(Array.isArray(data.events)){
+        for(const e of data.events){
+          const cn = pickChineseFromEvent(e);
+          const m = mapStatusByChinese(cn);
+          if(m){ latest = m.text; break; }
+        }
+      }
 
       const allEvents = mapAllEvents(data.events);
 
-      // “ล่าสุด” เอาตามลำดับ API (ล่าสุดก่อน) ไม่ใช่ตามกลุ่ม
-      const latestTH = matchedByApi[0] || "-";
-
-      renderSummary(data, latestTH);
+      renderSummary(data, latest);
       renderTimeline(allEvents);
       history.style.display = "block";
     }catch(e){
@@ -394,5 +196,3 @@
   $("btn").addEventListener("click", run);
   $("no").addEventListener("keydown", (e) => { if(e.key === "Enter") run(); });
 </script>
-</body>
-</html>

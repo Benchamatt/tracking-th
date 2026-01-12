@@ -7,148 +7,261 @@
 
   <style>
     :root{
-      --navy:#0b2a4a;
-      --navy2:#08345f;
-      --bg:#f3f7ff;
-      --sky:#eaf3ff;
+      --bg:#f6f8fb;
+      --surface:#ffffff;
+      --surface-2:#f1f4f9;
+      --text:#0f172a;
+      --muted:#64748b;
+      --border:#e5e7eb;
+      --shadow: 0 10px 24px rgba(2, 6, 23, 0.08);
 
-      --text:#0b1220;
-      --muted:#5c6f86;
+      --brand:#0f5fbf;
+      --brand-2:#0a3f7a;
 
-      --shadow: 0 18px 42px rgba(8, 28, 55, .10);
-      --shadow2: 0 10px 22px rgba(8, 28, 55, .08);
-      --ring: rgba(11,42,74,.18);
+      --ok:#0f766e;
+      --warn:#b45309;
+      --bad:#b91c1c;
+
+      --badge-bg: rgba(15, 95, 191, 0.10);
+      --badge-text: #0f5fbf;
+
+      --ring: rgba(15,95,191,.25);
     }
 
     *{box-sizing:border-box}
     html,body{height:100%}
     body{
       margin:0;
-      font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Tahoma, sans-serif;
+      font-family: system-ui, -apple-system, "Segoe UI", Tahoma, sans-serif;
+      background: radial-gradient(1200px 600px at 20% -10%, rgba(15,95,191,.10), transparent 60%),
+                  radial-gradient(1000px 500px at 90% 0%, rgba(15,95,191,.08), transparent 55%),
+                  var(--bg);
       color:var(--text);
-      background:
-        radial-gradient(1200px 520px at 15% -8%, rgba(11,42,74,.18), transparent 60%),
-        radial-gradient(900px 460px at 90% 0%, rgba(40,140,255,.14), transparent 55%),
-        linear-gradient(180deg, var(--sky), var(--bg));
     }
 
-    .wrap{max-width:1080px;margin:0 auto;padding:22px 14px 28px;}
+    /* Wix iframe friendly: no fixed heights, flexible width */
+    .wrap{
+      max-width: 980px;
+      margin: 0 auto;
+      padding: 20px 14px 28px;
+    }
 
     .topbar{
-      display:flex;align-items:center;justify-content:space-between;gap:12px;
-      padding:18px 18px;
-      border:1px solid rgba(255,255,255,.60);
-      border-radius:20px;
-      background:linear-gradient(135deg, rgba(255,255,255,.88), rgba(255,255,255,.70));
-      box-shadow:var(--shadow);
-      backdrop-filter: blur(10px);
-      position:relative; overflow:hidden;
-    }
-    .topbar:before{
-      content:""; position:absolute; inset:-60%;
-      background: radial-gradient(circle at 20% 20%, rgba(40,140,255,.18), transparent 55%);
-      transform: rotate(12deg);
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      padding: 14px 16px;
+      border:1px solid var(--border);
+      border-radius: 16px;
+      background: linear-gradient(135deg, rgba(15,95,191,.12), rgba(15,95,191,.04));
+      box-shadow: var(--shadow);
     }
 
-    .brand{display:flex;align-items:center;gap:12px;min-width:0;position:relative;z-index:1;}
+    .brand{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      min-width:0;
+    }
+
     .logo{
-      width:46px;height:46px;border-radius:16px;
-      background: linear-gradient(135deg, var(--navy), var(--navy2));
-      display:grid;place-items:center;
-      box-shadow: 0 18px 32px rgba(11,42,74,.24);
-      position:relative;overflow:hidden;flex:0 0 auto;
+      width:40px;height:40px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, var(--brand), var(--brand-2));
+      display:grid;
+      place-items:center;
+      box-shadow: 0 10px 18px rgba(15,95,191,.25);
+      flex:0 0 auto;
     }
-    .logo:after{
-      content:""; position:absolute; inset:-40%;
-      background: radial-gradient(circle at 35% 25%, rgba(255,255,255,.25), transparent 55%);
-      transform: rotate(18deg);
+    .logo svg{width:22px;height:22px;fill:#fff}
+
+    .brand h1{
+      margin:0;
+      font-size:16px;
+      letter-spacing:.2px;
+      line-height:1.1;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
     }
-    .logo svg{width:22px;height:22px;fill:#fff;position:relative;z-index:1;}
-    .brand h1{margin:0;font-size:16px;letter-spacing:.2px;line-height:1.1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-    .brand .sub{font-size:12px;color:var(--muted);margin-top:4px;}
+    .brand .sub{
+      font-size:12px;
+      color:var(--muted);
+      margin-top:2px;
+    }
 
     .grid{
-      display:grid;grid-template-columns: 1.10fr .90fr;gap:14px;margin-top:14px;align-items:start;
+      display:grid;
+      grid-template-columns: 1.1fr .9fr;
+      gap: 14px;
+      margin-top: 14px;
     }
-    @media(max-width: 920px){ .grid{grid-template-columns:1fr} }
+    @media(max-width: 860px){
+      .grid{grid-template-columns:1fr}
+    }
 
     .card{
-      background: rgba(255,255,255,.90);
-      border: 1px solid rgba(255,255,255,.60);
-      border-radius: 20px;
-      box-shadow: var(--shadow2);
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      box-shadow: var(--shadow);
       padding: 16px;
-      backdrop-filter: blur(10px);
-      position:relative;overflow:hidden;
+      overflow:hidden;
     }
-    .card:before{
-      content:""; position:absolute; inset:-40%;
-      background: radial-gradient(circle at 30% 15%, rgba(40,140,255,.10), transparent 55%);
-      pointer-events:none;
-    }
-    .card > *{ position:relative; z-index:1; }
 
-    .card h2{margin:0 0 8px 0;font-size:14px;letter-spacing:.3px;color:#0b223c;}
-    .muted{color:var(--muted);font-size:13px}
-    .small{font-size:12px;color:var(--muted)}
+    .card h2{
+      margin:0 0 8px 0;
+      font-size:14px;
+      letter-spacing:.2px;
+    }
+    .muted{color:var(--muted); font-size:13px}
+    .small{font-size:12px; color:var(--muted)}
 
     .searchRow{
-      display:grid;grid-template-columns: 1fr 156px;gap:10px;margin-top:10px;
+      display:grid;
+      grid-template-columns: 1fr 132px;
+      gap: 10px;
+      margin-top: 10px;
     }
-    @media(max-width:520px){ .searchRow{grid-template-columns:1fr} }
+    @media(max-width:520px){
+      .searchRow{grid-template-columns:1fr}
+    }
 
     input{
-      width:100%;padding:12px 14px;border-radius:16px;
-      border:1px solid rgba(11,42,74,.14);
-      background: linear-gradient(180deg, rgba(255,255,255,.92), rgba(247,251,255,.92));
-      font-size:15px;
-      box-shadow: inset 0 1px 0 rgba(255,255,255,.85);
+      width:100%;
+      padding: 12px 14px;
+      border-radius: 14px;
+      border: 1px solid var(--border);
+      background: var(--surface-2);
+      color: var(--text);
+      font-size: 15px;
     }
-    input:focus{outline:3px solid var(--ring); border-color: transparent;}
+    input:focus{outline:3px solid var(--ring); border-color: transparent}
 
     .btn{
-      border:none;border-radius:16px;padding:12px 14px;
-      background: linear-gradient(135deg, var(--navy), var(--navy2));
-      color:#fff;font-size:15px;cursor:pointer;
-      box-shadow: 0 18px 26px rgba(11,42,74,.18);
-      position:relative;overflow:hidden;
+      border:none;
+      border-radius: 14px;
+      padding: 12px 14px;
+      background: linear-gradient(135deg, var(--brand), var(--brand-2));
+      color:#fff;
+      font-size:15px;
+      cursor:pointer;
+      box-shadow: 0 12px 18px rgba(15,95,191,.22);
     }
-    .btn:disabled{opacity:.6;cursor:not-allowed;box-shadow:none;}
+    .btn:disabled{
+      opacity:.6;
+      cursor:not-allowed;
+      box-shadow:none;
+    }
 
-    .headline{padding-top:2px;font-size:18px;font-weight:900;letter-spacing:.2px;color:#0b223c;}
+    .summaryTop{
+      display:flex;
+      justify-content:space-between;
+      align-items:flex-start;
+      gap:10px;
+      margin-bottom: 10px;
+    }
+
+    .kv{
+      display:grid;
+      gap:6px;
+    }
+    .kv b{font-size:13px}
+    .kv .value{font-size:14px}
+
+    .badge{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding: 8px 10px;
+      border-radius: 999px;
+      background: var(--badge-bg);
+      color: var(--badge-text);
+      border: 1px solid rgba(15,95,191,.18);
+      font-size: 12px;
+      font-weight: 600;
+      white-space:nowrap;
+    }
+    .dot{width:8px;height:8px;border-radius:999px;background: currentColor;opacity:.9}
+
+    .badge.ok{background: rgba(15,118,110,.12); color: var(--ok); border-color: rgba(15,118,110,.25)}
+    .badge.warn{background: rgba(180,83,9,.12); color: var(--warn); border-color: rgba(180,83,9,.25)}
+    .badge.bad{background: rgba(185,28,28,.12); color: var(--bad); border-color: rgba(185,28,28,.25)}
+
+    /* Timeline */
+    .timeline{
+      margin-top: 12px;
+      position:relative;
+      padding-left: 18px;
+    }
+    .timeline:before{
+      content:"";
+      position:absolute;
+      left:7px;
+      top:2px;
+      bottom:2px;
+      width:2px;
+      background: linear-gradient(to bottom, rgba(15,95,191,.35), rgba(15,95,191,.08));
+    }
 
     .event{
-      padding:12px 12px;
-      border-radius:18px;
-      border:1px solid rgba(11,42,74,.10);
-      background: linear-gradient(180deg, rgba(247,251,255,.92), rgba(255,255,255,.88));
-      margin-bottom:10px;
-      box-shadow: 0 10px 18px rgba(8,28,55,.06);
+      position:relative;
+      padding: 10px 10px 10px 12px;
+      border-radius: 14px;
+      border: 1px solid var(--border);
+      background: var(--surface-2);
+      margin-bottom: 10px;
     }
-    .event .time{font-size:12px;color:var(--muted);}
-    .event .text{font-size:14px;font-weight:800;margin-top:6px;line-height:1.35;color:#0b223c;}
+    .event:before{
+      content:"";
+      position:absolute;
+      left:-18px;
+      top: 16px;
+      width: 12px;
+      height: 12px;
+      border-radius: 999px;
+      background: var(--surface);
+      border: 3px solid rgba(15,95,191,.55);
+      box-shadow: 0 0 0 3px rgba(15,95,191,.10);
+    }
 
-    .loading{display:flex;align-items:center;gap:10px;font-size:13px;color:var(--muted);}
+    .event .time{font-size:12px; color: var(--muted)}
+    .event .text{font-size:14px; font-weight:600; margin-top:4px}
+
+    .footer{
+      margin-top: 14px;
+      padding: 12px 6px 2px;
+      text-align:center;
+      color: var(--muted);
+      font-size: 12px;
+    }
+    .footer a{color: var(--muted); text-decoration:none}
+    .footer a:hover{text-decoration:underline}
+
+    .errorBox{
+      border: 1px solid rgba(185,28,28,.25);
+      background: rgba(185,28,28,.08);
+      color: var(--bad);
+      border-radius: 14px;
+      padding: 10px 12px;
+      font-size: 13px;
+    }
+
+    .loading{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      font-size:13px;
+      color:var(--muted);
+    }
     .spinner{
       width:16px;height:16px;border-radius:999px;
-      border:2px solid rgba(11,42,74,.18);
-      border-top-color: rgba(11,42,74,.85);
+      border:2px solid rgba(15,95,191,.25);
+      border-top-color: rgba(15,95,191,.85);
       animation: spin 0.9s linear infinite;
     }
     @keyframes spin{to{transform:rotate(360deg)}}
-
-    .errorBox{
-      border:1px solid rgba(180,35,24,.22);
-      background: rgba(180,35,24,.06);
-      color:#b42318;
-      border-radius:16px;
-      padding:10px 12px;
-      font-size:13px;
-    }
-
-    .footer{margin-top:14px;padding:10px 6px 2px;text-align:center;color:var(--muted);font-size:12px;}
-    .footer a{color:var(--muted);text-decoration:none}
-    .footer a:hover{text-decoration:underline}
   </style>
 </head>
 
@@ -176,11 +289,11 @@
 
           <div class="searchRow">
             <input id="no" placeholder="เลขพัสดุ" inputmode="numeric" autocomplete="off" />
-            <button class="btn" id="btn"><span>ค้นหา</span></button>
+            <button class="btn" id="btn">ค้นหา</button>
           </div>
 
           <div style="margin-top:10px" class="small">
-            หมายเหตุ: ถ้าเจอภาษาจีน → แปลตาม mapping ที่กำหนดเท่านั้น (ไม่ตรง = ไม่แสดง) และแสดงตามลำดับ API
+            หมายเหตุ: ระบบแสดงผลเป็นภาษาไทย และเรียงเหตุการณ์ล่าสุดก่อน
           </div>
         </div>
 
@@ -190,8 +303,8 @@
       <div>
         <div class="card" id="history" style="display:none">
           <h2>ไทม์ไลน์สถานะ</h2>
-          <div class="muted">แสดงตามลำดับที่ API ส่งมา</div>
-          <div id="timeline" style="margin-top:10px"></div>
+          <div class="muted">เหตุการณ์ล่าสุดอยู่ด้านบน</div>
+          <div class="timeline" id="timeline"></div>
         </div>
       </div>
     </div>
@@ -209,57 +322,62 @@
   const history = $("history");
   const timeline = $("timeline");
   const btn = $("btn");
+
   $("year").textContent = String(new Date().getFullYear());
 
-  function normalize(s){
-    return (s || "").replace(/\s+/g, " ").trim();
-  }
-  function hasCJK(s){
-    return /[\u4E00-\u9FFF]/.test(s || "");
-  }
+  // Badge classification by Thai status (no Chinese displayed)
+  function classify(th){
+    const s = (th || "").toLowerCase();
 
-  // ===== mapping ตามที่คุณให้เท่านั้น =====
-  const MAP = [
-    { key: "配完-配完>順利送達>白河營業所", th: "พัสดุถึงผู้รับเรียบร้อยแล้ว" },
-    { key: "配送中-配送中>白河營業所", th: "อยู่ระหว่างจัดส่ง" },
-    { key: "公司行號休息-公司行號休息>白河營業所", th: "จัดส่งไม่สำเร็จเนื่องจากบริษัทหยุดทำการ" },
-    { key: "轉運中-轉運中>已集貸>北三特服二所", th: "อยู่ระหว่างการขนส่งไปยังศูนย์ย่อย(สาขาปลายทาง)" },
-    { key: "貨物在目的地國家海關清關中", th: "พัสดุอยู่ระหว่างการเดินพิธีการศุลกากรในประเทศปลายทาง" },
-
-    { key: "連線收單建檔", th: "ระบบศุลกากรรับและบันทึกข้อมูลเรียบร้อยแล้ว" },
-    { key: "通關方式C1", th: "พิธีการศุลกากรแบบ C1" },
-    { key: "放行", th: "พัสดุผ่านพิธีการศุลกากรเรียบร้อยแล้ว" },
-    {
-      key: "由於海關系統查無此包裹申報人資料",
-      th: "เนื่องจากระบบศุลกากรไม่พบข้อมูลผู้เดินพิธีการ โปรดตรวจสอบว่าผู้รับพัสดุได้ลงทะเบียนกับ EZ WAY แล้วหรือไม่ หากยังไม่ได้ลงทะเบียนโปรดลงทะเบียนให้เรียบร้อย ถ่ายภาพหน้าจอให้ติดชื่อ/หมายเลขโทรศัพท์และหมายเลขบัตรประชาชนของผู้เดินพิธีการ แล้วส่งให้เจ้าหน้าที่ลูกค้าสัมพันธ์ของWeiming หลังจากได้รับข้อมูลแล้ว พัสดุจะได้รับการปล่อยภายในประมาณ 1-2 วันทำการ"
-    },
-    { key: "不受理不可補正之錯單", th: "ข้อมูลที่ใช้เดินพิธีการไม่สอดคล้องกัน โปรดติดต่อเจ้าหน้าที่" },
-
-    { key: "您的貨物已准備從集運倉出倉", th: "พัสดุุของคุณออกคลัง เพื่อเตรียมส่งไปยังสนามบินแล้ว" },
-    { key: "已經打印好地址面單", th: "พิมพ์ใบปะหน้าที่อยู่เรียบร้อยแล้ว" },
-    { key: "您已下單成功!請等待倉庫人員作業出貨", th: "สร้างออเดอร์การจัดส่งเรียบร้อย" },
-  ];
-
-  // แปลจีน -> ไทย (match เท่านั้น, ไม่ match = "")
-  function translateChineseToThai(ch){
-    const t = normalize(ch);
-    if(!t) return "";
-
-    let out = "";
-    for(const r of MAP){
-      if(t.includes(r.key)) out = r.th; // ถ้าชนหลายอัน ให้ท้าย override หน้า
+    if (s.includes("ถึงแล้ว") || s.includes("จัดส่งสำเร็จ") || s.includes("เซ็นรับ") || s.includes("รับพัสดุ")) {
+      return { cls:"ok", label:"ถึงแล้ว" };
     }
-    return out; // ไม่ match = ""
+    if (s.includes("ตีกลับ") || s.includes("ไม่สำเร็จ") || s.includes("ผิดพลาด") || s.includes("ยกเลิก") || s.includes("ปัญหา")) {
+      return { cls:"bad", label:"มีปัญหา" };
+    }
+    if (s.includes("กำลัง") || s.includes("ระหว่าง") || s.includes("ขนส่ง") || s.includes("ส่งต่อ") || s.includes("ออกจาก") || s.includes("กำลังดำเนินการ")) {
+      return { cls:"warn", label:"กำลังขนส่ง" };
+    }
+    return { cls:"warn", label:"กำลังดำเนินการ" };
   }
 
-  // ดึง “ข้อความจีน” จาก event แบบยืดหยุ่น (ไม่ต้องรู้ field แน่ชัด)
-  function pickChinese(e){
-    const candidates = [e.status, e.latest_status_th, e.status_th];
-    for(const c of candidates){
-      const t = normalize(c);
-      if(t && hasCJK(t)) return t;
-    }
-    return "";
+  function renderSummary(data){
+    const cls = classify(data.latest_status_th);
+    summary.style.display = "block";
+    summary.innerHTML = `
+      <div class="summaryTop">
+        <div class="kv">
+          <div><b>เลขพัสดุ</b> <span class="value">${data.tracking_no || "-"}</span></div>
+          <div><b>อัปเดตล่าสุด</b> <span class="value">${data.last_update || "-"}</span></div>
+        </div>
+
+        <span class="badge ${cls.cls}">
+          <span class="dot"></span>
+          ${cls.label}
+        </span>
+      </div>
+
+      <div style="display:flex;flex-direction:column;gap:6px">
+        <div class="muted">สถานะล่าสุด</div>
+        <div style="font-size:18px;font-weight:700;letter-spacing:.2px">
+          ${data.latest_status_th || "-"}
+        </div>
+      </div>
+    `;
+  }
+
+  function renderTimeline(events){
+    const items = (events || []).map(e => {
+      const th = e.status_th || "-";
+      return `
+        <div class="event">
+          <div class="time">${e.time || "-"}</div>
+          <div class="text">${th}</div>
+        </div>
+      `;
+    }).join("");
+
+    timeline.innerHTML = items || `<div class="muted" style="padding:10px 0">ไม่มีข้อมูล</div>`;
   }
 
   function setLoading(){
@@ -269,7 +387,7 @@
       <div class="loading">
         <span class="spinner" aria-hidden="true"></span>
         <div>
-          <div style="font-weight:800;color:#0b223c">กำลังค้นหา...</div>
+          <div style="font-weight:600">กำลังค้นหา...</div>
           <div class="small">โปรดรอสักครู่</div>
         </div>
       </div>
@@ -280,31 +398,6 @@
     summary.style.display = "block";
     history.style.display = "none";
     summary.innerHTML = `<div class="errorBox"><b>ไม่สำเร็จ:</b> ${msg || "เกิดข้อผิดพลาด"}</div>`;
-  }
-
-  function renderSummary(data, latestTH){
-    summary.style.display = "block";
-    summary.innerHTML = `
-      <div class="muted">เลขพัสดุ</div>
-      <div class="headline" style="margin-bottom:8px">${data.tracking_no || "-"}</div>
-
-      <div class="muted">อัปเดตล่าสุด</div>
-      <div style="font-weight:800;margin-top:4px;color:#0b223c">${data.last_update || "-"}</div>
-
-      <div style="margin-top:12px" class="muted">สถานะล่าสุด (แปลได้เท่านั้น)</div>
-      <div class="headline">${latestTH || "-"}</div>
-    `;
-  }
-
-  function renderTimeline(items){
-    const html = items.map((it, idx) => `
-      <div class="event ${idx === 0 ? "isLatest" : ""}">
-        <div class="time">${it.time}</div>
-        <div class="text">${it.text}</div>
-      </div>
-    `).join("");
-
-    timeline.innerHTML = html || `<div class="muted" style="padding:10px 0">ไม่มีสถานะจีนที่ตรงกับ mapping</div>`;
   }
 
   async function run(){
@@ -323,31 +416,11 @@
         return;
       }
 
-      const rawEvents = Array.isArray(data.events) ? data.events : [];
-
-      // แปลงตามลำดับ API: เจอจีน -> แปล -> ถ้าแปลได้ค่อยแสดง
-      const items = [];
-      for(const e of rawEvents){
-        const cn = pickChinese(e);
-        if(!cn) continue;
-
-        const th = translateChineseToThai(cn);
-        if(!th) continue; // ไม่อยู่ใน mapping = ไม่แสดง
-
-        items.push({
-          time: normalize(e.time) || "-",
-          text: th
-        });
-      }
-
-      // latest = อันแรกที่แปลได้ (ตามลำดับ API)
-      const latest = items[0]?.text || "-";
-
-      renderSummary(data, latest);
-      renderTimeline(items);
+      renderSummary(data);
+      renderTimeline(data.events);
       history.style.display = "block";
-    }catch(err){
-      setError(String(err));
+    }catch(e){
+      setError(String(e));
     }finally{
       btn.disabled = false;
     }

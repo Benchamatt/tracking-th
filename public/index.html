@@ -372,46 +372,53 @@
     return { cls:"warn", label:"กำลังดำเนินการ" };
   }
 
-  function renderSummary(data){
-    const mixedLatest =
-      data.latest_status_zh ||
-      data.latest_status ||
-      data.latest_status_cn ||
-      data.latest_status_th ||
-      "";
+ function renderSummary(data){
+  const mixed =
+    data.latest_status_zh ||
+    data.latest_status ||
+    data.latest_status_cn ||
+    data.latest_status_th ||
+    "";
 
-    const latestTh = toThaiStatus(data.latest_status_th, mixedLatest);
-    const cls = classify(latestTh);
+  const latestTh = toThaiStatus(data.latest_status_th, mixed);
 
-    if (!summary) return;
-    summary.style.display = "block";
-
-    summary.innerHTML = `
-      <div class="summaryTop">
-        <div class="kv">
-          <div><b>เลขพัสดุ</b> <span class="value">${data.tracking_no || data.no || "-"}</span></div>
-          <div><b>อัปเดตล่าสุด</b> <span class="value">${data.last_update || data.updated_at || "-"}</span></div>
-        </div>
-
-        <span class="badge ${cls.cls}">
-          <span class="dot"></span>
-          ${cls.label}
-        </span>
-      </div>
-
-      <div style="display:flex;flex-direction:column;gap:6px">
-        <div class="latestTitle">สถานะล่าสุด</div>
-        <div class="latestText">${latestTh || "-"}</div>
-      </div>
-    `;
+  if (!latestTh) {
+    summary.style.display = "none";
+    return;
   }
 
-  function renderTimeline(events){
-    if (!timeline) return;
+  const cls = classify(latestTh);
 
-    const items = (events || []).map(e => {
+  summary.style.display = "block";
+  summary.innerHTML = `
+    <div class="summaryTop">
+      <div class="kv">
+        <div><b>เลขพัสดุ</b> <span class="value">${data.tracking_no || "-"}</span></div>
+        <div><b>อัปเดตล่าสุด</b> <span class="value">${data.last_update || "-"}</span></div>
+      </div>
+
+      <span class="badge ${cls.cls}">
+        <span class="dot"></span>
+        ${cls.label}
+      </span>
+    </div>
+
+    <div style="margin-top:6px;font-size:18px;font-weight:800">
+      ${latestTh}
+    </div>
+  `;
+}
+
+
+  function renderTimeline(events){
+  if (!timeline) return;
+
+  const items = (events || [])
+    .map(e => {
       const mixed = e.status_zh || e.status || e.status_cn || e.status_th || "";
       const th = toThaiStatus(e.status_th, mixed);
+
+      if (!th) return ""; // ❗ ไม่ตรง keywordMap = ไม่แสดง
 
       return `
         <div class="event">
@@ -419,10 +426,13 @@
           <div class="text">${th}</div>
         </div>
       `;
-    }).join("");
+    })
+    .join("");
 
-    timeline.innerHTML = items || `<div class="muted" style="padding:10px 0">ไม่มีข้อมูล</div>`;
-  }
+  timeline.innerHTML =
+    items || `<div class="muted" style="padding:10px 0">ไม่มีข้อมูล</div>`;
+}
+
 
   function setLoading(){
     if (!summary) return;

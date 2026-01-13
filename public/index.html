@@ -313,49 +313,44 @@
     return s;
   }
 
-  function toThaiStatus(status_th, status_zh_or_mixed) {
-    // บังคับใช้ mapping จากจีนก่อน
-    const zhRaw = extractZh(status_zh_or_mixed);
+ function toThaiStatus(status_zh_or_mixed) {
+  const zhRaw = extractZh(status_zh_or_mixed);
+  if (!zhRaw) return null;
 
-    if (zhRaw) {
-      // exact
-      const exact = STATUS_MAP.find(x => normalizeZh(x.zh) === zhRaw);
-      if (exact) return exact.th;
+  // exact match
+  const exact = STATUS_MAP.find(x => normalizeZh(x.zh) === zhRaw);
+  if (exact) return exact.th;
 
-      // contains (เผื่อมี suffix/prefix)
-      const loose = STATUS_MAP.find(x => zhRaw.includes(normalizeZh(x.zh)));
-      if (loose) return loose.th;
+  // contains match (กรณีมี prefix/suffix)
+  const loose = STATUS_MAP.find(x => zhRaw.includes(normalizeZh(x.zh)));
+  if (loose) return loose.th;
 
-      // keyword match (กันเคสมีโค้ดต่อท้าย เช่น 訂單已接收-00000)
-      const keywordMap = [
-        { k: "配送中", th: "อยู่ระหว่างจัดส่ง" },
-        { k: "配完", th: "พัสดุถึงผู้รับเรียบร้อยแล้ว" },
-        { k: "公司行號休息", th: "จัดส่งไม่สำเร็จเนื่องจากบริษัทหยุดทำการ" },
-        { k: "轉運中", th: "อยู่ระหว่างการขนส่งไปยังศูนย์ย่อย(สาขาปลายทาง)" },
-        { k: "海關清關", th: "พัสดุอยู่ระหว่างการเดินพิธีการศุลกากรในประเทศปลายทาง" },
-        { k: "連線收單建檔", th: "ระบบศุลกากรรับและบันทึกข้อมูลเรียบร้อยแล้ว" },
-        { k: "通關方式C1", th: "พิธีการศุลกากรแบบ C1" },
-        { k: "通關方式C2", th: "พิธีการศุลกากรแบบ C2" },
-        { k: "通關方式C3", th: "พิธีการศุลกากรแบบ C3" },
-        { k: "放行", th: "พัสดุผ่านพิธีการศุลกากรเรียบร้อยแล้ว" },
-        { k: "不受理不可補正之錯單", th: "ข้อมูลที่ใช้เดินพิธีการไม่สอดคล้องกัน โปรดติดต่อเจ้าหน้าที่" },
-        { k: "訂單已接收", th: "ระบบรับคำสั่งและบันทึกข้อมูลเรียบร้อยแล้ว" },
-        { k: "已經打印好地址面單", th: "พิมพ์ใบปะหน้าที่อยู่เรียบร้อยแล้ว" },
-        { k: "已准備從集運倉出倉", th: "พัสดุของคุณออกคลัง เพื่อเตรียมส่งไปยังสนามบินแล้ว" },
-        { k: "您已下單成功", th: "สร้างออเดอร์การจัดส่งเรียบร้อย" },
-        { k: "EZ WAY", th: "โปรดตรวจสอบการลงทะเบียน EZ WAY เพื่อรอปล่อยของ 1-2 วันทำการ" },
-      ];
+  // keyword match (ถ้าคุณต้องการ “เฉพาะที่คุณกำหนดไว้” ก็ถือว่า keywordMap เป็นส่วนหนึ่งของกติกาได้)
+  const keywordMap = [
+    { k: "配送中", th: "อยู่ระหว่างจัดส่ง" },
+    { k: "配完", th: "พัสดุถึงผู้รับเรียบร้อยแล้ว" },
+    { k: "公司行號休息", th: "จัดส่งไม่สำเร็จเนื่องจากบริษัทหยุดทำการ" },
+    { k: "轉運中", th: "อยู่ระหว่างการขนส่งไปยังศูนย์ย่อย(สาขาปลายทาง)" },
+    { k: "海關清關", th: "พัสดุอยู่ระหว่างการเดินพิธีการศุลกากรในประเทศปลายทาง" },
+    { k: "連線收單建檔", th: "ระบบศุลกากรรับและบันทึกข้อมูลเรียบร้อยแล้ว" },
+    { k: "通關方式C1", th: "พิธีการศุลกากรแบบ C1" },
+    { k: "通關方式C2", th: "พิธีการศุลกากรแบบ C2" },
+    { k: "通關方式C3", th: "พิธีการศุลกากรแบบ C3" },
+    { k: "放行", th: "พัสดุผ่านพิธีการศุลกากรเรียบร้อยแล้ว" },
+    { k: "不受理不可補正之錯單", th: "ข้อมูลที่ใช้เดินพิธีการไม่สอดคล้องกัน โปรดติดต่อเจ้าหน้าที่" },
+    { k: "訂單已接收", th: "ระบบรับคำสั่งและบันทึกข้อมูลเรียบร้อยแล้ว" },
+    { k: "已經打印好地址面單", th: "พิมพ์ใบปะหน้าที่อยู่เรียบร้อยแล้ว" },
+    { k: "已准備從集運倉出倉", th: "พัสดุของคุณออกคลัง เพื่อเตรียมส่งไปยังสนามบินแล้ว" },
+    { k: "您已下單成功", th: "สร้างออเดอร์การจัดส่งเรียบร้อย" },
+    { k: "EZ WAY", th: "โปรดตรวจสอบการลงทะเบียน EZ WAY เพื่อรอปล่อยของ 1-2 วันทำการ" },
+  ];
 
-      const kw = keywordMap.find(x => zhRaw.includes(x.k));
-      if (kw) return kw.th;
-    }
+  const kw = keywordMap.find(x => zhRaw.includes(x.k));
+  if (kw) return kw.th;
 
-    // fallback ใช้ไทยจาก API
-    const th = (status_th || "").trim();
-    if (th) return th;
-
-    return "กำลังดำเนินการ";
-  }
+  // สำคัญ: ไม่ match = ไม่แสดง
+  return null;
+}
 
   function classify(th){
     const s = (th || "").toLowerCase();
@@ -372,7 +367,7 @@
     return { cls:"warn", label:"กำลังดำเนินการ" };
   }
 
- function renderSummary(data){
+function renderSummary(data){
   const mixed =
     data.latest_status_zh ||
     data.latest_status ||
@@ -380,10 +375,12 @@
     data.latest_status_th ||
     "";
 
-  const latestTh = toThaiStatus(data.latest_status_th, mixed);
+  const latestTh = toThaiStatus(mixed);
 
+  // ไม่ match = ซ่อน summary และ history
   if (!latestTh) {
     summary.style.display = "none";
+    if (history) history.style.display = "none";
     return;
   }
 
@@ -416,9 +413,9 @@
   const items = (events || [])
     .map(e => {
       const mixed = e.status_zh || e.status || e.status_cn || e.status_th || "";
-      const th = toThaiStatus(e.status_th, mixed);
+      const th = toThaiStatus(mixed);
 
-      if (!th) return ""; // ❗ ไม่ตรง keywordMap = ไม่แสดง
+      if (!th) return ""; // ไม่ match = ไม่แสดง
 
       return `
         <div class="event">

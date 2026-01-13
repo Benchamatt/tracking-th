@@ -409,12 +409,21 @@ function renderSummary(data){
   function renderTimeline(events){
   if (!timeline) return;
 
+  const seen = new Set(); // เก็บสถานะที่เคยแสดงแล้ว
+
   const items = (events || [])
     .map(e => {
       const mixed = e.status_zh || e.status || e.status_cn || e.status_th || "";
       const th = toThaiStatus(mixed);
 
-      if (!th) return ""; // ไม่ match = ไม่แสดง
+      // ❌ ไม่อยู่ใน mapping = ไม่แสดง
+      if (!th) return null;
+
+      // ❌ ถ้าสถานะนี้เคยแสดงแล้ว = ข้าม
+      if (seen.has(th)) return null;
+
+      // ✅ mark ว่าเคยแสดงแล้ว
+      seen.add(th);
 
       return `
         <div class="event">
@@ -423,6 +432,7 @@ function renderSummary(data){
         </div>
       `;
     })
+    .filter(Boolean) // ลบ null
     .join("");
 
   timeline.innerHTML =

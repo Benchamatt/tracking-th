@@ -142,6 +142,9 @@
     .badge.warn{background: rgba(180,83,9,.12); color: var(--warn); border-color: rgba(180,83,9,.25)}
     .badge.bad{background: rgba(185,28,28,.12); color: var(--bad); border-color: rgba(185,28,28,.25)}
 
+    .latestTitle{font-size:12px;color:var(--muted)}
+    .latestText{font-size:18px;font-weight:800;letter-spacing:.2px;line-height:1.25}
+
     .timeline{
       margin-top: 12px;
       position:relative;
@@ -263,8 +266,6 @@
   </div>
 
 <script>
-<script>
- <script>
   const $ = (id) => document.getElementById(id);
   const summary = $("summary");
   const history = $("history");
@@ -275,191 +276,166 @@
   const yearEl = $("year");
   if (yearEl) yearEl.textContent = String(new Date().getFullYear());
 
-  // ===== เปิด/ปิด debug =====
-  const DEBUG = true; // <- ถ้าทุกอย่างโอเคแล้วค่อยเปลี่ยนเป็น false
-  const dlog = (...a) => { if (DEBUG) console.log("[TRACK]", ...a); };
-
   // ===== Mapping จีน -> ไทย (ของคุณ) =====
   const STATUS_MAP = [
-    { zh: "配完", th: "พัสดุถึงผู้รับเรียบร้อยแล้ว" },
-    { zh: "順利送達", th: "พัสดุถึงผู้รับเรียบร้อยแล้ว" },
-
-    { zh: "配送中", th: "อยู่ระหว่างจัดส่ง" },
-    { zh: "SDI正在將包裹配送到收件人途中", th: "อยู่ระหว่างจัดส่งถึงผู้รับ" },
-
-    { zh: "公司行號休息", th: "จัดส่งไม่สำเร็จเนื่องจากบริษัทหยุดทำการ" },
-
-    { zh: "轉運中", th: "อยู่ระหว่างการขนส่งไปยังศูนย์ย่อย(สาขาปลายทาง)" },
-    { zh: "已集貨", th: "พัสดุถูกรวบรวมที่ศูนย์กระจายสินค้าแล้ว" },
-    { zh: "北三特服", th: "พัสดุถึงศูนย์บริการปลายทางแล้ว" },
-
+    { zh: "配完-配完>順利送達>白河營業所", th: "พัสดุถึงผู้รับเรียบร้อยแล้ว" },
+    { zh: "配送中-配送中>白河營業所", th: "อยู่ระหว่างจัดส่ง" },
+    { zh: "公司行號休息-公司行號休息>白河營業所", th: "จัดส่งไม่สำเร็จเนื่องจากบริษัทหยุดทำการ" },
+    { zh: "轉運中-轉運中>已集貸>北三特服二所", th: "อยู่ระหว่างการขนส่งไปยังศูนย์ย่อย(สาขาปลายทาง)" },
     { zh: "貨物在目的地國家海關清關中", th: "พัสดุอยู่ระหว่างการเดินพิธีการศุลกากรในประเทศปลายทาง" },
-    { zh: "海關清關", th: "พัสดุอยู่ระหว่างการเดินพิธีการศุลกากรในประเทศปลายทาง" },
-
     { zh: "連線收單建檔", th: "ระบบศุลกากรรับและบันทึกข้อมูลเรียบร้อยแล้ว" },
     { zh: "通關方式C1", th: "พิธีการศุลกากรแบบ C1" },
     { zh: "通關方式C2", th: "พิธีการศุลกากรแบบ C2" },
     { zh: "通關方式C3", th: "พิธีการศุลกากรแบบ C3" },
     { zh: "放行", th: "พัสดุผ่านพิธีการศุลกากรเรียบร้อยแล้ว" },
-
-    { zh: "由於海關系統查無此包裹申報人資料", th: "โปรดตรวจสอบการลงทะเบียน EZ WAY เพื่อรอปล่อยของ 1-2 วันทำการ" },
-    { zh: "EZ WAY", th: "โปรดตรวจสอบการลงทะเบียน EZ WAY เพื่อรอปล่อยของ 1-2 วันทำการ" },
+    {
+      zh: "由於海關系統查無此包裹申報人資料，請確認申報人是否已註冊過EZ WAY。 若尚未註冊，請於完成註冊後，至個人資料維護介面截圖申報人名、電話號碼及身分證號，並提交給威名客服，海關受理資料後約1~2個工作天放行",
+      th: "เนื่องจากระบบศุลกากรไม่พบข้อมูลผู้เดินพิธีการ โปรดตรวจสอบว่าผู้รับพัสดุได้ลงทะเบียนกับ EZ WAY แล้วหรือไม่ หากยังไม่ได้ลงทะเบียนโปรดลงทะเบียนให้เรียบร้อย ถ่ายภาพหน้าจอให้ติดชื่อ/หมายเลขโทรศัพท์และหมายเลขบัตรประชาชนของผู้เดินพิธีการ แล้วส่งให้เจ้าหน้าที่ลูกค้าสัมพันธ์ของ Weiming หลังจากได้รับข้อมูลแล้ว พัสดุจะได้รับการปล่อยภายในประมาณ 1-2 วันทำการ"
+    },
     { zh: "不受理不可補正之錯單", th: "ข้อมูลที่ใช้เดินพิธีการไม่สอดคล้องกัน โปรดติดต่อเจ้าหน้าที่" },
-
     { zh: "您的貨物已准備從集運倉出倉", th: "พัสดุของคุณออกคลัง เพื่อเตรียมส่งไปยังสนามบินแล้ว" },
-    { zh: "出倉", th: "พัสดุของคุณออกคลัง เพื่อเตรียมส่งไปยังสนามบินแล้ว" },
-
     { zh: "已經打印好地址面單", th: "พิมพ์ใบปะหน้าที่อยู่เรียบร้อยแล้ว" },
-    { zh: "打印", th: "พิมพ์ใบปะหน้าที่อยู่เรียบร้อยแล้ว" },
-
-    { zh: "您已下單成功", th: "สร้างออเดอร์การจัดส่งเรียบร้อย" },
-    { zh: "訂單已接收", th: "ระบบรับคำสั่งและบันทึกข้อมูลเรียบร้อยแล้ว" },
+    { zh: "您已下單成功!請等待倉庫人員作業出貨", th: "สร้างออเดอร์การจัดส่งเรียบร้อย" },
   ];
 
-  function normalizeText(s) {
+  function normalizeZh(s) {
     return (s || "")
       .replace(/[“”]/g, '"')
       .replace(/\s+/g, " ")
       .trim();
   }
 
-  function hasChinese(s){
-    return /[\u4e00-\u9fff]/.test(s || "");
-  }
-
-  // รองรับทั้ง () และ （）
+  // ดึงจีนจากข้อความผสม เช่น "กำลังดำเนินการ (不受理不可補正之錯單)"
   function extractZh(mixed) {
-    const s = normalizeText(mixed);
-    const m = s.match(/[（(]([^）)]+)[）)]/);
-    if (m && m[1]) return normalizeText(m[1]);
+    const s = normalizeZh(mixed);
+    const m = s.match(/\(([^)]+)\)/);
+    if (m && m[1]) return normalizeZh(m[1]);
     return s;
   }
 
-  // แปลเฉพาะ “จีน” เท่านั้น; ไม่ใช่จีน => null
-  function toThaiStatus(rawAny) {
-    const raw = extractZh(rawAny);
-    if (!raw) return null;
+  function toThaiStatus(status_th, status_zh_or_mixed) {
+    // บังคับใช้ mapping จากจีนก่อน
+    const zhRaw = extractZh(status_zh_or_mixed);
 
-    if (!hasChinese(raw)) return null; // บังคับอิงจากจีนเท่านั้น
+    if (zhRaw) {
+      // exact
+      const exact = STATUS_MAP.find(x => normalizeZh(x.zh) === zhRaw);
+      if (exact) return exact.th;
 
-    const zh = normalizeText(raw);
-    const hit = STATUS_MAP.find(x => zh.includes(normalizeText(x.zh)));
-    return hit ? hit.th : null; // ไม่ match => ไม่แสดง
-  }
+      // contains (เผื่อมี suffix/prefix)
+      const loose = STATUS_MAP.find(x => zhRaw.includes(normalizeZh(x.zh)));
+      if (loose) return loose.th;
 
-  // ------- ดึงข้อความสถานะจาก object แบบยืดหยุ่น -------
-  function pickStatusText(obj) {
-    if (!obj || typeof obj !== "object") return "";
+      // keyword match (กันเคสมีโค้ดต่อท้าย เช่น 訂單已接收-00000)
+      const keywordMap = [
+        { k: "配送中", th: "อยู่ระหว่างจัดส่ง" },
+        { k: "配完", th: "พัสดุถึงผู้รับเรียบร้อยแล้ว" },
+        { k: "公司行號休息", th: "จัดส่งไม่สำเร็จเนื่องจากบริษัทหยุดทำการ" },
+        { k: "轉運中", th: "อยู่ระหว่างการขนส่งไปยังศูนย์ย่อย(สาขาปลายทาง)" },
+        { k: "海關清關", th: "พัสดุอยู่ระหว่างการเดินพิธีการศุลกากรในประเทศปลายทาง" },
+        { k: "連線收單建檔", th: "ระบบศุลกากรรับและบันทึกข้อมูลเรียบร้อยแล้ว" },
+        { k: "通關方式C1", th: "พิธีการศุลกากรแบบ C1" },
+        { k: "通關方式C2", th: "พิธีการศุลกากรแบบ C2" },
+        { k: "通關方式C3", th: "พิธีการศุลกากรแบบ C3" },
+        { k: "放行", th: "พัสดุผ่านพิธีการศุลกากรเรียบร้อยแล้ว" },
+        { k: "不受理不可補正之錯單", th: "ข้อมูลที่ใช้เดินพิธีการไม่สอดคล้องกัน โปรดติดต่อเจ้าหน้าที่" },
+        { k: "訂單已接收", th: "ระบบรับคำสั่งและบันทึกข้อมูลเรียบร้อยแล้ว" },
+        { k: "已經打印好地址面單", th: "พิมพ์ใบปะหน้าที่อยู่เรียบร้อยแล้ว" },
+        { k: "已准備從集運倉出倉", th: "พัสดุของคุณออกคลัง เพื่อเตรียมส่งไปยังสนามบินแล้ว" },
+        { k: "您已下單成功", th: "สร้างออเดอร์การจัดส่งเรียบร้อย" },
+        { k: "EZ WAY", th: "โปรดตรวจสอบการลงทะเบียน EZ WAY เพื่อรอปล่อยของ 1-2 วันทำการ" },
+      ];
 
-    // ตัวเลือกที่พบบ่อยจาก API หลายเจ้า
-    const candidates = [
-      obj.status_zh, obj.status_cn, obj.status, obj.statusText, obj.status_text,
-      obj.latest_status_zh, obj.latest_status_cn, obj.latest_status, obj.latestStatus,
-      obj.desc_zh, obj.description_zh, obj.description, obj.remark, obj.remark_zh,
-      obj.event, obj.message, obj.state
-    ];
-
-    for (const c of candidates) {
-      if (typeof c === "string" && c.trim()) return c;
+      const kw = keywordMap.find(x => zhRaw.includes(x.k));
+      if (kw) return kw.th;
     }
-    return "";
-  }
 
-  function pickTimeText(obj) {
-    if (!obj || typeof obj !== "object") return "-";
-    return obj.time || obj.datetime || obj.dateTime || obj.date_time || obj.timestamp || "-";
+    // fallback ใช้ไทยจาก API
+    const th = (status_th || "").trim();
+    if (th) return th;
+
+    return "กำลังดำเนินการ";
   }
 
   function classify(th){
     const s = (th || "").toLowerCase();
-    if (s.includes("ถึงผู้รับ") || s.includes("ถึงแล้ว") || s.includes("จัดส่งสำเร็จ") || s.includes("เซ็นรับ") || s.includes("รับพัสดุ")) {
+
+    if (s.includes("ถึงแล้ว") || s.includes("จัดส่งสำเร็จ") || s.includes("เซ็นรับ") || s.includes("รับพัสดุ") || s.includes("ถึงผู้รับ")) {
       return { cls:"ok", label:"ถึงแล้ว" };
     }
-    if (s.includes("ไม่สำเร็จ") || s.includes("ผิดพลาด") || s.includes("ยกเลิก") || s.includes("ปัญหา") || s.includes("ไม่สอดคล้อง") || s.includes("ติดต่อ") || s.includes("ez way")) {
+    if (s.includes("ตีกลับ") || s.includes("ไม่สำเร็จ") || s.includes("ผิดพลาด") || s.includes("ยกเลิก") || s.includes("ปัญหา")) {
       return { cls:"bad", label:"มีปัญหา" };
     }
-    return { cls:"warn", label:"กำลังขนส่ง" };
-  }
-
-  function renderSummary(data){
-    // อ่านสถานะล่าสุดแบบยืดหยุ่น (จาก data ตรง ๆ)
-    const rawLatest = pickStatusText(data) || "";
-    dlog("raw latest:", rawLatest);
-
-    const latestTh = toThaiStatus(rawLatest);
-
-    if (!latestTh) {
-      summary.style.display = "block";
-      summary.innerHTML = `
-        <div class="errorBox">
-          <b>ไม่มีสถานะที่รองรับ</b><br/>
-          ระบบจะแสดงเฉพาะ “สถานะจีน” ที่อยู่ใน mapping เท่านั้น
-        </div>
-      `;
-      return;
+    if (s.includes("กำลัง") || s.includes("ระหว่าง") || s.includes("ขนส่ง") || s.includes("ส่งต่อ") || s.includes("ออกจาก") || s.includes("กำลังดำเนินการ")) {
+      return { cls:"warn", label:"กำลังขนส่ง" };
     }
-
-    const cls = classify(latestTh);
-
-    summary.style.display = "block";
-    summary.innerHTML = `
-      <div class="summaryTop">
-        <div class="kv">
-          <div><b>เลขพัสดุ</b> <span class="value">${data.tracking_no || data.trackingNo || "-"}</span></div>
-          <div><b>อัปเดตล่าสุด</b> <span class="value">${data.last_update || data.lastUpdate || "-"}</span></div>
-        </div>
-
-        <span class="badge ${cls.cls}">
-          <span class="dot"></span>
-          ${cls.label}
-        </span>
-      </div>
-
-      <div style="margin-top:6px;font-size:18px;font-weight:800">
-        ${latestTh}
-      </div>
-    `;
+    return { cls:"warn", label:"กำลังดำเนินการ" };
   }
+
+ function renderSummary(data){
+  const mixed =
+    data.latest_status_zh ||
+    data.latest_status ||
+    data.latest_status_cn ||
+    data.latest_status_th ||
+    "";
+
+  const latestTh = toThaiStatus(data.latest_status_th, mixed);
+
+  if (!latestTh) {
+    summary.style.display = "none";
+    return;
+  }
+
+  const cls = classify(latestTh);
+
+  summary.style.display = "block";
+  summary.innerHTML = `
+    <div class="summaryTop">
+      <div class="kv">
+        <div><b>เลขพัสดุ</b> <span class="value">${data.tracking_no || "-"}</span></div>
+        <div><b>อัปเดตล่าสุด</b> <span class="value">${data.last_update || "-"}</span></div>
+      </div>
+
+      <span class="badge ${cls.cls}">
+        <span class="dot"></span>
+        ${cls.label}
+      </span>
+    </div>
+
+    <div style="margin-top:6px;font-size:18px;font-weight:800">
+      ${latestTh}
+    </div>
+  `;
+}
+
 
   function renderTimeline(events){
-    if (!timeline) return;
+  if (!timeline) return;
 
-    // รองรับกรณี events ไม่ใช่ array
-    const arr = Array.isArray(events) ? events : (events ? [events] : []);
-    dlog("events count:", arr.length);
+  const items = (events || [])
+    .map(e => {
+      const mixed = e.status_zh || e.status || e.status_cn || e.status_th || "";
+      const th = toThaiStatus(e.status_th, mixed);
 
-    const seen = new Set();
-    const rendered = [];
+      if (!th) return ""; // ❗ ไม่ตรง keywordMap = ไม่แสดง
 
-    for (const e of arr) {
-      const raw = pickStatusText(e);
-      const th = toThaiStatus(raw);
-
-      dlog("event raw:", raw, "=> th:", th);
-
-      if (!th) continue;
-      if (seen.has(th)) continue;
-
-      seen.add(th);
-      rendered.push(`
+      return `
         <div class="event">
-          <div class="time">${pickTimeText(e)}</div>
+          <div class="time">${e.time || e.datetime || "-"}</div>
           <div class="text">${th}</div>
         </div>
-      `);
-    }
+      `;
+    })
+    .join("");
 
-    if (!rendered.length) {
-      timeline.innerHTML = `<div class="muted" style="padding:10px 0">ไม่มีสถานะที่ match ตาม mapping</div>`;
-      if (history) history.style.display = "block"; // ให้เห็นข้อความ “ไม่มีสถานะ…” แทนว่าง
-      return;
-    }
+  timeline.innerHTML =
+    items || `<div class="muted" style="padding:10px 0">ไม่มีข้อมูล</div>`;
+}
 
-    timeline.innerHTML = rendered.join("");
-    if (history) history.style.display = "block";
-  }
 
   function setLoading(){
+    if (!summary) return;
     summary.style.display = "block";
     if (history) history.style.display = "none";
     summary.innerHTML = `
@@ -474,26 +450,24 @@
   }
 
   function setError(msg){
+    if (!summary) return;
     summary.style.display = "block";
     if (history) history.style.display = "none";
     summary.innerHTML = `<div class="errorBox"><b>ไม่สำเร็จ:</b> ${msg || "เกิดข้อผิดพลาด"}</div>`;
   }
 
   async function run(){
-    const no = (noEl.value || "").trim();
+    if (!noEl) return;
+
+    const no = noEl.value.trim();
     if(!no){ alert("กรุณากรอกเลขพัสดุ"); return; }
 
-    btn.disabled = true;
+    if (btn) btn.disabled = true;
     setLoading();
 
     try{
-      const url = `/api/track?no=${encodeURIComponent(no)}`;
-      dlog("fetch:", url);
-
-      const r = await fetch(url);
+      const r = await fetch(`/api/track?no=${encodeURIComponent(no)}`);
       const data = await r.json();
-
-      dlog("response ok:", r.ok, "data:", data);
 
       if(!r.ok){
         setError(data.error || "ไม่พบข้อมูล");
@@ -501,20 +475,17 @@
       }
 
       renderSummary(data);
-
-      // events อาจชื่อไม่เหมือนกัน
-      const events = data.events || data.history || data.traces || data.track || [];
-      renderTimeline(events);
-
+      renderTimeline(data.events);
+      if (history) history.style.display = "block";
     }catch(e){
       setError(String(e));
     }finally{
-      btn.disabled = false;
+      if (btn) btn.disabled = false;
     }
   }
 
-  btn.addEventListener("click", run);
-  noEl.addEventListener("keydown", (e) => { if(e.key === "Enter") run(); });
+  if (btn) btn.addEventListener("click", run);
+  if (noEl) noEl.addEventListener("keydown", (e) => { if(e.key === "Enter") run(); });
 </script>
 </body>
 </html>

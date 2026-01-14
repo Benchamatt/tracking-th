@@ -418,61 +418,70 @@
     };
 
     // 1) แปลเฉพาะที่ match
-    const translated = (events || [])
-      .map(e => {
-        const mixed = e.status_zh || e.status_cn || e.status || e.status_th || "";
-        const th = toThaiStatus(mixed);
-        if (!th) return null;
+   function renderTimeline(events){
+  if (!timeline) return;
 
-        return {
-          time: e.time || e.datetime || "-",
-          th,
-          group: groupOf(th),
-        };
-      })
-      .filter(Boolean);
-
-    // 2) ไม่มี match = ไม่ต้องขึ้น
-    if (!translated.length) {
-      timeline.innerHTML = "";
-      if (history) history.style.display = "none";
-      return;
-    }
-
-    // 3) ตัดซ้ำแบบข้อความไทย (ล่าสุดจะถูกเก็บก่อน เพราะข้อมูลเรียงล่าสุดก่อน)
-    const seenText = new Set();
-    const unique = [];
-    for (const item of translated) {
-      if (seenText.has(item.th)) continue;
-      seenText.add(item.th);
-      unique.push(item);
-    }
-
-    // 4) กันรก: เอา 1 รายการ "ล่าสุด" ต่อหมวด
-    const seenGroup = new Set();
-    const onePerGroup = [];
-    for (const item of unique) {
-      if (seenGroup.has(item.group)) continue;
-      seenGroup.add(item.group);
-      onePerGroup.push(item);
-    }
-
-    // 5) เรียงตามหมวด
-    onePerGroup.sort((a, b) => (groupRank[a.group] ?? 99) - (groupRank[b.group] ?? 99));
-
-    // 6) จำกัดจำนวนรายการ
-    const MAX_ITEMS = 6;
-    const finalItems = onePerGroup.slice(0, MAX_ITEMS);
-
-    timeline.innerHTML = finalItems.map(x => `
-      <div class="event">
-        <div class="time">${x.time}</div>
-        <div class="text">${x.th}</div>
-      </div>
-    `).join("");
-
-    if (history) history.style.display = "block";
+  function groupOf(th){
+    if (!th) return "OTHER";
+    if (th.includes("EZ WAY") || th.includes("เอกสาร") || th.includes("ข้อมูล") || th.includes("ไม่ถูกต้อง")) return "ISSUE";
+    if (th.includes("ศุลกากร") || th.includes("พิธีการศุลกากร")) return "CUSTOMS";
+    if (th.includes("ศูนย์") || th.includes("ขนส่งไปยังศูนย์") || th.includes("รวบรวม")) return "TRANSIT";
+    if (th.includes("คลัง") || th.includes("ใบปะหน้า") || th.includes("ออเดอร์")) return "WAREHOUSE";
+    if (th.includes("จัดส่ง") || th.includes("ถึงผู้รับ")) return "DELIVERY";
+    return "OTHER";
   }
+
+  // ลำดับหมวด: ปัญหา -> ศุลกากร -> ขนส่ง/ศูนย์ -> คลัง -> จัดส่ง
+  const groupRank = { ISSUE:0, CUSTOMS:1, TRANSIT:2, WAREHOUSE:3, DELIVERY:4, OTHER:5 };
+
+  // 1) แปลเฉพาะที่ match
+  const translated = (events || [])
+    .map(e => {
+      const mixed = e.status_zh || e.status_cn || e.status || e.status_th || "";
+      const th = toThaiStatus(mixed);
+      if (!th) return null;
+      return { time: e.time || e.datetime || "-", th, group: groupOf(th) };
+    })
+    .filter(Boolean);
+
+  // 2) ไม่มี match = ไม่ต้องขึ้น
+  if (!translated.length) {
+    timeline.innerHTML = "";
+    if (history) history.style.display = "none";
+    return;
+  }
+
+  // 3) ตัดซ้ำแบบ “ข้อความไทย”
+  const seenText = new Set();
+  const unique = [];
+  for (const item of translated) {
+    if (seenText.has(item.th)) continue;
+    seenText.add(item.th);
+    unique.push(item);
+  }
+
+  // 4) จัดเรียงตามหมวด แต่ยัง “รักษาความเป็นล่าสุด” ภายในหมวด
+  // unique ตอนนี้เรียงล่าสุดก่อนอยู่แล้ว → เราจะ stable-sort แบบง่าย:
+  const buckets = { ISSUE:[], CUSTOMS:[], TRANSIT:[], WAREHOUSE:[], DELIVERY:[], OTHER:[] };
+  for (const it of unique) buckets[it.group].push(it);
+
+  const orderedGroups = Object.keys(groupRank).sort((a,b)=>groupRank[a]-groupRank[b]);
+  const merged = orderedGroups.flatMap(g => buckets[g]);
+
+  // 5) จำกัดจำนวน (กันรก) — ปรับได้
+  const MAX_ITEMS = 10;
+  const finalItems = merged.slice(0, MAX_ITEMS);
+
+  timeline.innerHTML = finalItems.map(x => `
+    <div class="event">
+      <div class="time">${x.time}</div>
+      <div class="text">${x.th}</div>
+    </div>
+  `).join("");
+
+  if (history) history.style.display = "block";
+}
+
 
   // =========================
   // Loading / Error / Run

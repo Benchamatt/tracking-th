@@ -263,6 +263,7 @@
   </div>
 
 <script>
+<script>
   const $ = (id) => document.getElementById(id);
   const summary = $("summary");
   const history = $("history");
@@ -273,10 +274,39 @@
   const yearEl = $("year");
   if (yearEl) yearEl.textContent = String(new Date().getFullYear());
 
-  // =========================
-  // Normalization / Extract
-  // =========================
-  function normalizeZh(s) {
+  // ===== Mapping จีน -> ไทย (ของคุณ) =====
+  // ใช้แค่นี้ชุดเดียวพอ และแปลเฉพาะที่ match เท่านั้น
+  const STATUS_MAP = [
+    { zh: "配完", th: "พัสดุถึงผู้รับเรียบร้อยแล้ว" },
+    { zh: "順利送達", th: "พัสดุถึงผู้รับเรียบร้อยแล้ว" },
+
+    { zh: "配送中", th: "อยู่ระหว่างจัดส่ง" },
+    { zh: "SDI正在將包裹配送到收件人途中", th: "อยู่ระหว่างจัดส่งถึงผู้รับ" },
+
+    { zh: "公司行號休息", th: "จัดส่งไม่สำเร็จเนื่องจากบริษัทหยุดทำการ" },
+
+    { zh: "轉運中", th: "อยู่ระหว่างการขนส่งไปยังศูนย์ย่อย(สาขาปลายทาง)" },
+    { zh: "已集貨", th: "พัสดุถูกรวบรวมที่ศูนย์กระจายสินค้าแล้ว" },
+    { zh: "北三特服", th: "พัสดุถึงศูนย์บริการปลายทางแล้ว" },
+
+    { zh: "貨物在目的地國家海關清關中", th: "พัสดุอยู่ระหว่างการเดินพิธีการศุลกากรในประเทศปลายทาง" },
+    { zh: "連線收單建檔", th: "ระบบศุลกากรรับและบันทึกข้อมูลเรียบร้อยแล้ว" },
+    { zh: "通關方式C1", th: "พิธีการศุลกากรแบบ C1" },
+    { zh: "通關方式C2", th: "พิธีการศุลกากรแบบ C2" },
+    { zh: "通關方式C3", th: "พิธีการศุลกากรแบบ C3" },
+    { zh: "放行", th: "พัสดุผ่านพิธีการศุลกากรเรียบร้อยแล้ว" },
+
+    { zh: "由於海關系統查無此包裹申報人資料", th: "โปรดตรวจสอบการลงทะเบียน EZ WAY เพื่อรอปล่อยของ 1-2 วันทำการ" },
+    { zh: "EZ WAY", th: "โปรดตรวจสอบการลงทะเบียน EZ WAY เพื่อรอปล่อยของ 1-2 วันทำการ" },
+    { zh: "不受理不可補正之錯單", th: "ข้อมูลที่ใช้เดินพิธีการไม่สอดคล้องกัน โปรดติดต่อเจ้าหน้าที่" },
+
+    { zh: "您的貨物已准備從集運倉出倉", th: "พัสดุของคุณออกคลัง เพื่อเตรียมส่งไปยังสนามบินแล้ว" },
+    { zh: "已經打印好地址面單", th: "พิมพ์ใบปะหน้าที่อยู่เรียบร้อยแล้ว" },
+    { zh: "您已下單成功", th: "สร้างออเดอร์การจัดส่งเรียบร้อย" },
+    { zh: "訂單已接收", th: "ระบบรับคำสั่งและบันทึกข้อมูลเรียบร้อยแล้ว" },
+  ];
+
+  function normalizeText(s) {
     return (s || "")
       .replace(/[“”]/g, '"')
       .replace(/\s+/g, " ")
@@ -285,71 +315,45 @@
 
   // รองรับทั้ง () และ （）
   function extractZh(mixed) {
-    const s = normalizeZh(mixed);
+    const s = normalizeText(mixed);
     const m = s.match(/[（(]([^）)]+)[）)]/);
-    if (m && m[1]) return normalizeZh(m[1]);
+    if (m && m[1]) return normalizeText(m[1]);
     return s;
   }
 
-  // =========================
-  // Keyword mapping (จีน -> ไทย)
-  // แปลเฉพาะที่ match เท่านั้น
-  // =========================
-  const KEYWORD_MAP = [
-    { k: "配完", th: "พัสดุถึงผู้รับเรียบร้อยแล้ว" },
-    { k: "順利送達", th: "พัสดุถึงผู้รับเรียบร้อยแล้ว" },
-    { k: "配送中", th: "อยู่ระหว่างจัดส่ง" },
-    { k: "SDI正在將包裹配送到收件人途中", th: "อยู่ระหว่างจัดส่งถึงผู้รับ" },
-    { k: "公司行號休息", th: "จัดส่งไม่สำเร็จเนื่องจากบริษัทหยุดทำการ" },
-
-    { k: "轉運中", th: "อยู่ระหว่างการขนส่งไปยังศูนย์ย่อย (สาขาปลายทาง)" },
-    { k: "已集貨", th: "พัสดุถูกรวบรวมที่ศูนย์กระจายสินค้าแล้ว" },
-    { k: "北三特服", th: "พัสดุถึงศูนย์บริการปลายทางแล้ว" },
-
-    { k: "貨物在目的地國家海關清關中", th: "พัสดุอยู่ระหว่างการดำเนินพิธีการศุลกากรในประเทศปลายทาง" },
-    { k: "海關清關", th: "พัสดุอยู่ระหว่างการดำเนินพิธีการศุลกากรในประเทศปลายทาง" },
-    { k: "連線收單建檔", th: "ระบบศุลกากรรับและบันทึกข้อมูลเรียบร้อยแล้ว" },
-    { k: "通關方式C1", th: "พิธีการศุลกากรแบบ C1" },
-    { k: "通關方式C2", th: "พิธีการศุลกากรแบบ C2" },
-    { k: "通關方式C3", th: "พิธีการศุลกากรแบบ C3" },
-    { k: "放行", th: "พัสดุผ่านพิธีการศุลกากรเรียบร้อยแล้ว" },
-
-    { k: "由於海關系統查無此包裹申報人資料", th: "ระบบศุลกากรไม่พบข้อมูลผู้รับ โปรดลงทะเบียน EZ WAY" },
-    { k: "EZ WAY", th: "โปรดตรวจสอบและยืนยันข้อมูลในระบบ EZ WAY" },
-    { k: "不受理不可補正之錯單", th: "ข้อมูลเอกสารไม่ถูกต้อง ไม่สามารถแก้ไขได้" },
-
-    { k: "出倉", th: "พัสดุออกจากคลังสินค้าแล้ว" },
-    { k: "打印", th: "พิมพ์ใบปะหน้าที่อยู่เรียบร้อยแล้ว" },
-    { k: "訂單已接收", th: "ระบบรับคำสั่งซื้อเรียบร้อยแล้ว" },
-    { k: "您已下單成功", th: "สร้างออเดอร์การจัดส่งเรียบร้อยแล้ว" },
-  ];
-
-  function toThaiStatus(status_zh_or_mixed) {
-    const zhRaw = extractZh(status_zh_or_mixed);
-    if (!zhRaw) return null;
-
-    const hit = KEYWORD_MAP.find(x => zhRaw.includes(x.k));
-    return hit ? hit.th : null; // ไม่ match = ไม่แสดง
+  function hasChinese(s){
+    return /[\u4e00-\u9fff]/.test(s || "");
   }
 
-  // =========================
-  // Badge classification (จากไทยที่แปลได้)
-  // =========================
+  // ✅ แปลเฉพาะ "จีนจากเว็บ" เท่านั้น:
+  // - ไม่มีจีน => ไม่แสดง (return null)
+  // - ไม่ match => ไม่แสดง (return null)
+  function toThaiStatus(status_zh_or_mixed) {
+    const raw = extractZh(status_zh_or_mixed);
+    if (!raw) return null;
+
+    // บังคับต้องเป็นจีนเท่านั้น
+    if (!hasChinese(raw)) return null;
+
+    const zhRaw = normalizeText(raw);
+
+    // match แบบ contains (ของจริงมี prefix/suffix บ่อย)
+    const hit = STATUS_MAP.find(x => zhRaw.includes(normalizeText(x.zh)));
+    return hit ? hit.th : null;
+  }
+
   function classify(th){
     const s = (th || "").toLowerCase();
 
     if (s.includes("ถึงผู้รับ") || s.includes("ถึงแล้ว") || s.includes("จัดส่งสำเร็จ") || s.includes("เซ็นรับ") || s.includes("รับพัสดุ")) {
       return { cls:"ok", label:"ถึงแล้ว" };
     }
-    if (s.includes("ไม่สำเร็จ") || s.includes("ผิดพลาด") || s.includes("ยกเลิก") || s.includes("ปัญหา") || s.includes("ไม่ถูกต้อง") || s.includes("ez way") || s.includes("เอกสาร")) {
+    if (s.includes("ไม่สำเร็จ") || s.includes("ผิดพลาด") || s.includes("ยกเลิก") || s.includes("ปัญหา") || s.includes("ไม่สอดคล้อง") || s.includes("ติดต่อ")) {
       return { cls:"bad", label:"มีปัญหา" };
     }
     return { cls:"warn", label:"กำลังขนส่ง" };
   }
 
-  // =========================
-  // Render summary
-  // =========================
   function renderSummary(data){
     const mixed =
       data.latest_status_zh ||
@@ -359,10 +363,9 @@
 
     const latestTh = toThaiStatus(mixed);
 
-    // ไม่ match = ซ่อน summary และ history
+    // ไม่ match / ไม่ใช่จีน => ไม่แสดง
     if (!latestTh) {
       summary.style.display = "none";
-      if (history) history.style.display = "none";
       return;
     }
 
@@ -372,6 +375,7 @@
     summary.innerHTML = `
       <div class="summaryTop">
         <div class="kv">
+          <div><b>เลขพัสดุ</b> <span class="value">${data.tracking_no || "-"}</span></div>
           <div><b>อัปเดตล่าสุด</b> <span class="value">${data.last_update || "-"}</span></div>
         </div>
 
@@ -387,107 +391,40 @@
     `;
   }
 
-  // =========================
-  // Render timeline (แบบที่ 1)
-  // - แปลเฉพาะที่ match
-  // - ไม่มี match = ไม่ต้องขึ้น (ซ่อน history)
-  // - ตัดสถานะซ้ำ (ข้อความไทยซ้ำ)
-  // - กันรก: เอา 1 ต่อหมวด + เรียงหมวด + จำกัดจำนวน
-  // =========================
   function renderTimeline(events){
     if (!timeline) return;
 
-    function groupOf(th){
-      if (!th) return "OTHER";
-      if (th.includes("EZ WAY") || th.includes("เอกสาร") || th.includes("ข้อมูล") || th.includes("ไม่ถูกต้อง")) return "ISSUE";
-      if (th.includes("ศุลกากร") || th.includes("พิธีการศุลกากร")) return "CUSTOMS";
-      if (th.includes("ศูนย์") || th.includes("ขนส่งไปยังศูนย์") || th.includes("รวบรวม")) return "TRANSIT";
-      if (th.includes("คลัง") || th.includes("ใบปะหน้า") || th.includes("ออเดอร์")) return "WAREHOUSE";
-      if (th.includes("จัดส่ง") || th.includes("ถึงผู้รับ")) return "DELIVERY";
-      return "OTHER";
-    }
+    const seen = new Set(); // ตัดซ้ำตาม "ข้อความไทย" ที่แปลได้
+    const rendered = [];
 
-    // ลำดับหมวด: ปัญหา -> ศุลกากร -> ขนส่ง/ศูนย์ -> คลัง -> จัดส่ง
-    const groupRank = {
-      ISSUE: 0,
-      CUSTOMS: 1,
-      TRANSIT: 2,
-      WAREHOUSE: 3,
-      DELIVERY: 4,
-      OTHER: 5,
-    };
-
-    // 1) แปลเฉพาะที่ match
-   function renderTimeline(events){
-  if (!timeline) return;
-
-  function groupOf(th){
-    if (!th) return "OTHER";
-    if (th.includes("EZ WAY") || th.includes("เอกสาร") || th.includes("ข้อมูล") || th.includes("ไม่ถูกต้อง")) return "ISSUE";
-    if (th.includes("ศุลกากร") || th.includes("พิธีการศุลกากร")) return "CUSTOMS";
-    if (th.includes("ศูนย์") || th.includes("ขนส่งไปยังศูนย์") || th.includes("รวบรวม")) return "TRANSIT";
-    if (th.includes("คลัง") || th.includes("ใบปะหน้า") || th.includes("ออเดอร์")) return "WAREHOUSE";
-    if (th.includes("จัดส่ง") || th.includes("ถึงผู้รับ")) return "DELIVERY";
-    return "OTHER";
-  }
-
-  // ลำดับหมวด: ปัญหา -> ศุลกากร -> ขนส่ง/ศูนย์ -> คลัง -> จัดส่ง
-  const groupRank = { ISSUE:0, CUSTOMS:1, TRANSIT:2, WAREHOUSE:3, DELIVERY:4, OTHER:5 };
-
-  // 1) แปลเฉพาะที่ match
-  const translated = (events || [])
-    .map(e => {
+    for (const e of (events || [])) {
       const mixed = e.status_zh || e.status_cn || e.status || e.status_th || "";
       const th = toThaiStatus(mixed);
-      if (!th) return null;
-      return { time: e.time || e.datetime || "-", th, group: groupOf(th) };
-    })
-    .filter(Boolean);
 
-  // 2) ไม่มี match = ไม่ต้องขึ้น
-  if (!translated.length) {
-    timeline.innerHTML = "";
-    if (history) history.style.display = "none";
-    return;
+      if (!th) continue;        // ไม่ match => ไม่แสดง
+      if (seen.has(th)) continue; // ซ้ำ => ข้าม
+      seen.add(th);
+
+      rendered.push(`
+        <div class="event">
+          <div class="time">${e.time || e.datetime || "-"}</div>
+          <div class="text">${th}</div>
+        </div>
+      `);
+    }
+
+    // ไม่มีรายการที่ match => ซ่อนทั้งกล่อง timeline
+    if (!rendered.length) {
+      timeline.innerHTML = "";
+      if (history) history.style.display = "none";
+      return;
+    }
+
+    timeline.innerHTML = rendered.join("");
+    if (history) history.style.display = "block";
   }
 
-  // 3) ตัดซ้ำแบบ “ข้อความไทย”
-  const seenText = new Set();
-  const unique = [];
-  for (const item of translated) {
-    if (seenText.has(item.th)) continue;
-    seenText.add(item.th);
-    unique.push(item);
-  }
-
-  // 4) จัดเรียงตามหมวด แต่ยัง “รักษาความเป็นล่าสุด” ภายในหมวด
-  // unique ตอนนี้เรียงล่าสุดก่อนอยู่แล้ว → เราจะ stable-sort แบบง่าย:
-  const buckets = { ISSUE:[], CUSTOMS:[], TRANSIT:[], WAREHOUSE:[], DELIVERY:[], OTHER:[] };
-  for (const it of unique) buckets[it.group].push(it);
-
-  const orderedGroups = Object.keys(groupRank).sort((a,b)=>groupRank[a]-groupRank[b]);
-  const merged = orderedGroups.flatMap(g => buckets[g]);
-
-  // 5) จำกัดจำนวน (กันรก) — ปรับได้
-  const MAX_ITEMS = 10;
-  const finalItems = merged.slice(0, MAX_ITEMS);
-
-  timeline.innerHTML = finalItems.map(x => `
-    <div class="event">
-      <div class="time">${x.time}</div>
-      <div class="text">${x.th}</div>
-    </div>
-  `).join("");
-
-  if (history) history.style.display = "block";
-}
-
-
-  // =========================
-  // Loading / Error / Run
-  // =========================
   function setLoading(){
-    if (!summary) return;
     summary.style.display = "block";
     if (history) history.style.display = "none";
     summary.innerHTML = `
@@ -502,19 +439,16 @@
   }
 
   function setError(msg){
-    if (!summary) return;
     summary.style.display = "block";
     if (history) history.style.display = "none";
     summary.innerHTML = `<div class="errorBox"><b>ไม่สำเร็จ:</b> ${msg || "เกิดข้อผิดพลาด"}</div>`;
   }
 
   async function run(){
-    if (!noEl) return;
-
-    const no = noEl.value.trim();
+    const no = (noEl.value || "").trim();
     if(!no){ alert("กรุณากรอกเลขพัสดุ"); return; }
 
-    if (btn) btn.disabled = true;
+    btn.disabled = true;
     setLoading();
 
     try{
@@ -529,16 +463,16 @@
       renderSummary(data);
       renderTimeline(data.events);
 
-      // แสดง history เฉพาะเมื่อมีข้อมูล match (renderTimeline จะตัดสินเอง)
+      // หมายเหตุ: renderTimeline จะตัดสินใจเองว่าจะโชว์/ซ่อน history
     }catch(e){
       setError(String(e));
     }finally{
-      if (btn) btn.disabled = false;
+      btn.disabled = false;
     }
   }
 
-  if (btn) btn.addEventListener("click", run);
-  if (noEl) noEl.addEventListener("keydown", (e) => { if(e.key === "Enter") run(); });
+  btn.addEventListener("click", run);
+  noEl.addEventListener("keydown", (e) => { if(e.key === "Enter") run(); });
 </script>
 </body>
 </html>

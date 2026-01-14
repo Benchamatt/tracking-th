@@ -264,6 +264,7 @@
 
 <script>
 <script>
+ <script>
   const $ = (id) => document.getElementById(id);
   const summary = $("summary");
   const history = $("history");
@@ -274,8 +275,11 @@
   const yearEl = $("year");
   if (yearEl) yearEl.textContent = String(new Date().getFullYear());
 
+  // ===== เปิด/ปิด debug =====
+  const DEBUG = true; // <- ถ้าทุกอย่างโอเคแล้วค่อยเปลี่ยนเป็น false
+  const dlog = (...a) => { if (DEBUG) console.log("[TRACK]", ...a); };
+
   // ===== Mapping จีน -> ไทย (ของคุณ) =====
-  // ใช้แค่นี้ชุดเดียวพอ และแปลเฉพาะที่ match เท่านั้น
   const STATUS_MAP = [
     { zh: "配完", th: "พัสดุถึงผู้รับเรียบร้อยแล้ว" },
     { zh: "順利送達", th: "พัสดุถึงผู้รับเรียบร้อยแล้ว" },
@@ -290,6 +294,8 @@
     { zh: "北三特服", th: "พัสดุถึงศูนย์บริการปลายทางแล้ว" },
 
     { zh: "貨物在目的地國家海關清關中", th: "พัสดุอยู่ระหว่างการเดินพิธีการศุลกากรในประเทศปลายทาง" },
+    { zh: "海關清關", th: "พัสดุอยู่ระหว่างการเดินพิธีการศุลกากรในประเทศปลายทาง" },
+
     { zh: "連線收單建檔", th: "ระบบศุลกากรรับและบันทึกข้อมูลเรียบร้อยแล้ว" },
     { zh: "通關方式C1", th: "พิธีการศุลกากรแบบ C1" },
     { zh: "通關方式C2", th: "พิธีการศุลกากรแบบ C2" },
@@ -301,7 +307,11 @@
     { zh: "不受理不可補正之錯單", th: "ข้อมูลที่ใช้เดินพิธีการไม่สอดคล้องกัน โปรดติดต่อเจ้าหน้าที่" },
 
     { zh: "您的貨物已准備從集運倉出倉", th: "พัสดุของคุณออกคลัง เพื่อเตรียมส่งไปยังสนามบินแล้ว" },
+    { zh: "出倉", th: "พัสดุของคุณออกคลัง เพื่อเตรียมส่งไปยังสนามบินแล้ว" },
+
     { zh: "已經打印好地址面單", th: "พิมพ์ใบปะหน้าที่อยู่เรียบร้อยแล้ว" },
+    { zh: "打印", th: "พิมพ์ใบปะหน้าที่อยู่เรียบร้อยแล้ว" },
+
     { zh: "您已下單成功", th: "สร้างออเดอร์การจัดส่งเรียบร้อย" },
     { zh: "訂單已接收", th: "ระบบรับคำสั่งและบันทึกข้อมูลเรียบร้อยแล้ว" },
   ];
@@ -313,6 +323,10 @@
       .trim();
   }
 
+  function hasChinese(s){
+    return /[\u4e00-\u9fff]/.test(s || "");
+  }
+
   // รองรับทั้ง () และ （）
   function extractZh(mixed) {
     const s = normalizeText(mixed);
@@ -321,51 +335,67 @@
     return s;
   }
 
-  function hasChinese(s){
-    return /[\u4e00-\u9fff]/.test(s || "");
-  }
-
-  // ✅ แปลเฉพาะ "จีนจากเว็บ" เท่านั้น:
-  // - ไม่มีจีน => ไม่แสดง (return null)
-  // - ไม่ match => ไม่แสดง (return null)
-  function toThaiStatus(status_zh_or_mixed) {
-    const raw = extractZh(status_zh_or_mixed);
+  // แปลเฉพาะ “จีน” เท่านั้น; ไม่ใช่จีน => null
+  function toThaiStatus(rawAny) {
+    const raw = extractZh(rawAny);
     if (!raw) return null;
 
-    // บังคับต้องเป็นจีนเท่านั้น
-    if (!hasChinese(raw)) return null;
+    if (!hasChinese(raw)) return null; // บังคับอิงจากจีนเท่านั้น
 
-    const zhRaw = normalizeText(raw);
+    const zh = normalizeText(raw);
+    const hit = STATUS_MAP.find(x => zh.includes(normalizeText(x.zh)));
+    return hit ? hit.th : null; // ไม่ match => ไม่แสดง
+  }
 
-    // match แบบ contains (ของจริงมี prefix/suffix บ่อย)
-    const hit = STATUS_MAP.find(x => zhRaw.includes(normalizeText(x.zh)));
-    return hit ? hit.th : null;
+  // ------- ดึงข้อความสถานะจาก object แบบยืดหยุ่น -------
+  function pickStatusText(obj) {
+    if (!obj || typeof obj !== "object") return "";
+
+    // ตัวเลือกที่พบบ่อยจาก API หลายเจ้า
+    const candidates = [
+      obj.status_zh, obj.status_cn, obj.status, obj.statusText, obj.status_text,
+      obj.latest_status_zh, obj.latest_status_cn, obj.latest_status, obj.latestStatus,
+      obj.desc_zh, obj.description_zh, obj.description, obj.remark, obj.remark_zh,
+      obj.event, obj.message, obj.state
+    ];
+
+    for (const c of candidates) {
+      if (typeof c === "string" && c.trim()) return c;
+    }
+    return "";
+  }
+
+  function pickTimeText(obj) {
+    if (!obj || typeof obj !== "object") return "-";
+    return obj.time || obj.datetime || obj.dateTime || obj.date_time || obj.timestamp || "-";
   }
 
   function classify(th){
     const s = (th || "").toLowerCase();
-
     if (s.includes("ถึงผู้รับ") || s.includes("ถึงแล้ว") || s.includes("จัดส่งสำเร็จ") || s.includes("เซ็นรับ") || s.includes("รับพัสดุ")) {
       return { cls:"ok", label:"ถึงแล้ว" };
     }
-    if (s.includes("ไม่สำเร็จ") || s.includes("ผิดพลาด") || s.includes("ยกเลิก") || s.includes("ปัญหา") || s.includes("ไม่สอดคล้อง") || s.includes("ติดต่อ")) {
+    if (s.includes("ไม่สำเร็จ") || s.includes("ผิดพลาด") || s.includes("ยกเลิก") || s.includes("ปัญหา") || s.includes("ไม่สอดคล้อง") || s.includes("ติดต่อ") || s.includes("ez way")) {
       return { cls:"bad", label:"มีปัญหา" };
     }
     return { cls:"warn", label:"กำลังขนส่ง" };
   }
 
   function renderSummary(data){
-    const mixed =
-      data.latest_status_zh ||
-      data.latest_status_cn ||
-      data.latest_status ||
-      "";
+    // อ่านสถานะล่าสุดแบบยืดหยุ่น (จาก data ตรง ๆ)
+    const rawLatest = pickStatusText(data) || "";
+    dlog("raw latest:", rawLatest);
 
-    const latestTh = toThaiStatus(mixed);
+    const latestTh = toThaiStatus(rawLatest);
 
-    // ไม่ match / ไม่ใช่จีน => ไม่แสดง
     if (!latestTh) {
-      summary.style.display = "none";
+      summary.style.display = "block";
+      summary.innerHTML = `
+        <div class="errorBox">
+          <b>ไม่มีสถานะที่รองรับ</b><br/>
+          ระบบจะแสดงเฉพาะ “สถานะจีน” ที่อยู่ใน mapping เท่านั้น
+        </div>
+      `;
       return;
     }
 
@@ -375,8 +405,8 @@
     summary.innerHTML = `
       <div class="summaryTop">
         <div class="kv">
-          <div><b>เลขพัสดุ</b> <span class="value">${data.tracking_no || "-"}</span></div>
-          <div><b>อัปเดตล่าสุด</b> <span class="value">${data.last_update || "-"}</span></div>
+          <div><b>เลขพัสดุ</b> <span class="value">${data.tracking_no || data.trackingNo || "-"}</span></div>
+          <div><b>อัปเดตล่าสุด</b> <span class="value">${data.last_update || data.lastUpdate || "-"}</span></div>
         </div>
 
         <span class="badge ${cls.cls}">
@@ -394,29 +424,34 @@
   function renderTimeline(events){
     if (!timeline) return;
 
-    const seen = new Set(); // ตัดซ้ำตาม "ข้อความไทย" ที่แปลได้
+    // รองรับกรณี events ไม่ใช่ array
+    const arr = Array.isArray(events) ? events : (events ? [events] : []);
+    dlog("events count:", arr.length);
+
+    const seen = new Set();
     const rendered = [];
 
-    for (const e of (events || [])) {
-      const mixed = e.status_zh || e.status_cn || e.status || e.status_th || "";
-      const th = toThaiStatus(mixed);
+    for (const e of arr) {
+      const raw = pickStatusText(e);
+      const th = toThaiStatus(raw);
 
-      if (!th) continue;        // ไม่ match => ไม่แสดง
-      if (seen.has(th)) continue; // ซ้ำ => ข้าม
+      dlog("event raw:", raw, "=> th:", th);
+
+      if (!th) continue;
+      if (seen.has(th)) continue;
+
       seen.add(th);
-
       rendered.push(`
         <div class="event">
-          <div class="time">${e.time || e.datetime || "-"}</div>
+          <div class="time">${pickTimeText(e)}</div>
           <div class="text">${th}</div>
         </div>
       `);
     }
 
-    // ไม่มีรายการที่ match => ซ่อนทั้งกล่อง timeline
     if (!rendered.length) {
-      timeline.innerHTML = "";
-      if (history) history.style.display = "none";
+      timeline.innerHTML = `<div class="muted" style="padding:10px 0">ไม่มีสถานะที่ match ตาม mapping</div>`;
+      if (history) history.style.display = "block"; // ให้เห็นข้อความ “ไม่มีสถานะ…” แทนว่าง
       return;
     }
 
@@ -452,8 +487,13 @@
     setLoading();
 
     try{
-      const r = await fetch(`/api/track?no=${encodeURIComponent(no)}`);
+      const url = `/api/track?no=${encodeURIComponent(no)}`;
+      dlog("fetch:", url);
+
+      const r = await fetch(url);
       const data = await r.json();
+
+      dlog("response ok:", r.ok, "data:", data);
 
       if(!r.ok){
         setError(data.error || "ไม่พบข้อมูล");
@@ -461,9 +501,11 @@
       }
 
       renderSummary(data);
-      renderTimeline(data.events);
 
-      // หมายเหตุ: renderTimeline จะตัดสินใจเองว่าจะโชว์/ซ่อน history
+      // events อาจชื่อไม่เหมือนกัน
+      const events = data.events || data.history || data.traces || data.track || [];
+      renderTimeline(events);
+
     }catch(e){
       setError(String(e));
     }finally{

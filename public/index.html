@@ -222,100 +222,9 @@
     .footer a:hover{text-decoration:underline}
 
     /* ซ่อนกติกา และข้อความจัดกลุ่ม (ถาวร) */
-    #rule, #groupHint { display: none !important; }
-
-    /* ===== Progress Bar ===== */
-    .progressWrap{margin-top:12px}
-    .progressMeta{
-      display:flex;justify-content:space-between;align-items:center;
-      margin-bottom:8px
-    }
-    .progressLabel{
-      font-size:12px;color:var(--muted);
-      font-weight:800;letter-spacing:.2px
-    }
-    .progressPct{
-      font-size:12px;color:var(--text);font-weight:900
-    }
-    .progressBar{
-      height:10px;border-radius:999px;
-      background: rgba(15,95,191,.10);
-      overflow:hidden;
-      border:1px solid rgba(15,95,191,.16);
-    }
-    .progressFill{
-      height:100%;
-      border-radius:999px;
-      background: linear-gradient(90deg, var(--brand), var(--brand-2));
-      box-shadow: 0 10px 18px rgba(15,95,191,.14);
-    }
-
-    /* ===== Stepper (องค์กร/ทางการ + เส้นเชื่อม) ===== */
-    .stepper{margin-top:14px}
-
-    .steps{display:flex;gap:12px;align-items:stretch}
-
-    .step{
-      flex:1;
-      position:relative;
-      padding:12px 12px;
-      border-radius:14px;
-      background: var(--surface-2);
-      border:1px solid var(--border);
-    }
-
-    .step:not(:last-child)::after{
-      content:"";
-      position:absolute;
-      top:19px;
-      right:-12px;
-      width:12px;
-      height:2px;
-      background: rgba(100,116,139,.22);
-    }
-
-    .stepTop{display:flex;align-items:center;gap:10px}
-
-    .stepDot{
-      width:12px;height:12px;border-radius:999px;
-      background: rgba(100,116,139,.22);
-      border:3px solid rgba(100,116,139,.16);
-      flex:0 0 auto;
-    }
-
-    .stepTitle{
-      font-size:12px;font-weight:900;color:var(--muted);
-      letter-spacing:.2px;line-height:1.2;
-    }
-
-    .step.active{
-      background: rgba(15,95,191,.06);
-      border-color: rgba(15,95,191,.22);
-    }
-    .step.active .stepDot{
-      background: var(--brand);
-      border-color: rgba(15,95,191,.22);
-      box-shadow: 0 0 0 3px rgba(15,95,191,.10);
-    }
-    .step.active .stepTitle{color: var(--text)}
-
-    .step.done{
-      background: rgba(15,95,191,.04);
-      border-color: rgba(15,95,191,.14);
-    }
-    .step.done .stepDot{
-      background: var(--brand);
-      border-color: rgba(15,95,191,.18);
-    }
-    .step.done .stepTitle{color: rgba(15,23,42,.90)}
-    .step.done:not(:last-child)::after{background: rgba(15,95,191,.40)}
-
-    @media(max-width:520px){
-      .steps{flex-direction:column;gap:10px}
-      .step:not(:last-child)::after{
-        top:auto;bottom:-10px;left:18px;right:auto;
-        width:2px;height:10px;
-      }
+    #rule,
+    #groupHint {
+      display: none !important;
     }
   </style>
 </head>
@@ -347,6 +256,7 @@
             <button class="btn" id="btn">ค้นหา</button>
           </div>
 
+          <!-- ใส่ id="rule" (ซ่อนด้วย CSS) -->
           <div id="rule" style="margin-top:10px" class="small">
             กติกา: แสดงเฉพาะสถานะ “ภาษาจีน” ที่ตรงกับ mapping ของคุณเท่านั้น (ไม่ match = ไม่แสดง)
           </div>
@@ -359,6 +269,7 @@
         <div class="card" id="history" style="display:none">
           <h2>ไทม์ไลน์สถานะ</h2>
 
+          <!-- ใส่ id="groupHint" (ซ่อนด้วย CSS) -->
           <div id="groupHint" class="muted">
             จัดกลุ่ม: ขนส่งปลายทาง / ศุลกากรประเทศปลายทาง / คลังสินค้าต้นทาง
           </div>
@@ -403,6 +314,9 @@
 
     // คลังสินค้า(ต้นทาง)
     { zh: "您的貨物已准備從集運倉出倉", th: "พัสดุของคุณออกคลัง เพื่อเตรียมส่งไปยังสนามบินแล้ว" },
+    // (ถ้า API ส่งตัวย่อ เพิ่มอันนี้ด้วย)
+    // { zh: "您的货物已准备从集运仓出仓", th: "พัสดุของคุณออกคลัง เพื่อเตรียมส่งไปยังสนามบินแล้ว" },
+
     { zh: "已經打印好地址面單", th: "พิมพ์ใบปะหน้าที่อยู่เรียบร้อยแล้ว" },
     { zh: "您已下單成功", th: "สร้างออเดอร์การจัดส่งเรียบร้อย" },
   ];
@@ -455,6 +369,7 @@
   function toThaiStatus(rawAny) {
     const raw = extractZh(rawAny);
     if (!raw) return null;
+
     if (!hasChinese(raw)) return null;
 
     const zh = normalizeText(raw);
@@ -491,27 +406,6 @@
     return "คลังสินค้าต้นทาง";
   }
 
-  function calcProgressFromEvents(events){
-    const arr = Array.isArray(events) ? events : (events ? [events] : []);
-    const thList = arr.map(e => toThaiStatus(pickStatusText(e))).filter(Boolean);
-
-    const hasOrigin   = thList.some(th => groupOf(th) === "คลังสินค้าต้นทาง");
-    const hasCustoms  = thList.some(th => groupOf(th) === "ศุลกากรประเทศปลายทาง");
-    const hasLastMile = thList.some(th => groupOf(th) === "ขนส่งปลายทาง");
-
-    if (hasLastMile) return { pct: 100, label: "ขนส่งปลายทาง" };
-    if (hasCustoms)  return { pct: 80,  label: "ศุลกากรประเทศปลายทาง" };
-    if (hasOrigin)   return { pct: 35,  label: "คลังสินค้าต้นทาง" };
-    return { pct: 0, label: "" };
-  }
-
-  function progressToStepIndex(pct){
-    if (pct >= 100) return 3;
-    if (pct >= 80)  return 2;
-    if (pct >= 35)  return 1;
-    return 0;
-  }
-
   function badgeOf(th){
     if (!th) return { cls:"warn", label:"กำลังดำเนินการ" };
     if (th.includes("ถึงผู้รับ")) return { cls:"ok", label:"ถึงแล้ว" };
@@ -524,7 +418,8 @@
   // ==========================================
   // 5) Render
   // ==========================================
-  function renderSummary(data, latestTh, events){
+  function renderSummary(data, latestTh){
+    // ถ้าไม่ match: ไม่แสดงอะไรเลย (ไม่มีกล่องแดง)
     if (!latestTh) {
       summary.style.display = "none";
       summary.innerHTML = "";
@@ -532,16 +427,14 @@
     }
 
     summary.style.display = "block";
-
     const badge = badgeOf(latestTh);
-    const progress = calcProgressFromEvents(events);
-    const step = progressToStepIndex(progress.pct);
 
     summary.innerHTML = `
       <div class="summaryTop">
         <div class="kv">
           <div><b>อัปเดตล่าสุด</b> <span class="value">${data.last_update || data.lastUpdate || "-"}</span></div>
         </div>
+
         <span class="badge ${badge.cls}">
           <span class="dot"></span>
           ${badge.label}
@@ -551,43 +444,6 @@
       <div style="margin-top:6px;font-size:18px;font-weight:800">
         ${latestTh}
       </div>
-
-      <div class="stepper">
-        <div class="steps">
-          <div class="step ${step>=1 ? (step===1 ? 'active' : 'done') : ''}">
-            <div class="stepTop">
-              <span class="stepDot"></span>
-              <span class="stepTitle">คลังสินค้าต้นทาง</span>
-            </div>
-          </div>
-
-          <div class="step ${step>=2 ? (step===2 ? 'active' : 'done') : ''}">
-            <div class="stepTop">
-              <span class="stepDot"></span>
-              <span class="stepTitle">ศุลกากรประเทศปลายทาง</span>
-            </div>
-          </div>
-
-          <div class="step ${step>=3 ? 'active done' : ''}">
-            <div class="stepTop">
-              <span class="stepDot"></span>
-              <span class="stepTitle">ขนส่งปลายทาง</span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      ${progress.pct > 0 ? `
-        <div class="progressWrap">
-          <div class="progressMeta">
-            <span class="progressLabel">${progress.label}</span>
-            <span class="progressPct">${progress.pct}%</span>
-          </div>
-          <div class="progressBar" role="progressbar" aria-valuenow="${progress.pct}" aria-valuemin="0" aria-valuemax="100">
-            <div class="progressFill" style="width:${progress.pct}%"></div>
-          </div>
-        </div>
-      ` : ``}
     `;
   }
 
@@ -600,14 +456,11 @@
       return { time: pickTimeText(e), th };
     }).filter(x => !!x.th);
 
-    // ไม่ match เลย => ไม่แสดงไทม์ไลน์
     if (!translated.length) {
-      history.style.display = "none";
-      groupsEl.innerHTML = "";
+      if (history) history.style.display = "none";
       return;
     }
 
-    // ตัดซ้ำ (สถานะไทยซ้ำ แสดงแค่ครั้งเดียว)
     const seen = new Set();
     const deduped = [];
     for (const x of translated) {
@@ -616,7 +469,6 @@
       deduped.push({ ...x, group: groupOf(x.th) });
     }
 
-    // bucket ตามกลุ่ม
     const buckets = new Map(GROUP_ORDER.map(g => [g, []]));
     for (const x of deduped) {
       if (!buckets.has(x.group)) buckets.set(x.group, []);
@@ -634,9 +486,12 @@
           </div>
         `).join("");
 
+        // ไม่แสดง "x รายการ" ตามที่ขอ
         return `
           <div class="group">
-            <div class="groupTitle"><div>${g}</div></div>
+            <div class="groupTitle">
+              <div>${g}</div>
+            </div>
             <div class="timeline">${itemsHtml}</div>
           </div>
         `;
@@ -662,6 +517,7 @@
   }
 
   function setError(msg){
+    // อันนี้ยังคงไว้สำหรับ error จริง ๆ จาก API
     summary.style.display = "block";
     history.style.display = "none";
     summary.innerHTML = `<div class="errorBox"><b>ไม่สำเร็จ:</b> ${msg || "เกิดข้อผิดพลาด"}</div>`;
@@ -698,7 +554,7 @@
       const rawLatest = pickStatusText(data) || pickStatusText(Array.isArray(events) ? events[0] : events);
       const latestTh = toThaiStatus(rawLatest);
 
-      renderSummary(data, latestTh, events);
+      renderSummary(data, latestTh);
       renderGroupedTimeline(events);
 
     }catch(e){

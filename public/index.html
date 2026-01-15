@@ -226,6 +226,39 @@
     #groupHint {
       display: none !important;
     }
+        /* ===== Progress Bar ===== */
+    .progressWrap{margin-top:12px}
+    .progressMeta{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      margin-bottom:8px
+    }
+    .progressLabel{
+      font-size:12px;
+      color:var(--muted);
+      font-weight:800;
+      letter-spacing:.2px
+    }
+    .progressPct{
+      font-size:12px;
+      color:var(--text);
+      font-weight:900
+    }
+    .progressBar{
+      height:10px;
+      border-radius:999px;
+      background: rgba(15,95,191,.10);
+      overflow:hidden;
+      border:1px solid rgba(15,95,191,.16);
+    }
+    .progressFill{
+      height:100%;
+      border-radius:999px;
+      background: linear-gradient(90deg, var(--brand), var(--brand-2));
+      box-shadow: 0 10px 18px rgba(15,95,191,.14);
+    }
+
   </style>
 </head>
 
@@ -405,6 +438,30 @@
 
     return "คลังสินค้าต้นทาง";
   }
+function calcProgressFromEvents(events){
+  const arr = Array.isArray(events) ? events : (events ? [events] : []);
+
+  // แปลง event → สถานะไทยที่ match แล้วเท่านั้น
+  const thList = arr
+    .map(e => toThaiStatus(pickStatusText(e)))
+    .filter(Boolean);
+
+  const reachedOrigin   = thList.some(th => groupOf(th) === "คลังสินค้าต้นทาง");
+  const reachedCustoms  = thList.some(th => groupOf(th) === "ศุลกากรประเทศปลายทาง");
+  const reachedLastMile = thList.some(th => groupOf(th) === "ขนส่งปลายทาง");
+
+  if (reachedLastMile) {
+    return { pct: 100, label: "ขนส่งปลายทาง" };
+  }
+  if (reachedCustoms) {
+    return { pct: 80, label: "ศุลกากรประเทศปลายทาง" };
+  }
+  if (reachedOrigin) {
+    return { pct: 35, label: "คลังสินค้าต้นทาง" };
+  }
+
+  return { pct: 0, label: "" };
+}
 
   function badgeOf(th){
     if (!th) return { cls:"warn", label:"กำลังดำเนินการ" };
@@ -418,7 +475,7 @@
   // ==========================================
   // 5) Render
   // ==========================================
-  function renderSummary(data, latestTh){
+  function renderSummary(data, latestTh, events){
     // ถ้าไม่ match: ไม่แสดงอะไรเลย (ไม่มีกล่องแดง)
     if (!latestTh) {
       summary.style.display = "none";
@@ -428,6 +485,8 @@
 
     summary.style.display = "block";
     const badge = badgeOf(latestTh);
+    const progress = calcProgressFromEvents(events);
+
 
     summary.innerHTML = `
       <div class="summaryTop">
@@ -444,8 +503,19 @@
       <div style="margin-top:6px;font-size:18px;font-weight:800">
         ${latestTh}
       </div>
-    `;
-  }
+    ${progress.pct > 0 ? `
+  <div class="progressWrap">
+    <div class="progressMeta">
+      <span class="progressLabel">${progress.label}</span>
+      <span class="progressPct">${progress.pct}%</span>
+    </div>
+    <div class="progressBar" role="progressbar" aria-valuenow="${progress.pct}" aria-valuemin="0" aria-valuemax="100">
+      <div class="progressFill" style="width:${progress.pct}%"></div>
+    </div>
+  </div>
+` : ``}
+  `;
+}
 
   function renderGroupedTimeline(events){
     const arr = Array.isArray(events) ? events : (events ? [events] : []);
@@ -554,7 +624,7 @@
       const rawLatest = pickStatusText(data) || pickStatusText(Array.isArray(events) ? events[0] : events);
       const latestTh = toThaiStatus(rawLatest);
 
-      renderSummary(data, latestTh);
+      renderSummary(data, latestTh, events);
       renderGroupedTimeline(events);
 
     }catch(e){

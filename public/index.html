@@ -258,52 +258,6 @@
       background: linear-gradient(90deg, var(--brand), var(--brand-2));
       box-shadow: 0 10px 18px rgba(15,95,191,.14);
     }
-/* ===== Stepper (3 steps) ===== */
-.stepper{margin-top:12px}
-.steps{display:flex;gap:10px;align-items:flex-start}
-.step{
-  flex:1;
-  border:1px solid var(--border);
-  background: var(--surface-2);
-  border-radius: 14px;
-  padding: 10px 10px;
-  position:relative;
-}
-.stepTop{display:flex;align-items:center;gap:8px}
-.stepDot{
-  width:10px;height:10px;border-radius:999px;
-  background: rgba(100,116,139,.25);
-  border: 3px solid rgba(100,116,139,.18);
-}
-.stepTitle{
-  font-size:12px;
-  font-weight:900;
-  color:var(--muted);
-  letter-spacing:.2px
-}
-
-/* สถานะกำลังอยู่ขั้นนี้ */
-.step.active{
-  background: rgba(15,95,191,.06);
-  border-color: rgba(15,95,191,.20);
-}
-.step.active .stepDot{
-  background: var(--brand);
-  border-color: rgba(15,95,191,.20);
-  box-shadow: 0 0 0 3px rgba(15,95,191,.10);
-}
-.step.active .stepTitle{color:var(--text)}
-
-/* สถานะผ่านแล้ว */
-.step.done{
-  background: rgba(15,95,191,.04);
-  border-color: rgba(15,95,191,.14);
-}
-.step.done .stepDot{
-  background: var(--brand);
-  border-color: rgba(15,95,191,.18);
-}
-.step.done .stepTitle{color: rgba(15,23,42,.85)}
 /* ===== Stepper (องค์กร/ทางการ + เส้นเชื่อม) ===== */
 .stepper{margin-top:14px}
 
@@ -356,7 +310,7 @@
   line-height:1.2;
 }
 
-/* Active (กำลังอยู่ขั้นนี้) */
+/* Active */
 .step.active{
   background: rgba(15,95,191,.06);
   border-color: rgba(15,95,191,.22);
@@ -368,7 +322,7 @@
 }
 .step.active .stepTitle{color: var(--text)}
 
-/* Done (ผ่านแล้ว) */
+/* Done */
 .step.done{
   background: rgba(15,95,191,.04);
   border-color: rgba(15,95,191,.14);
@@ -382,7 +336,7 @@
   background: rgba(15,95,191,.40);
 }
 
-/* Mobile: เรียงลงล่าง + เส้นเชื่อมแนวตั้ง */
+/* Mobile */
 @media(max-width:520px){
   .steps{flex-direction:column;gap:10px}
   .step:not(:last-child)::after{
@@ -592,67 +546,83 @@ function calcProgressFromEvents(events){
   return { pct: 0, label: "" };
 }
 
-  if (reachedLastMile) {
-    return { pct: 100, label: "ขนส่งปลายทาง" };
-  }
-  if (reachedCustoms) {
-    return { pct: 80, label: "ศุลกากรประเทศปลายทาง" };
-  }
-  if (reachedOrigin) {
-    return { pct: 35, label: "คลังสินค้าต้นทาง" };
-  }
-
-  return { pct: 0, label: "" };
+function progressToStepIndex(pct){
+  if (pct >= 100) return 3; // ขนส่งปลายทาง
+  if (pct >= 80)  return 2; // ศุลกากรประเทศปลายทาง
+  if (pct >= 35)  return 1; // คลังสินค้าต้นทาง
+  return 0;
 }
 
-  function badgeOf(th){
-    if (!th) return { cls:"warn", label:"กำลังดำเนินการ" };
-    if (th.includes("ถึงผู้รับ")) return { cls:"ok", label:"ถึงแล้ว" };
-    if (th.includes("โปรดตรวจสอบ") || th.includes("ไม่สอดคล้อง") || th.includes("ติดต่อ")) {
-      return { cls:"bad", label:"มีปัญหา" };
-    }
-    return { cls:"warn", label:"กำลังขนส่ง" };
+function renderSummary(data, latestTh, events){
+  // ถ้าไม่ match: ไม่แสดงอะไรเลย
+  if (!latestTh) {
+    summary.style.display = "none";
+    summary.innerHTML = "";
+    return;
   }
 
-  // ==========================================
-  // 5) Render
-  // ==========================================
-  function renderSummary(data, latestTh, events){
-    // ถ้าไม่ match: ไม่แสดงอะไรเลย (ไม่มีกล่องแดง)
-    if (!latestTh) {
-      summary.style.display = "none";
-      summary.innerHTML = "";
-      return;
-    }
+  summary.style.display = "block";
 
-    summary.innerHTML = `
-  <div class="stepper">
-    <div class="steps">
+  const badge = badgeOf(latestTh);
+  const progress = calcProgressFromEvents(events);
+  const step = progressToStepIndex(progress.pct);
 
-      <div class="step ${step>=1 ? (step===1 ? 'active' : 'done') : ''}">
-        <div class="stepTop">
-          <span class="stepDot"></span>
-          <span class="stepTitle">คลังสินค้าต้นทาง</span>
-        </div>
+  summary.innerHTML = `
+    <div class="summaryTop">
+      <div class="kv">
+        <div><b>อัปเดตล่าสุด</b> <span class="value">${data.last_update || data.lastUpdate || "-"}</span></div>
       </div>
 
-      <div class="step ${step>=2 ? (step===2 ? 'active' : 'done') : ''}">
-        <div class="stepTop">
-          <span class="stepDot"></span>
-          <span class="stepTitle">ศุลกากรประเทศปลายทาง</span>
-        </div>
-      </div>
-
-      <div class="step ${step>=3 ? 'active done' : ''}">
-        <div class="stepTop">
-          <span class="stepDot"></span>
-          <span class="stepTitle">ขนส่งปลายทาง</span>
-        </div>
-      </div>
-
+      <span class="badge ${badge.cls}">
+        <span class="dot"></span>
+        ${badge.label}
+      </span>
     </div>
-  </div>
-`;
+
+    <div style="margin-top:6px;font-size:18px;font-weight:800">
+      ${latestTh}
+    </div>
+
+    <div class="stepper">
+      <div class="steps">
+
+        <div class="step ${step>=1 ? (step===1 ? 'active' : 'done') : ''}">
+          <div class="stepTop">
+            <span class="stepDot"></span>
+            <span class="stepTitle">คลังสินค้าต้นทาง</span>
+          </div>
+        </div>
+
+        <div class="step ${step>=2 ? (step===2 ? 'active' : 'done') : ''}">
+          <div class="stepTop">
+            <span class="stepDot"></span>
+            <span class="stepTitle">ศุลกากรประเทศปลายทาง</span>
+          </div>
+        </div>
+
+        <div class="step ${step>=3 ? 'active done' : ''}">
+          <div class="stepTop">
+            <span class="stepDot"></span>
+            <span class="stepTitle">ขนส่งปลายทาง</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    ${progress.pct > 0 ? `
+      <div class="progressWrap">
+        <div class="progressMeta">
+          <span class="progressLabel">${progress.label}</span>
+          <span class="progressPct">${progress.pct}%</span>
+        </div>
+        <div class="progressBar" role="progressbar" aria-valuenow="${progress.pct}" aria-valuemin="0" aria-valuemax="100">
+          <div class="progressFill" style="width:${progress.pct}%"></div>
+        </div>
+      </div>
+    ` : ``}
+  `;
+}
 
   function renderGroupedTimeline(events){
     const arr = Array.isArray(events) ? events : (events ? [events] : []);
@@ -762,7 +732,7 @@ function calcProgressFromEvents(events){
       const latestTh = toThaiStatus(rawLatest);
 
       renderSummary(data, latestTh, events);
-      renderGroupedTimeline(events);
+      function renderGroupedTimeline(events){
 
     }catch(e){
       setError(String(e));

@@ -6,130 +6,228 @@
   <title>Weiming Tracking</title>
 
   <style>
-  :root{
-    --bg:#f6f8fb;
-    --surface:#ffffff;
-    --surface-2:#f1f4f9;
-    --text:#0f172a;
-    --muted:#64748b;
-    --border:#e5e7eb;
-    --shadow: 0 10px 24px rgba(2, 6, 23, 0.08);
+    :root{
+      --bg:#f6f8fb;
+      --surface:#ffffff;
+      --surface-2:#f1f4f9;
+      --text:#0f172a;
+      --muted:#64748b;
+      --border:#e5e7eb;
+      --shadow: 0 10px 24px rgba(2, 6, 23, 0.08);
 
-    --brand:#0f5fbf;
-    --brand-2:#0a3f7a;
+      --brand:#0f5fbf;
+      --brand-2:#0a3f7a;
 
-    --ok:#0f766e;
-    --warn:#b45309;
-    --bad:#b91c1c;
+      --ok:#0f766e;
+      --warn:#b45309;
+      --bad:#b91c1c;
 
-    --badge-bg: rgba(15, 95, 191, 0.10);
-    --badge-text: #0f5fbf;
+      --badge-bg: rgba(15, 95, 191, 0.10);
+      --badge-text: #0f5fbf;
 
-    --ring: rgba(15,95,191,.25);
-  }
+      --ring: rgba(15,95,191,.25);
+    }
 
-  *{box-sizing:border-box}
-  html,body{height:100%}
-  body{
-    margin:0;
-    font-family: system-ui, -apple-system, "Segoe UI", Tahoma, sans-serif;
-    background: radial-gradient(1200px 600px at 20% -10%, rgba(15,95,191,.10), transparent 60%),
-                radial-gradient(1000px 500px at 90% 0%, rgba(15,95,191,.08), transparent 55%),
-                var(--bg);
-    color:var(--text);
-  }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      font-family: system-ui, -apple-system, "Segoe UI", Tahoma, sans-serif;
+      background: radial-gradient(1200px 600px at 20% -10%, rgba(15,95,191,.10), transparent 60%),
+                  radial-gradient(1000px 500px at 90% 0%, rgba(15,95,191,.08), transparent 55%),
+                  var(--bg);
+      color:var(--text);
+    }
 
-  .wrap{max-width:980px;margin:0 auto;padding:20px 14px 28px}
+    .wrap{max-width:980px;margin:0 auto;padding:20px 14px 28px}
 
-  .topbar{
-    display:flex;align-items:center;justify-content:space-between;gap:12px;
-    padding: 14px 16px;
-    border:1px solid var(--border);
-    border-radius: 16px;
-    background: linear-gradient(135deg, rgba(15,95,191,.12), rgba(15,95,191,.04));
-    box-shadow: var(--shadow);
-  }
+    .topbar{
+      display:flex;align-items:center;justify-content:space-between;gap:12px;
+      padding: 14px 16px;
+      border:1px solid var(--border);
+      border-radius: 16px;
+      background: linear-gradient(135deg, rgba(15,95,191,.12), rgba(15,95,191,.04));
+      box-shadow: var(--shadow);
+    }
+    .brand{display:flex;align-items:center;gap:10px;min-width:0}
+    .logo{
+      width:40px;height:40px;border-radius:12px;
+      background: linear-gradient(135deg, var(--brand), var(--brand-2));
+      display:grid;place-items:center;
+      box-shadow: 0 10px 18px rgba(15,95,191,.25);
+      flex:0 0 auto;
+    }
+    .logo svg{width:22px;height:22px;fill:#fff}
+    .brand h1{margin:0;font-size:16px;letter-spacing:.2px;line-height:1.1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .brand .sub{font-size:12px;color:var(--muted);margin-top:2px}
 
-  .brand{display:flex;align-items:center;gap:10px;min-width:0}
-  .logo{
-    width:40px;height:40px;border-radius:12px;
-    background: linear-gradient(135deg, var(--brand), var(--brand-2));
-    display:grid;place-items:center;
-    box-shadow: 0 10px 18px rgba(15,95,191,.25);
-    flex:0 0 auto;
-  }
-  .logo svg{width:22px;height:22px;fill:#fff}
-  .brand h1{margin:0;font-size:16px;letter-spacing:.2px;line-height:1.1}
-  .brand .sub{font-size:12px;color:var(--muted);margin-top:2px}
+    .grid{
+      display:grid;
+      grid-template-columns: 1.1fr .9fr;
+      gap: 14px;
+      margin-top: 14px;
+    }
+    @media(max-width: 860px){.grid{grid-template-columns:1fr}}
 
-  .grid{
-    display:grid;
-    grid-template-columns: 1.1fr .9fr;
-    gap: 14px;
-    margin-top: 14px;
-  }
-  @media(max-width: 860px){.grid{grid-template-columns:1fr}}
+    .card{
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      box-shadow: var(--shadow);
+      padding: 16px;
+      overflow:hidden;
+    }
+    .card h2{margin:0 0 8px 0;font-size:14px;letter-spacing:.2px}
+    .muted{color:var(--muted); font-size:13px}
+    .small{font-size:12px; color:var(--muted)}
 
-  .card{
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 16px;
-    box-shadow: var(--shadow);
-    padding: 16px;
-    overflow:hidden;
-  }
-  .card h2{margin:0 0 8px 0;font-size:14px}
-  .muted{color:var(--muted); font-size:13px}
-  .small{font-size:12px; color:var(--muted)}
+    .searchRow{
+      display:grid;
+      grid-template-columns: 1fr 132px;
+      gap: 10px;
+      margin-top: 10px;
+    }
+    @media(max-width:520px){.searchRow{grid-template-columns:1fr}}
 
-  .searchRow{
-    display:grid;
-    grid-template-columns: 1fr 132px;
-    gap: 10px;
-    margin-top: 10px;
-  }
-  @media(max-width:520px){.searchRow{grid-template-columns:1fr}}
+    input{
+      width:100%;
+      padding: 12px 14px;
+      border-radius: 14px;
+      border: 1px solid var(--border);
+      background: var(--surface-2);
+      color: var(--text);
+      font-size: 15px;
+    }
+    input:focus{outline:3px solid var(--ring); border-color: transparent}
 
-  input{
-    width:100%;
-    padding: 12px 14px;
-    border-radius: 14px;
-    border: 1px solid var(--border);
-    background: var(--surface-2);
-    color: var(--text);
-    font-size: 15px;
-  }
-  input:focus{outline:3px solid var(--ring); border-color: transparent}
+    .btn{
+      border:none;
+      border-radius: 14px;
+      padding: 12px 14px;
+      background: linear-gradient(135deg, var(--brand), var(--brand-2));
+      color:#fff;
+      font-size:15px;
+      cursor:pointer;
+      box-shadow: 0 12px 18px rgba(15,95,191,.22);
+      transition: transform .06s ease, filter .12s ease;
+    }
+    .btn:hover{filter:brightness(1.02)}
+    .btn:active{transform: translateY(1px)}
+    .btn:disabled{opacity:.6;cursor:not-allowed;box-shadow:none}
 
-  .btn{
-    border:none;
-    border-radius: 14px;
-    padding: 12px 14px;
-    background: linear-gradient(135deg, var(--brand), var(--brand-2));
-    color:#fff;
-    font-size:15px;
-    cursor:pointer;
-    box-shadow: 0 12px 18px rgba(15,95,191,.22);
-  }
+    .summaryTop{
+      display:flex;
+      justify-content:space-between;
+      align-items:flex-start;
+      gap:10px;
+      margin-bottom: 10px;
+    }
+    .kv{display:grid;gap:6px}
+    .kv b{font-size:13px}
+    .kv .value{font-size:14px}
 
-  .footer{
-    margin-top: 14px;
-    padding: 12px 6px 2px;
-    text-align:center;
-    color: var(--muted);
-    font-size: 12px;
-  }
-  .footer a{color: var(--muted); text-decoration:none}
-  .footer a:hover{text-decoration:underline}
+    .badge{
+      display:inline-flex;align-items:center;gap:8px;
+      padding: 8px 10px;border-radius: 999px;
+      background: var(--badge-bg);
+      color: var(--badge-text);
+      border: 1px solid rgba(15,95,191,.18);
+      font-size: 12px;
+      font-weight: 700;
+      white-space:nowrap;
+    }
+    .dot{width:8px;height:8px;border-radius:999px;background: currentColor;opacity:.95}
 
-  /* =========================
-     ซ่อนกติกา และข้อความจัดกลุ่ม
-     ========================= */
-  #rule,
-  #groupHint {
-    display: none !important;
-  }
-</style>
+    .badge.ok{background: rgba(15,118,110,.12); color: var(--ok); border-color: rgba(15,118,110,.25)}
+    .badge.warn{background: rgba(180,83,9,.12); color: var(--warn); border-color: rgba(180,83,9,.25)}
+    .badge.bad{background: rgba(185,28,28,.12); color: var(--bad); border-color: rgba(185,28,28,.25)}
+
+    /* กลุ่มสถานะ */
+    .group{margin-top:12px}
+    .groupTitle{
+      display:flex;align-items:center;justify-content:space-between;gap:10px;
+      padding: 10px 12px;
+      border-radius: 14px;
+      border: 1px solid var(--border);
+      background: linear-gradient(180deg, rgba(15,95,191,.06), rgba(15,95,191,.02));
+      font-weight:800;
+      font-size:13px;
+    }
+
+    .timeline{
+      margin-top: 10px;
+      position:relative;
+      padding-left: 18px;
+    }
+    .timeline:before{
+      content:"";
+      position:absolute;
+      left:7px; top:2px; bottom:2px;
+      width:2px;
+      background: linear-gradient(to bottom, rgba(15,95,191,.35), rgba(15,95,191,.08));
+    }
+
+    .event{
+      position:relative;
+      padding: 10px 10px 10px 12px;
+      border-radius: 14px;
+      border: 1px solid var(--border);
+      background: var(--surface-2);
+      margin-bottom: 10px;
+    }
+    .event:before{
+      content:"";
+      position:absolute;
+      left:-18px;
+      top: 16px;
+      width: 12px;
+      height: 12px;
+      border-radius: 999px;
+      background: var(--surface);
+      border: 3px solid rgba(15,95,191,.55);
+      box-shadow: 0 0 0 3px rgba(15,95,191,.10);
+    }
+    .event .time{font-size:12px;color:var(--muted)}
+    .event .text{font-size:14px;font-weight:700;margin-top:4px;line-height:1.35}
+
+    .errorBox{
+      border: 1px solid rgba(185,28,28,.25);
+      background: rgba(185,28,28,.08);
+      color: var(--bad);
+      border-radius: 14px;
+      padding: 10px 12px;
+      font-size: 13px;
+    }
+
+    .loading{
+      display:flex;align-items:center;gap:10px;
+      font-size:13px;color:var(--muted);
+    }
+    .spinner{
+      width:16px;height:16px;border-radius:999px;
+      border:2px solid rgba(15,95,191,.25);
+      border-top-color: rgba(15,95,191,.85);
+      animation: spin 0.9s linear infinite;
+    }
+    @keyframes spin{to{transform:rotate(360deg)}}
+
+    .footer{
+      margin-top: 14px;
+      padding: 12px 6px 2px;
+      text-align:center;
+      color: var(--muted);
+      font-size: 12px;
+    }
+    .footer a{color: var(--muted); text-decoration:none}
+    .footer a:hover{text-decoration:underline}
+
+    /* ซ่อนกติกา และข้อความจัดกลุ่ม (ถาวร) */
+    #rule,
+    #groupHint {
+      display: none !important;
+    }
+  </style>
+</head>
 
 <body>
   <div class="wrap" id="app">
@@ -139,10 +237,6 @@
           <svg viewBox="0 0 24 24">
             <path d="M20 8h-3V4H3v13h2.1a2.9 2.9 0 0 0 5.8 0h4.2a2.9 2.9 0 0 0 5.8 0H23v-5l-3-4zM6.5 19a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zm10 0a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zM17 12V9h2l2 3h-4z"/>
           </svg>
-           #rule,
-           #groupHint {
-             display: none !important;
-  }
         </div>
         <div style="min-width:0">
           <h1>Weiming Tracking</h1>
@@ -162,7 +256,8 @@
             <button class="btn" id="btn">ค้นหา</button>
           </div>
 
-         <div id="rule" style="margin-top:10px" class="small">
+          <!-- ใส่ id="rule" (ซ่อนด้วย CSS) -->
+          <div id="rule" style="margin-top:10px" class="small">
             กติกา: แสดงเฉพาะสถานะ “ภาษาจีน” ที่ตรงกับ mapping ของคุณเท่านั้น (ไม่ match = ไม่แสดง)
           </div>
         </div>
@@ -173,8 +268,12 @@
       <div>
         <div class="card" id="history" style="display:none">
           <h2>ไทม์ไลน์สถานะ</h2>
-         <div id="groupHint" class="muted">
-          จัดกลุ่ม:   ขนส่งปลายทาง / ศุลกากรประเทศปลายทาง / คลังสินค้าต้นทาง</div>
+
+          <!-- ใส่ id="groupHint" (ซ่อนด้วย CSS) -->
+          <div id="groupHint" class="muted">
+            จัดกลุ่ม: ขนส่งปลายทาง / ศุลกากรประเทศปลายทาง / คลังสินค้าต้นทาง
+          </div>
+
           <div id="groups"></div>
         </div>
       </div>
@@ -212,7 +311,7 @@
     { zh: "連線收單建檔", th: "ระบบศุลกากรรับและบันทึกข้อมูลเรียบร้อยแล้ว" },
     { zh: "由於海關系統查無此包裹申報人資料", th: "เนื่องจากระบบศุลกากรไม่พบข้อมูลผู้เดินพิธีการ โปรดตรวจสอบว่าผู้รับพัสดุได้ลงทะเบียนกับ EZ WAY แล้วหรือไม่ หากยังไม่ได้ลงทะเบียนโปรดลงทะเบียนให้เรียบร้อย ถ่ายภาพหน้าจอให้ติดชื่อ/หมายเลขโทรศัพท์และหมายเลขบัตรประชาชนของผู้เดินพิธีการ แล้วส่งให้เจ้าหน้าที่ลูกค้าสัมพันธ์ของWeiming หลังจากได้รับข้อมูลแล้ว พัสดุจะได้รับการปล่อยภายในประมาณ 1-2 วันทำการ" },
     { zh: "不受理不可補正之錯單", th: "ข้อมูลที่ใช้เดินพิธีการไม่สอดคล้องกัน โปรดติดต่อเจ้าหน้าที่" },
-    
+
     // คลังสินค้า(ต้นทาง)
     { zh: "您的貨物已準備從集運倉出倉", th: "พัสดุของคุณออกคลัง เพื่อเตรียมส่งไปยังสนามบินแล้ว" },
     { zh: "已經打印好地址面單", th: "พิมพ์ใบปะหน้าที่อยู่เรียบร้อยแล้ว" },
@@ -220,7 +319,7 @@
   ];
 
   // ==========================================
-  // 2) Utilities: normalize / extract / checks
+  // 2) Utilities
   // ==========================================
   function normalizeText(s) {
     return (s || "")
@@ -241,7 +340,6 @@
     return s;
   }
 
-  // ดึงข้อความสถานะจากหลาย key (กัน API ส่งชื่อไม่ตรง)
   function pickStatusText(obj) {
     if (!obj || typeof obj !== "object") return "";
     const keys = [
@@ -263,22 +361,19 @@
   }
 
   // ==========================================
-  // 3) Translate: “match เท่านั้น” (ไม่ match = null)
+  // 3) Translate: match เท่านั้น
   // ==========================================
   function toThaiStatus(rawAny) {
     const raw = extractZh(rawAny);
     if (!raw) return null;
 
-    // บังคับ: ต้องเป็นจีนจริง ๆ
     if (!hasChinese(raw)) return null;
 
     const zh = normalizeText(raw);
 
-    // exact
     const exact = STATUS_MAP.find(x => normalizeText(x.zh) === zh);
     if (exact) return exact.th;
 
-    // contains (ให้ยืดหยุ่น: บางทีเว็บมี suffix/prefix)
     const loose = STATUS_MAP.find(x => zh.includes(normalizeText(x.zh)) || normalizeText(x.zh).includes(zh));
     if (loose) return loose.th;
 
@@ -286,110 +381,97 @@
   }
 
   // ==========================================
-  // 4) Grouping: ขนส่งปลายทาง / ศุลกากรประเทศปลายทาง / คลังสินค้าต้นทาง
+  // 4) Grouping
   // ==========================================
   const GROUP_ORDER = ["ขนส่งปลายทาง", "ศุลกากรประเทศปลายทาง", "คลังสินค้าต้นทาง"];
 
   function groupOf(th){
-  if (!th) return "คลังสินค้าต้นทาง";
+    if (!th) return "คลังสินค้าต้นทาง";
 
-  // ขนส่งปลายทาง
-  if (
-    th.includes("พัสดุถึงผู้รับเรียบร้อยแล้ว") ||
-    th.includes("อยู่ระหว่างจัดส่ง") ||
-    th.includes("พัสดุอยู่ศูนย์คัดแยกพัสดุ")
-  ) return "ขนส่งปลายทาง";
+    if (th.includes("พัสดุถึงผู้รับเรียบร้อยแล้ว") || th.includes("อยู่ระหว่างจัดส่ง") || th.includes("พัสดุอยู่ศูนย์คัดแยกพัสดุ")) {
+      return "ขนส่งปลายทาง";
+    }
 
-  // ศุลกากรประเทศปลายทาง
-  if (
-    th.includes("กำลังดำเนินการนำสินค้าออกจากคลัง") ||
-    th.includes("ระบบศุลกากรรับและบันทึกข้อมูลเรียบร้อยแล้ว") ||
-    th.includes("เนื่องจากระบบศุลกากรไม่พบข้อมูล") ||
-    th.includes("ข้อมูลที่ใช้เดินพิธีการไม่สอดคล้องกัน")
-  ) return "ศุลกากรประเทศปลายทาง";
+    if (th.includes("กำลังดำเนินการนำสินค้า") || th.includes("ระบบศุลกากรรับ") || th.includes("เนื่องจากระบบศุลกากรไม่พบข้อมูล") || th.includes("ข้อมูลที่ใช้เดินพิธีการ")) {
+      return "ศุลกากรประเทศปลายทาง";
+    }
 
-  // คลังสินค้าต้นทาง
-  if (
-    th.includes("ออกคลัง") ||
-    th.includes("ใบปะหน้า") ||
-    th.includes("สร้างออเดอร์")
-  ) return "คลังสินค้าต้นทาง";
+    if (th.includes("ออกคลัง") || th.includes("ใบปะหน้า") || th.includes("สร้างออเดอร์")) {
+      return "คลังสินค้าต้นทาง";
+    }
 
-  return "คลังสินค้าต้นทาง";
-}
+    return "คลังสินค้าต้นทาง";
+  }
 
+  function badgeOf(th){
+    if (!th) return { cls:"warn", label:"กำลังดำเนินการ" };
+    if (th.includes("ถึงผู้รับ")) return { cls:"ok", label:"ถึงแล้ว" };
+    if (th.includes("โปรดตรวจสอบ") || th.includes("ไม่สอดคล้อง") || th.includes("ติดต่อ")) {
+      return { cls:"bad", label:"มีปัญหา" };
+    }
+    return { cls:"warn", label:"กำลังขนส่ง" };
+  }
 
   // ==========================================
   // 5) Render
   // ==========================================
-  // NOTE: ตัด "เลขพัสดุ" ออกตามที่ขอ
   function renderSummary(data, latestTh){
-  // ไม่ต้องแสดงอะไรเลย ถ้าไม่มีสถานะที่ match
-  if (!latestTh) {
-    summary.style.display = "none";
-    summary.innerHTML = "";
-    return;
-  }
+    // ถ้าไม่ match: ไม่แสดงอะไรเลย (ไม่มีกล่องแดง)
+    if (!latestTh) {
+      summary.style.display = "none";
+      summary.innerHTML = "";
+      return;
+    }
 
-  summary.style.display = "block";
+    summary.style.display = "block";
+    const badge = badgeOf(latestTh);
 
-  const badge = badgeOf(latestTh);
-  summary.innerHTML = `
-    <div class="summaryTop">
-      <div class="kv">
-        <div><b>อัปเดตล่าสุด</b> <span class="value">${data.last_update || data.lastUpdate || "-"}</span></div>
+    summary.innerHTML = `
+      <div class="summaryTop">
+        <div class="kv">
+          <div><b>อัปเดตล่าสุด</b> <span class="value">${data.last_update || data.lastUpdate || "-"}</span></div>
+        </div>
+
+        <span class="badge ${badge.cls}">
+          <span class="dot"></span>
+          ${badge.label}
+        </span>
       </div>
 
-      <span class="badge ${badge.cls}">
-        <span class="dot"></span>
-        ${badge.label}
-      </span>
-    </div>
-
-    <div style="margin-top:6px;font-size:18px;font-weight:800">
-      ${latestTh}
-    </div>
-  `;
-}
+      <div style="margin-top:6px;font-size:18px;font-weight:800">
+        ${latestTh}
+      </div>
+    `;
+  }
 
   function renderGroupedTimeline(events){
     const arr = Array.isArray(events) ? events : (events ? [events] : []);
 
-    // 1) แปลเฉพาะที่ match
     const translated = arr.map(e => {
       const raw = pickStatusText(e);
       const th = toThaiStatus(raw);
-      return {
-        time: pickTimeText(e),
-        th,
-      };
+      return { time: pickTimeText(e), th };
     }).filter(x => !!x.th);
 
-    // 2) ถ้าไม่ match เลย => ไม่ขึ้น (ไม่รก)
     if (!translated.length) {
       if (history) history.style.display = "none";
       return;
     }
 
-    // 3) ตัดซ้ำ: แสดงสถานะไทยแต่ละอัน "แค่ 1 ครั้ง" (ไม่สนกลุ่ม)
-    //    โดยจะเก็บรายการแรกที่เจอ (มักเป็นรายการล่าสุด ถ้า API ส่งล่าสุดมาก่อน)
     const seen = new Set();
     const deduped = [];
     for (const x of translated) {
-      const key = x.th;
-      if (seen.has(key)) continue;
-      seen.add(key);
+      if (seen.has(x.th)) continue;
+      seen.add(x.th);
       deduped.push({ ...x, group: groupOf(x.th) });
     }
 
-    // 4) จัดเรียง: ตาม GROUP_ORDER และภายในกลุ่มรักษาลำดับเดิม (ล่าสุดก่อน ถ้า API ล่าสุดมาก่อน)
     const buckets = new Map(GROUP_ORDER.map(g => [g, []]));
     for (const x of deduped) {
       if (!buckets.has(x.group)) buckets.set(x.group, []);
       buckets.get(x.group).push(x);
     }
 
-    // 5) render
     const html = GROUP_ORDER
       .filter(g => (buckets.get(g) || []).length > 0)
       .map(g => {
@@ -401,15 +483,15 @@
           </div>
         `).join("");
 
-  return `
-  <div class="group">
-    <div class="groupTitle">
-      <div>${g}</div>
-    </div>
-    <div class="timeline">${itemsHtml}</div>
-  </div>
-`;
-
+        // ไม่แสดง "x รายการ" ตามที่ขอ
+        return `
+          <div class="group">
+            <div class="groupTitle">
+              <div>${g}</div>
+            </div>
+            <div class="timeline">${itemsHtml}</div>
+          </div>
+        `;
       })
       .join("");
 
@@ -432,13 +514,14 @@
   }
 
   function setError(msg){
+    // อันนี้ยังคงไว้สำหรับ error จริง ๆ จาก API
     summary.style.display = "block";
     history.style.display = "none";
     summary.innerHTML = `<div class="errorBox"><b>ไม่สำเร็จ:</b> ${msg || "เกิดข้อผิดพลาด"}</div>`;
   }
 
   // ==========================================
-  // 6) Run: robust JSON parsing (กัน API ส่ง HTML)
+  // 6) Run
   // ==========================================
   async function run(){
     const no = (noEl.value || "").trim();
@@ -454,17 +537,17 @@
 
       let data;
       try { data = JSON.parse(text); }
-      catch { setError(`API ไม่ได้ส่ง JSON (HTTP ${r.status})`); return; }
+      catch {
+        setError(`API ไม่ได้ส่ง JSON (HTTP ${r.status})`);
+        return;
+      }
 
       if(!r.ok){
         setError(data.error || `HTTP ${r.status}`);
         return;
       }
 
-      // เลือก events จากหลายชื่อที่เป็นไปได้
       const events = data.events || data.history || data.traces || data.track || [];
-
-      // หา latest จาก data หรือเอา event แรก
       const rawLatest = pickStatusText(data) || pickStatusText(Array.isArray(events) ? events[0] : events);
       const latestTh = toThaiStatus(rawLatest);
 

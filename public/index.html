@@ -344,28 +344,40 @@
   if (yearEl) yearEl.textContent = String(new Date().getFullYear());
 
   // ==============================
-  // 1) Mapping จีน -> ไทย (แก้ quote ให้ถูกต้อง)
+  // 1) Mapping จีน -> ไทย + กลุ่มตามประเทศ (TW/HK)
+  //    - แปลไทย "เหมือนเดิม"
+  //    - จัดกลุ่ม "ดูจากจีน" แล้วอิงกลุ่มตามรูปที่ให้มา
   // ==============================
   const STATUS_MAP = [
-    // ขนส่ง(ปลายทาง)
-    { zh: "順利送達", th: "พัสดุถึงผู้รับเรียบร้อยแล้ว" },
-    { zh: "配送中", th: "อยู่ระหว่างจัดส่ง" },
-    { zh: "已集貨", th: "พัสดุอยู่ศูนย์คัดแยกพัสดุ" },
-    { zh: "快件交给", th: "อยู่ระหว่างจัดส่ง" },
-    { zh: "快件派送不成功", th: "จัดส่งไม่สำเร็จ ติดต่อผู้รับไม่ได้" },
-    { zh: "快件离开", th: "พัสดุออกจากศูนย์คัดแยกพัสดุ" },
+    // ===== TW: ขนส่ง(ปลายทาง) =====
+    { zh: "順利送達", th: "พัสดุถึงผู้รับเรียบร้อยแล้ว", group_tw: "ขนส่ง(ปลายทาง)" },
+    { zh: "配送中", th: "อยู่ระหว่างจัดส่ง", group_tw: "ขนส่ง(ปลายทาง)" },
+    { zh: "已集貨", th: "พัสดุอยู่ศูนย์คัดแยกพัสดุ", group_tw: "ขนส่ง(ปลายทาง)" },
 
-    // ศุลกากรประเทศปลายทาง
-    { zh: "出倉處理", th: "กำลังดำเนินการนำสินค้าออกจากคลัง" },
-    { zh: "連線收單建檔", th: "ระบบศุลกากรรับและบันทึกข้อมูลเรียบร้อยแล้ว" },
-    { zh: "由於海關系統查無此包裹申報人資料", th: "เนื่องจากระบบศุลกากรไม่พบข้อมูลผู้เดินพิธีการ โปรดตรวจสอบว่าผู้รับพัสดุได้ลงทะเบียนกับ EZ WAY แล้วหรือไม่ หากยังไม่ได้ลงทะเบียนโปรดลงทะเบียนให้เรียบร้อย ถ่ายภาพหน้าจอให้ติดชื่อ/หมายเลขโทรศัพท์และหมายเลขบัตรประชาชนของผู้เดินพิธีการ แล้วส่งให้เจ้าหน้าที่ลูกค้าสัมพันธ์ของWeiming หลังจากได้รับข้อมูลแล้ว พัสดุจะได้รับการปล่อยภายในประมาณ 1-2 วันทำการ" },
-    { zh: "不受理不可補正之錯單", th: "ข้อมูลที่ใช้เดินพิธีการไม่สอดคล้องกัน โปรดติดต่อเจ้าหน้าที่" },
+    // ===== HK: ขนส่ง(ปลายทาง) =====
+    { zh: "快件派送成功", th: "พัสดุถึงผู้รับเรียบร้อยแล้ว", group_hk: "ขนส่ง(ปลายทาง)" },
+    { zh: "快件派送不成功", th: "จัดส่งไม่สำเร็จ ติดต่อผู้รับไม่ได้", group_hk: "ขนส่ง(ปลายทาง)" },
+    { zh: "快件交给", th: "อยู่ระหว่างจัดส่ง", group_hk: "ขนส่ง(ปลายทาง)" },
+    { zh: "快件离开", th: "พัสดุออกจากศูนย์คัดแยกพัสดุ", group_hk: "ขนส่ง(ปลายทาง)" },
 
-    // คลังสินค้า(ต้นทาง)
-    { zh: "您的貨物已準備從集運倉出倉", th: "พัสดุของคุณออกคลัง เพื่อเตรียมส่งไปยังสนามบินแล้ว" },
-    { zh: "已經打印好地址面單", th: "พิมพ์ใบปะหน้าที่อยู่เรียบร้อยแล้ว" },
-    { zh: "您已下單成功", th: "สร้างออเดอร์การจัดส่งเรียบร้อย" },
+    // ===== TW: ศุลกากร(ปลายทาง) =====
+    { zh: "出倉處理", th: "กำลังดำเนินการนำสินค้าออกจากคลัง", group_tw: "ศุลกากร(ปลายทาง)" },
+    { zh: "連線收單建檔", th: "ระบบศุลกากรรับและบันทึกข้อมูลเรียบร้อยแล้ว", group_tw: "ศุลกากร(ปลายทาง)" },
+    { zh: "由於海關系統查無此包裹申報人資料", th: "เนื่องจากระบบศุลกากรไม่พบข้อมูลผู้เดินพิธีการ โปรดตรวจสอบว่าผู้รับพัสดุได้ลงทะเบียนกับ EZ WAY แล้วหรือไม่ หากยังไม่ได้ลงทะเบียนโปรดลงทะเบียนให้เรียบร้อย ถ่ายภาพหน้าจอให้ติดชื่อ/หมายเลขโทรศัพท์และหมายเลขบัตรประชาชนของผู้เดินพิธีการ แล้วส่งให้เจ้าหน้าที่ลูกค้าสัมพันธ์ของWeiming หลังจากได้รับข้อมูลแล้ว พัสดุจะได้รับการปล่อยภายในประมาณ 1-2 วันทำการ", group_tw: "ศุลกากร(ปลายทาง)" },
+    { zh: "不受理不可補正之錯單", th: "ข้อมูลที่ใช้เดินพิธีการไม่สอดคล้องกัน โปรดติดต่อเจ้าหน้าที่", group_tw: "ศุลกากร(ปลายทาง)" },
+
+    // ===== TW/HK: คลังสินค้า(ต้นทาง) =====
+    { zh: "您的貨物已準備從集運倉出倉", th: "พัสดุของคุณออกคลัง เพื่อเตรียมส่งไปยังสนามบินแล้ว", group_tw: "คลังสินค้า(ต้นทาง)", group_hk: "คลังสินค้า(ต้นทาง)" },
+    { zh: "已經打印好地址面單", th: "พิมพ์ใบปะหน้าที่อยู่เรียบร้อยแล้ว", group_tw: "คลังสินค้า(ต้นทาง)", group_hk: "คลังสินค้า(ต้นทาง)" },
+    { zh: "您已下單成功", th: "สร้างออเดอร์การจัดส่งเรียบร้อย", group_tw: "คลังสินค้า(ต้นทาง)", group_hk: "คลังสินค้า(ต้นทาง)" },
   ];
+
+  // หัวข้อกลุ่มตามประเทศ
+  const GROUPS_BY_LANE = {
+    TW: ["ขนส่ง(ปลายทาง)", "ศุลกากร(ปลายทาง)", "คลังสินค้า(ต้นทาง)"],
+    HK: ["ขนส่ง(ปลายทาง)", "คลังสินค้า(ต้นทาง)"],
+    DEFAULT: ["ขนส่ง(ปลายทาง)", "ศุลกากร(ปลายทาง)", "คลังสินค้า(ต้นทาง)"],
+  };
 
   // ==========================================
   // 2) Utilities
@@ -408,55 +420,77 @@
     return obj.time || obj.datetime || obj.dateTime || obj.date_time || obj.timestamp || "-";
   }
 
+  // พยายามหาเลนจาก data (ปรับ key ตาม API จริงได้)
+  function getLane(data){
+    const s = normalizeText(data?.lane || data?.region || data?.destination || data?.country || data?.to_country || "");
+    if (/(^|[^A-Z])TW([^A-Z]|$)/i.test(s) || s.includes("ไต้หวัน")) return "TW";
+    if (/(^|[^A-Z])HK([^A-Z]|$)/i.test(s) || s.includes("ฮ่องกง")) return "HK";
+    return "DEFAULT";
+  }
+
   // ==========================================
-  // 3) Translate: match เท่านั้น
+  // 3) Match by จีน -> คืนทั้ง th + กลุ่ม
   // ==========================================
-  function toThaiStatus(rawAny) {
+  function matchStatus(rawAny){
     const raw = extractZh(rawAny);
     if (!raw) return null;
     if (!hasChinese(raw)) return null;
 
     const zh = normalizeText(raw);
 
-    const exact = STATUS_MAP.find(x => normalizeText(x.zh) === zh);
-    if (exact) return exact.th;
+    // exact
+    let hit = STATUS_MAP.find(x => normalizeText(x.zh) === zh);
+    if (hit) return hit;
 
-    const loose = STATUS_MAP.find(x => zh.includes(normalizeText(x.zh)) || normalizeText(x.zh).includes(zh));
-    if (loose) return loose.th;
+    // loose (รองรับข้อความจีนที่มี prefix/suffix)
+    hit = STATUS_MAP.find(x => zh.includes(normalizeText(x.zh)) || normalizeText(x.zh).includes(zh));
+    return hit || null;
+  }
 
-    return null;
+  function toThaiStatus(rawAny) {
+    const m = matchStatus(rawAny);
+    return m ? m.th : null;
+  }
+
+  function groupOfRaw(rawAny, lane){
+    const m = matchStatus(rawAny);
+    if (!m) return null;
+
+    if (lane === "HK") return m.group_hk || null;
+    if (lane === "TW") return m.group_tw || null;
+    // DEFAULT: ใช้โครงแบบ TW เป็นหลัก (ถ้าไม่ได้กำหนดก็ไม่แสดง)
+    return m.group_tw || null;
   }
 
   // ==========================================
-  // 4) Grouping + Stepper logic
+  // 4) Stepper logic (รองรับ HK=2 ขั้น, TW=3 ขั้น)
   // ==========================================
-  const GROUP_ORDER = ["ขนส่งปลายทาง", "ศุลกากรประเทศปลายทาง", "คลังสินค้าต้นทาง"];
-
-  function groupOf(th){
-    if (!th) return "คลังสินค้าต้นทาง";
-    if (th.includes("พัสดุถึงผู้รับเรียบร้อยแล้ว") || th.includes("อยู่ระหว่างจัดส่ง") || th.includes("พัสดุอยู่ศูนย์คัดแยกพัสดุ") || th.includes("จัดส่งไม่สำเร็จ")) {
-      return "ขนส่งปลายทาง";
-    }
-    if (th.includes("กำลังดำเนินการนำสินค้า") || th.includes("ระบบศุลกากรรับ") || th.includes("เนื่องจากระบบศุลกากรไม่พบข้อมูล") || th.includes("ข้อมูลที่ใช้เดินพิธีการ")) {
-      return "ศุลกากรประเทศปลายทาง";
-    }
-    if (th.includes("ออกคลัง") || th.includes("ใบปะหน้า") || th.includes("สร้างออเดอร์")) {
-      return "คลังสินค้าต้นทาง";
-    }
-    return "คลังสินค้าต้นทาง";
-  }
-
-  function calcStepFromEvents(events){
+  function calcStepFromEvents(events, lane){
     const arr = Array.isArray(events) ? events : (events ? [events] : []);
-    const thList = arr.map(e => toThaiStatus(pickStatusText(e))).filter(Boolean);
+    const labels = GROUPS_BY_LANE[lane] || GROUPS_BY_LANE.DEFAULT;
 
-    const hasOrigin   = thList.some(th => groupOf(th) === "คลังสินค้าต้นทาง");
-    const hasCustoms  = thList.some(th => groupOf(th) === "ศุลกากรประเทศปลายทาง");
-    const hasLastMile = thList.some(th => groupOf(th) === "ขนส่งปลายทาง");
+    // สร้าง set ของกลุ่มที่พบจาก "จีน"
+    const groupsFound = new Set(
+      arr.map(e => groupOfRaw(pickStatusText(e), lane)).filter(Boolean)
+    );
 
-    if (hasLastMile) return 3;
-    if (hasCustoms)  return 2;
-    if (hasOrigin)   return 1;
+    // HK: [ขนส่ง, คลัง]  -> step: 0/1/2
+    if (lane === "HK") {
+      const hasOrigin = groupsFound.has(labels[1]);
+      const hasLast  = groupsFound.has(labels[0]);
+      if (hasLast) return 2;
+      if (hasOrigin) return 1;
+      return 0;
+    }
+
+    // TW/DEFAULT: [ขนส่ง, ศุลกากร, คลัง] -> step: 0/1/2/3
+    const hasOrigin  = groupsFound.has(labels[2]);
+    const hasCustoms = groupsFound.has(labels[1]);
+    const hasLast    = groupsFound.has(labels[0]);
+
+    if (hasLast) return 3;
+    if (hasCustoms) return 2;
+    if (hasOrigin) return 1;
     return 0;
   }
 
@@ -469,10 +503,43 @@
     return { cls:"warn", label:"กำลังขนส่ง" };
   }
 
+  function renderStepper(labels, step){
+    // labels เรียงจาก "ปลายทาง" ไป "ต้นทาง" ตามที่กำหนดใน GROUPS_BY_LANE
+    // แต่ stepper ของเดิมเรียง: ต้นทาง -> ศุลกากร -> ปลายทาง
+    // เราจะกลับลำดับเพื่อแสดงเหมือนเดิม (ต้นทางอยู่ซ้าย)
+    const reversed = [...labels].reverse(); // ต้นทาง ... -> ปลายทาง
+
+    // แปลง step ให้สอดคล้องกับจำนวนขั้น
+    // HK: step 1=ต้นทาง, step 2=ปลายทาง
+    // TW: step 1=ต้นทาง, step 2=ศุลกากร, step 3=ปลายทาง
+    const n = reversed.length;
+
+    const stepsHtml = reversed.map((title, idx) => {
+      const pos = idx + 1; // 1..n
+      const cls = (step >= pos) ? (step === pos ? "active" : "done") : "";
+      // ถ้าข้ามไปปลายทางแล้ว ให้ active+done แบบเดิมสำหรับขั้นสุดท้าย
+      const finalCls = (pos === n && step >= pos) ? "active done" : cls;
+      return `
+        <div class="step ${finalCls}">
+          <div class="stepTop">
+            <span class="stepDot"></span>
+            <span class="stepTitle">${title}</span>
+          </div>
+        </div>
+      `;
+    }).join("");
+
+    return `
+      <div class="stepper">
+        <div class="steps">${stepsHtml}</div>
+      </div>
+    `;
+  }
+
   // ==========================================
   // 5) Render
   // ==========================================
-  function renderSummary(data, latestTh, events){
+  function renderSummary(data, latestTh, events, lane){
     if (!latestTh) {
       summary.style.display = "none";
       summary.innerHTML = "";
@@ -482,7 +549,8 @@
     summary.style.display = "block";
 
     const badge = badgeOf(latestTh);
-    const step = calcStepFromEvents(events);
+    const labels = GROUPS_BY_LANE[lane] || GROUPS_BY_LANE.DEFAULT;
+    const step = calcStepFromEvents(events, lane);
 
     summary.innerHTML = `
       <div class="summaryTop">
@@ -500,41 +568,23 @@
         ${latestTh}
       </div>
 
-      <div class="stepper">
-        <div class="steps">
-          <div class="step ${step>=1 ? (step===1 ? 'active' : 'done') : ''}">
-            <div class="stepTop">
-              <span class="stepDot"></span>
-              <span class="stepTitle">คลังสินค้าต้นทาง</span>
-            </div>
-          </div>
-
-          <div class="step ${step>=2 ? (step===2 ? 'active' : 'done') : ''}">
-            <div class="stepTop">
-              <span class="stepDot"></span>
-              <span class="stepTitle">ศุลกากรประเทศปลายทาง</span>
-            </div>
-          </div>
-
-          <div class="step ${step>=3 ? 'active done' : ''}">
-            <div class="stepTop">
-              <span class="stepDot"></span>
-              <span class="stepTitle">ขนส่งปลายทาง</span>
-            </div>
-          </div>
-        </div>
-      </div>
+      ${renderStepper(labels, step)}
     `;
   }
 
-  function renderGroupedTimeline(events){
+  function renderGroupedTimeline(events, lane){
+    const labels = GROUPS_BY_LANE[lane] || GROUPS_BY_LANE.DEFAULT;
+    const GROUP_ORDER = labels; // ใช้ลำดับหัวข้อตามที่กำหนด (TW=3, HK=2)
+
     const arr = Array.isArray(events) ? events : (events ? [events] : []);
 
+    // แปลไทย + จัดกลุ่ม "จากจีน" ผ่าน mapping เท่านั้น
     const translated = arr.map(e => {
       const raw = pickStatusText(e);
       const th = toThaiStatus(raw);
-      return { time: pickTimeText(e), th };
-    }).filter(x => !!x.th);
+      const group = groupOfRaw(raw, lane);
+      return { time: pickTimeText(e), th, group };
+    }).filter(x => !!x.th && !!x.group);
 
     if (!translated.length) {
       if (history) history.style.display = "none";
@@ -544,14 +594,15 @@
     const seen = new Set();
     const deduped = [];
     for (const x of translated) {
+      // ยัง dedupe ตาม th เหมือนเดิม
       if (seen.has(x.th)) continue;
       seen.add(x.th);
-      deduped.push({ ...x, group: groupOf(x.th) });
+      deduped.push(x);
     }
 
     const buckets = new Map(GROUP_ORDER.map(g => [g, []]));
     for (const x of deduped) {
-      if (!buckets.has(x.group)) buckets.set(x.group, []);
+      if (!buckets.has(x.group)) continue;
       buckets.get(x.group).push(x);
     }
 
@@ -626,12 +677,14 @@
         return;
       }
 
+      const lane = getLane(data); // TW / HK / DEFAULT
+
       const events = data.events || data.history || data.traces || data.track || [];
       const rawLatest = pickStatusText(data) || pickStatusText(Array.isArray(events) ? events[0] : events);
       const latestTh = toThaiStatus(rawLatest);
 
-      renderSummary(data, latestTh, events);
-      renderGroupedTimeline(events);
+      renderSummary(data, latestTh, events, lane);
+      renderGroupedTimeline(events, lane);
 
     }catch(e){
       setError(String(e));

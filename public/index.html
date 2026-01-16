@@ -445,20 +445,26 @@
   }
 
   function extractStatusKeyZh(rawAny){
-    const raw = extractZh(rawAny);
-    if (!raw) return "";
-    const s = normalizeZhKey(raw);
+  const raw = extractZh(rawAny);
+  if (!raw) return "";
+  const s = normalizeZhKey(raw);
 
-    if (s.includes("：")) return s.split("：")[0].trim();
-    if (s.includes(":"))  return s.split(":")[0].trim();
+  // 1) ถ้าเจอ "：" ให้เอาหน้าสุด (มักเป็นคีย์)
+  if (s.includes("：")) return s.split("：")[0].trim();
+  if (s.includes(":"))  return s.split(":")[0].trim();
 
-    const cut = s
-      .split("（")[0].split("(")[0]
-      .split("【")[0].split("[")[0]
-      .trim();
+  // 2) ตัดวงเล็บ/เหลี่ยม/บอกตำแหน่งออก
+  let cut = s
+    .split("（")[0].split("(")[0]
+    .split("【")[0].split("[")[0]
+    .trim();
 
-    return cut || s;
-  }
+  // 3) ตัดข้อความต่อท้ายที่มักตามหลังคีย์ (จีนใช้ ，)
+  cut = cut.split("，")[0].split(",")[0].trim();
+
+  return cut || s;
+}
+
 
   function matchStatus(rawAny){
     const raw = extractZh(rawAny);

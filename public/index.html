@@ -285,7 +285,7 @@
       <div class="brand">
         <div class="logo" aria-hidden="true" title="Weiming">
           <svg viewBox="0 0 24 24">
-            <path d="M20 8h-3V4H3v13h2.1a2.9 2.9 0 0 0 5.8 0h4.2a2.9 2.9 0 0 0 5.8 0H23v-5l-3-4zM6.5 19a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zm10 0a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zM17 12V9h2l2 3h-4z"/>
+            <path d="M20 8h-3V4H3v13h2.1a2.9 2.9 0 0 0 5.8 0h4.2a2.9 2.9 0 0 0 5.8 0H23v-5l-3-4zM6.5 19a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zm10 0a 1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zM17 12V9h2l2 3h-4z"/>
           </svg>
         </div>
         <div style="min-width:0">
@@ -305,10 +305,6 @@
             <input id="no" placeholder="เลขพัสดุ" inputmode="numeric" autocomplete="off" />
             <button class="btn" id="btn">ค้นหา</button>
           </div>
-
-          <div id="rule" style="margin-top:10px" class="small">
-            กติกา: แสดงเฉพาะสถานะ “ภาษาจีน” ที่ตรงกับ mapping ของคุณเท่านั้น (ไม่ match = ไม่แสดง)
-          </div>
         </div>
 
         <div class="card" id="summary" style="display:none"></div>
@@ -317,9 +313,6 @@
       <div>
         <div class="card" id="history" style="display:none">
           <h2>ไทม์ไลน์สถานะ</h2>
-          <div id="groupHint" class="muted">
-            จัดกลุ่ม: ขนส่งปลายทาง / ศุลกากรประเทศปลายทาง / คลังสินค้าต้นทาง
-          </div>
           <div id="groups"></div>
         </div>
       </div>
@@ -360,9 +353,11 @@
 
     // ===== HK: ขนส่ง(ปลายทาง) =====
     { zh: "您的快件已派送成功", th: "พัสดุถึงผู้รับเรียบร้อยแล้ว", group_hk: "ขนส่ง(ปลายทาง)" },
+    { zh: "快件派送成功", th: "พัสดุถึงผู้รับเรียบร้อยแล้ว", group_hk: "ขนส่ง(ปลายทาง)" },
     { zh: "快件派送不成功", th: "จัดส่งไม่สำเร็จ ติดต่อผู้รับไม่ได้ กำลังดำเนินการส่งใหม่", group_hk: "ขนส่ง(ปลายทาง)" },
     { zh: "快件交给", th: "อยู่ระหว่างจัดส่ง", group_hk: "ขนส่ง(ปลายทาง)" },
     { zh: "快件离开", th: "พัสดุอยู่ศูนย์คัดแยกพัสดุ", group_hk: "ขนส่ง(ปลายทาง)" },
+    { zh: "快件到达", th: "พัสดุถึงศูนย์คัดแยกพัสดุ", group_hk: "ขนส่ง(ปลายทาง)" },
 
     // ===== TW/HK: คลังสินค้า(ต้นทาง) =====
     { zh: "您的貨物已準備從集運倉出倉", th: "พัสดุของคุณออกคลัง เพื่อเตรียมส่งไปยังสนามบินแล้ว", group_tw: "คลังสินค้า(ต้นทาง)", group_hk: "คลังสินค้า(ต้นทาง)" },
@@ -377,7 +372,6 @@
     { zh: "您已下單成功", th: "สร้างออเดอร์การจัดส่งเรียบร้อย", group_tw: "คลังสินค้า(ต้นทาง)" },
   ];
 
-  // หัวข้อกลุ่มตามประเทศ
   const GROUPS_BY_LANE = {
     TW: ["ขนส่ง(ปลายทาง)", "ศุลกากร(ปลายทาง)", "คลังสินค้า(ต้นทาง)"],
     HK: ["ขนส่ง(ปลายทาง)", "คลังสินค้า(ต้นทาง)"],
@@ -385,7 +379,7 @@
   };
 
   // ==========================================
-  // 2) Utilities
+  // 2) Utilities (ครบ)
   // ==========================================
   function normalizeText(s) {
     return (s || "")
@@ -425,19 +419,23 @@
     return obj.time || obj.datetime || obj.dateTime || obj.date_time || obj.timestamp || "-";
   }
 
-  // SFxxxx = HK ทันที
+  // ✅ ใส่ตรงนี้เลย (ก่อน run)
   function getLane(data, trackingNo){
     const no = normalizeText(trackingNo || "");
     if (/^SF/i.test(no)) return "HK";
 
-    const s = normalizeText(data?.lane || data?.region || data?.destination || data?.country || data?.to_country || "");
+    const s = normalizeText(
+      data?.lane || data?.region || data?.destination || data?.country || data?.to_country || ""
+    );
+
     if (/(^|[^A-Z])TW([^A-Z]|$)/i.test(s) || s.includes("ไต้หวัน")) return "TW";
     if (/(^|[^A-Z])HK([^A-Z]|$)/i.test(s) || s.includes("ฮ่องกง")) return "HK";
+
     return "DEFAULT";
   }
 
   // ==========================================
-  // 3) Match by จีน -> คืนทั้ง th + กลุ่ม (ทน !/！/ข้อความต่อท้าย)
+  // 3) Matching (ทน ! / ข้อความต่อท้าย)
   // ==========================================
   function normalizeZhKey(s){
     return normalizeText(s)
@@ -446,27 +444,46 @@
       .trim();
   }
 
+  function extractStatusKeyZh(rawAny){
+    const raw = extractZh(rawAny);
+    if (!raw) return "";
+    const s = normalizeZhKey(raw);
+
+    if (s.includes("：")) return s.split("：")[0].trim();
+    if (s.includes(":"))  return s.split(":")[0].trim();
+
+    const cut = s
+      .split("（")[0].split("(")[0]
+      .split("【")[0].split("[")[0]
+      .trim();
+
+    return cut || s;
+  }
+
   function matchStatus(rawAny){
     const raw = extractZh(rawAny);
     if (!raw) return null;
     if (!hasChinese(raw)) return null;
 
-    const zh = normalizeZhKey(raw);
+    const key  = normalizeZhKey(extractStatusKeyZh(rawAny));
+    const full = normalizeZhKey(raw);
 
-    // exact
-    let hit = STATUS_MAP.find(x => normalizeZhKey(x.zh) === zh);
+    const exactBy = (z) => STATUS_MAP.find(x => normalizeZhKey(x.zh) === z) || null;
+
+    let hit = exactBy(key);
     if (hit) return hit;
 
-    // loose
+    hit = exactBy(full);
+    if (hit) return hit;
+
     hit = STATUS_MAP.find(x => {
       const k = normalizeZhKey(x.zh);
-      return zh.includes(k) || k.includes(zh);
-    });
+      return full.includes(k) || key.includes(k) || k.includes(key);
+    }) || null;
 
-    return hit || null;
+    return hit;
   }
 
-  // ✅ ต้องมีแค่อันนี้อันเดียว (ห้ามซ้ำ)
   function toThaiStatus(rawAny) {
     const m = matchStatus(rawAny);
     return m ? m.th : null;
@@ -478,11 +495,11 @@
 
     if (lane === "HK") return m.group_hk || null;
     if (lane === "TW") return m.group_tw || null;
-    return m.group_tw || null; // DEFAULT ใช้แบบ TW เป็นหลัก
+    return m.group_tw || null;
   }
 
   // ==========================================
-  // 4) Stepper logic (รองรับ HK=2 ขั้น, TW=3 ขั้น)
+  // 4) Stepper logic
   // ==========================================
   function calcStepFromEvents(events, lane){
     const arr = Array.isArray(events) ? events : (events ? [events] : []);
@@ -492,7 +509,6 @@
       arr.map(e => groupOfRaw(pickStatusText(e), lane)).filter(Boolean)
     );
 
-    // HK: [ขนส่ง, คลัง]  -> step: 0/1/2
     if (lane === "HK") {
       const hasOrigin = groupsFound.has(labels[1]);
       const hasLast  = groupsFound.has(labels[0]);
@@ -501,7 +517,6 @@
       return 0;
     }
 
-    // TW/DEFAULT: [ขนส่ง, ศุลกากร, คลัง] -> step: 0/1/2/3
     const hasOrigin  = groupsFound.has(labels[2]);
     const hasCustoms = groupsFound.has(labels[1]);
     const hasLast    = groupsFound.has(labels[0]);
@@ -522,7 +537,7 @@
   }
 
   function renderStepper(labels, step){
-    const reversed = [...labels].reverse(); // ต้นทาง -> ปลายทาง
+    const reversed = [...labels].reverse();
     const n = reversed.length;
 
     const stepsHtml = reversed.map((title, idx) => {
@@ -585,7 +600,6 @@
 
   function renderGroupedTimeline(events, lane){
     const GROUP_ORDER = GROUPS_BY_LANE[lane] || GROUPS_BY_LANE.DEFAULT;
-
     const arr = Array.isArray(events) ? events : (events ? [events] : []);
 
     const translated = arr.map(e => {
@@ -596,7 +610,7 @@
     }).filter(x => !!x.th && !!x.group);
 
     if (!translated.length) {
-      if (history) history.style.display = "none";
+      history.style.display = "none";
       return;
     }
 
@@ -685,7 +699,6 @@
         return;
       }
 
-      // ✅ สำคัญ: ต้องส่ง no เข้าไป เพื่อให้ SF -> HK ทำงาน
       const lane = getLane(data, no);
 
       const events = data.events || data.history || data.traces || data.track || [];

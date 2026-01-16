@@ -602,125 +602,74 @@
     `;
   }
 
-  function renderGroupedTimeline(events, lane){
-    const GROUP_ORDER = GROUPS_BY_LANE[lane] || GROUPS_BY_LANE.DEFAULT;
-    const arr = Array.isArray(events) ? events : (events ? [events] : []);
+function renderGroupedTimeline(events, lane){
+  const GROUP_ORDER = GROUPS_BY_LANE[lane] || GROUPS_BY_LANE.DEFAULT;
+  const arr = Array.isArray(events) ? events : (events ? [events] : []);
 
-    const translated = arr.map(e => {
-      const raw = pickStatusText(e);
-      const th = toThaiStatus(raw);
-      const group = groupOfRaw(raw, lane);
-      return { time: pickTimeText(e), th, group };
-    }).filter(x => !!x.th && !!x.group);
+  const translated = arr.map(e => {
+    const raw = pickStatusText(e);
+    const m = matchStatus(raw); // ใช้ matchStatus โดยตรงเพื่อได้ "zh" ที่แมตช์
+    if (!m) return null;
 
-    if (!translated.length) {
-      history.style.display = "none";
-      return;
-    }
+    const group =
+      lane === "HK" ? (m.group_hk || null) :
+      lane === "TW" ? (m.group_tw || null) :
+      (m.group_tw || null);
 
-    const seen = new Set();
-    const deduped = [];
-    for (const x of translated) {
-      if (seen.has(x.th)) continue;
-      seen.add(x.th);
-      deduped.push(x);
-    }
+    if (!group) return null;
 
-    const buckets = new Map(GROUP_ORDER.map(g => [g, []]));
-    for (const x of deduped) {
-      if (!buckets.has(x.group)) continue;
-      buckets.get(x.group).push(x);
-    }
+    return {
+      time: pickTimeText(e),
+      th: m.th,
+      group,
+      // ✅ key สำหรับกันซ้ำ: ใช้คีย์จีนใน STATUS_MAP
+      key: normalizeZhKey(m.zh),
+    };
+  }).filter(Boolean);
 
-    const html = GROUP_ORDER
-      .filter(g => (buckets.get(g) || []).length > 0)
-      .map(g => {
-        const items = buckets.get(g) || [];
-        const itemsHtml = items.map(it => `
-          <div class="event">
-            <div class="time">${it.time || "-"}</div>
-            <div class="text">${it.th}</div>
-          </div>
-        `).join("");
-
-        return `
-          <div class="group">
-            <div class="groupTitle"><div>${g}</div></div>
-            <div class="timeline">${itemsHtml}</div>
-          </div>
-        `;
-      })
-      .join("");
-
-    groupsEl.innerHTML = html;
-    history.style.display = "block";
+  if (!translated.length) {
+    if (history) history.style.display = "none";
+    return;
   }
 
-  function setLoading(){
-    summary.style.display = "block";
-    history.style.display = "none";
-    summary.innerHTML = `
-      <div class="loading">
-        <span class="spinner" aria-hidden="true"></span>
-        <div>
-          <div style="font-weight:800;color:#0f172a">กำลังค้นหา...</div>
-          <div class="small">โปรดรอสักครู่</div>
+  // ✅ dedupe ตาม "จีน" (key) แทนภาษาไทย
+  const seen = new Set();
+  const deduped = [];
+  for (const x of translated) {
+    if (seen.has(x.key)) continue;
+    seen.add(x.key);
+    deduped.push(x);
+  }
+
+  const buckets = new Map(GROUP_ORDER.map(g => [g, []]));
+  for (const x of deduped) {
+    if (!buckets.has(x.group)) continue;
+    buckets.get(x.group).push(x);
+  }
+
+  const html = GROUP_ORDER
+    .filter(g => (buckets.get(g) || []).length > 0)
+    .map(g => {
+      const items = buckets.get(g) || [];
+      const itemsHtml = items.map(it => `
+        <div class="event">
+          <div class="time">${it.time || "-"}</div>
+          <div class="text">${it.th}</div>
         </div>
-      </div>
-    `;
-  }
+      `).join("");
 
-  function setError(msg){
-    summary.style.display = "block";
-    history.style.display = "none";
-    summary.innerHTML = `<div class="errorBox"><b>ไม่สำเร็จ:</b> ${msg || "เกิดข้อผิดพลาด"}</div>`;
-  }
+      return `
+        <div class="group">
+          <div class="groupTitle"><div>${g}</div></div>
+          <div class="timeline">${itemsHtml}</div>
+        </div>
+      `;
+    })
+    .join("");
 
-  // ==========================================
-  // 6) Run
-  // ==========================================
-  async function run(){
-    const no = (noEl.value || "").trim();
-    if(!no){ alert("กรุณากรอกเลขพัสดุ"); return; }
-
-    btn.disabled = true;
-    setLoading();
-
-    try{
-      const url = `/api/track?no=${encodeURIComponent(no)}`;
-      const r = await fetch(url, { cache: "no-store" });
-      const text = await r.text();
-
-      let data;
-      try { data = JSON.parse(text); }
-      catch {
-        setError(`API ไม่ได้ส่ง JSON (HTTP ${r.status})`);
-        return;
-      }
-
-      if(!r.ok){
-        setError(data.error || `HTTP ${r.status}`);
-        return;
-      }
-
-      const lane = getLane(data, no);
-
-      const events = data.events || data.history || data.traces || data.track || [];
-      const rawLatest = pickStatusText(data) || pickStatusText(Array.isArray(events) ? events[0] : events);
-      const latestTh = toThaiStatus(rawLatest);
-
-      renderSummary(data, latestTh, events, lane);
-      renderGroupedTimeline(events, lane);
-
-    }catch(e){
-      setError(String(e));
-    }finally{
-      btn.disabled = false;
-    }
-  }
-
-  btn.addEventListener("click", run);
-  noEl.addEventListener("keydown", (e) => { if(e.key === "Enter") run(); });
+  groupsEl.innerHTML = html;
+  history.style.display = "block";
+}
 </script>
 </body>
 </html>

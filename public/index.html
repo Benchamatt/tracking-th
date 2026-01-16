@@ -142,7 +142,6 @@
     .badge.warn{background: rgba(180,83,9,.12); color: var(--warn); border-color: rgba(180,83,9,.25)}
     .badge.bad{background: rgba(185,28,28,.12); color: var(--bad); border-color: rgba(185,28,28,.25)}
 
-    /* กลุ่มสถานะ */
     .group{margin-top:12px}
     .groupTitle{
       display:flex;align-items:center;justify-content:space-between;gap:10px;
@@ -285,7 +284,7 @@
       <div class="brand">
         <div class="logo" aria-hidden="true" title="Weiming">
           <svg viewBox="0 0 24 24">
-            <path d="M20 8h-3V4H3v13h2.1a2.9 2.9 0 0 0 5.8 0h4.2a2.9 2.9 0 0 0 5.8 0H23v-5l-3-4zM6.5 19a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zm10 0a 1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zM17 12V9h2l2 3h-4z"/>
+            <path d="M20 8h-3V4H3v13h2.1a2.9 2.9 0 0 0 5.8 0h4.2a2.9 2.9 0 0 0 5.8 0H23v-5l-3-4zM6.5 19a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zm10 0a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zM17 12V9h2l2 3h-4z"/>
           </svg>
         </div>
         <div style="min-width:0">
@@ -302,7 +301,7 @@
           <div class="muted">กรอกเลขพัสดุ แล้วกด “ค้นหา”</div>
 
           <div class="searchRow">
-            <input id="no" placeholder="เลขพัสดุ" inputmode="numeric" autocomplete="off" />
+            <input id="no" placeholder="เลขพัสดุ" autocomplete="off" />
             <button class="btn" id="btn">ค้นหา</button>
           </div>
         </div>
@@ -377,7 +376,7 @@
   };
 
   // ==========================================
-  // 2) Utilities (ครบ)
+  // 2) Utilities
   // ==========================================
   function normalizeText(s) {
     return (s || "")
@@ -417,7 +416,6 @@
     return obj.time || obj.datetime || obj.dateTime || obj.date_time || obj.timestamp || "-";
   }
 
-  // ✅ ใส่ตรงนี้เลย (ก่อน run)
   function getLane(data, trackingNo){
     const no = normalizeText(trackingNo || "");
     if (/^SF/i.test(no)) return "HK";
@@ -443,26 +441,21 @@
   }
 
   function extractStatusKeyZh(rawAny){
-  const raw = extractZh(rawAny);
-  if (!raw) return "";
-  const s = normalizeZhKey(raw);
+    const raw = extractZh(rawAny);
+    if (!raw) return "";
+    const s = normalizeZhKey(raw);
 
-  // 1) ถ้าเจอ "：" ให้เอาหน้าสุด (มักเป็นคีย์)
-  if (s.includes("：")) return s.split("：")[0].trim();
-  if (s.includes(":"))  return s.split(":")[0].trim();
+    if (s.includes("：")) return s.split("：")[0].trim();
+    if (s.includes(":"))  return s.split(":")[0].trim();
 
-  // 2) ตัดวงเล็บ/เหลี่ยม/บอกตำแหน่งออก
-  let cut = s
-    .split("（")[0].split("(")[0]
-    .split("【")[0].split("[")[0]
-    .trim();
+    let cut = s
+      .split("（")[0].split("(")[0]
+      .split("【")[0].split("[")[0]
+      .trim();
 
-  // 3) ตัดข้อความต่อท้ายที่มักตามหลังคีย์ (จีนใช้ ，)
-  cut = cut.split("，")[0].split(",")[0].trim();
-
-  return cut || s;
-}
-
+    cut = cut.split("，")[0].split(",")[0].trim();
+    return cut || s;
+  }
 
   function matchStatus(rawAny){
     const raw = extractZh(rawAny);
@@ -503,7 +496,7 @@
   }
 
   // ==========================================
-  // 4) Stepper logic
+  // 4) Stepper + Badge
   // ==========================================
   function calcStepFromEvents(events, lane){
     const arr = Array.isArray(events) ? events : (events ? [events] : []);
@@ -541,7 +534,7 @@
   }
 
   function renderStepper(labels, step){
-    const reversed = [...labels].reverse();
+    const reversed = [...labels].reverse(); // ต้นทาง -> ปลายทาง
     const n = reversed.length;
 
     const stepsHtml = reversed.map((title, idx) => {
@@ -602,74 +595,141 @@
     `;
   }
 
-function renderGroupedTimeline(events, lane){
-  const GROUP_ORDER = GROUPS_BY_LANE[lane] || GROUPS_BY_LANE.DEFAULT;
-  const arr = Array.isArray(events) ? events : (events ? [events] : []);
+  function renderGroupedTimeline(events, lane){
+    const GROUP_ORDER = GROUPS_BY_LANE[lane] || GROUPS_BY_LANE.DEFAULT;
+    const arr = Array.isArray(events) ? events : (events ? [events] : []);
 
-  const translated = arr.map(e => {
-    const raw = pickStatusText(e);
-    const m = matchStatus(raw); // ใช้ matchStatus โดยตรงเพื่อได้ "zh" ที่แมตช์
-    if (!m) return null;
+    const translated = arr.map(e => {
+      const raw = pickStatusText(e);
+      const m = matchStatus(raw);
+      if (!m) return null;
 
-    const group =
-      lane === "HK" ? (m.group_hk || null) :
-      lane === "TW" ? (m.group_tw || null) :
-      (m.group_tw || null);
+      const group =
+        lane === "HK" ? (m.group_hk || null) :
+        lane === "TW" ? (m.group_tw || null) :
+        (m.group_tw || null);
 
-    if (!group) return null;
+      if (!group) return null;
 
-    return {
-      time: pickTimeText(e),
-      th: m.th,
-      group,
-      // ✅ key สำหรับกันซ้ำ: ใช้คีย์จีนใน STATUS_MAP
-      key: normalizeZhKey(m.zh),
-    };
-  }).filter(Boolean);
+      return {
+        time: pickTimeText(e),
+        th: m.th,
+        group,
+        key: normalizeZhKey(m.zh), // ✅ กันซ้ำด้วยจีน
+      };
+    }).filter(Boolean);
 
-  if (!translated.length) {
-    if (history) history.style.display = "none";
-    return;
+    if (!translated.length) {
+      if (history) history.style.display = "none";
+      return;
+    }
+
+    const seen = new Set();
+    const deduped = [];
+    for (const x of translated) {
+      if (seen.has(x.key)) continue;
+      seen.add(x.key);
+      deduped.push(x);
+    }
+
+    const buckets = new Map(GROUP_ORDER.map(g => [g, []]));
+    for (const x of deduped) {
+      if (!buckets.has(x.group)) continue;
+      buckets.get(x.group).push(x);
+    }
+
+    const html = GROUP_ORDER
+      .filter(g => (buckets.get(g) || []).length > 0)
+      .map(g => {
+        const items = buckets.get(g) || [];
+        const itemsHtml = items.map(it => `
+          <div class="event">
+            <div class="time">${it.time || "-"}</div>
+            <div class="text">${it.th}</div>
+          </div>
+        `).join("");
+
+        return `
+          <div class="group">
+            <div class="groupTitle"><div>${g}</div></div>
+            <div class="timeline">${itemsHtml}</div>
+          </div>
+        `;
+      })
+      .join("");
+
+    groupsEl.innerHTML = html;
+    history.style.display = "block";
   }
 
-  // ✅ dedupe ตาม "จีน" (key) แทนภาษาไทย
-  const seen = new Set();
-  const deduped = [];
-  for (const x of translated) {
-    if (seen.has(x.key)) continue;
-    seen.add(x.key);
-    deduped.push(x);
-  }
-
-  const buckets = new Map(GROUP_ORDER.map(g => [g, []]));
-  for (const x of deduped) {
-    if (!buckets.has(x.group)) continue;
-    buckets.get(x.group).push(x);
-  }
-
-  const html = GROUP_ORDER
-    .filter(g => (buckets.get(g) || []).length > 0)
-    .map(g => {
-      const items = buckets.get(g) || [];
-      const itemsHtml = items.map(it => `
-        <div class="event">
-          <div class="time">${it.time || "-"}</div>
-          <div class="text">${it.th}</div>
+  function setLoading(){
+    summary.style.display = "block";
+    history.style.display = "none";
+    summary.innerHTML = `
+      <div class="loading">
+        <span class="spinner" aria-hidden="true"></span>
+        <div>
+          <div style="font-weight:800;color:#0f172a">กำลังค้นหา...</div>
+          <div class="small">โปรดรอสักครู่</div>
         </div>
-      `).join("");
+      </div>
+    `;
+  }
 
-      return `
-        <div class="group">
-          <div class="groupTitle"><div>${g}</div></div>
-          <div class="timeline">${itemsHtml}</div>
-        </div>
-      `;
-    })
-    .join("");
+  function setError(msg){
+    summary.style.display = "block";
+    history.style.display = "none";
+    summary.innerHTML = `<div class="errorBox"><b>ไม่สำเร็จ:</b> ${msg || "เกิดข้อผิดพลาด"}</div>`;
+  }
 
-  groupsEl.innerHTML = html;
-  history.style.display = "block";
-}
+  // ==========================================
+  // 6) Run (สำคัญ: ต้องมี)
+  // ==========================================
+  async function run(){
+    const no = (noEl.value || "").trim();
+    if(!no){ alert("กรุณากรอกเลขพัสดุ"); return; }
+
+    btn.disabled = true;
+    setLoading();
+
+    try{
+      const url = `/api/track?no=${encodeURIComponent(no)}`;
+      const r = await fetch(url, { cache: "no-store" });
+      const text = await r.text();
+
+      let data;
+      try { data = JSON.parse(text); }
+      catch {
+        setError(`API ไม่ได้ส่ง JSON (HTTP ${r.status})`);
+        return;
+      }
+
+      if(!r.ok){
+        setError(data.error || `HTTP ${r.status}`);
+        return;
+      }
+
+      const lane = getLane(data, no);
+
+      const events = data.events || data.history || data.traces || data.track || [];
+
+      // ✅ latest ใช้ matchStatus ด้วย (กันประโยคจีนยาว)
+      const rawLatest = pickStatusText(data) || pickStatusText(Array.isArray(events) ? events[0] : events);
+      const mLatest = matchStatus(rawLatest);
+      const latestTh = mLatest ? mLatest.th : null;
+
+      renderSummary(data, latestTh, events, lane);
+      renderGroupedTimeline(events, lane);
+
+    }catch(e){
+      setError(String(e));
+    }finally{
+      btn.disabled = false;
+    }
+  }
+
+  btn.addEventListener("click", run);
+  noEl.addEventListener("keydown", (e) => { if(e.key === "Enter") run(); });
 </script>
 </body>
 </html>

@@ -461,45 +461,65 @@
 
   // ✅ ตัด "ข้อความสถานะใหญ่" ออก และตัด label "ความคืบหน้า" ออก
   // ✅ ให้แถบ progress ใช้ percent เดียวกับปุ่มล่าง
-  function renderSummary(data, latestTh, events){
-    if (!latestTh) {
-      summary.style.display = "none";
-      summary.innerHTML = "";
-      return;
-    }
-
-    summary.style.display = "block";
-
-    const badge = badgeOf(latestTh);
-    const progressPercent = calcPercentFromEvents(events); // ค่าเดียวกันทั้ง bar + pills
-    const activeIdx = stageIndexFromPercent(progressPercent);
-
-    summary.innerHTML = `
-      <div class="summaryTop">
-        <div class="kv">
-          <div><b>อัปเดตล่าสุด</b> <span class="value">${data.last_update || data.lastUpdate || "-"}</span></div>
-        </div>
-
-        <span class="badge ${badge.cls}">
-          <span class="dot"></span>
-          ${badge.label}
-        </span>
-      </div>
-
-      <!-- ❌ ตัดบรรทัดสถานะใหญ่ที่อยู่ตรงนี้ออก (ตามที่ขอ) -->
-
-      <!-- ✅ เหลือแค่แถบ progress + % (ไม่เขียนคำว่า ความคืบหน้า) -->
-      <div style="margin-top:6px; display:flex; align-items:center; justify-content:flex-end; gap:10px;">
-        <div style="font-size:14px; font-weight:900;">${progressPercent}%</div>
-      </div>
-      <div style="margin-top:8px; height:10px; border-radius:999px; background:rgba(100,116,139,.18); overflow:hidden; border:1px solid rgba(100,116,139,.18);">
-        <div style="height:100%; width:${progressPercent}%; background:linear-gradient(135deg, var(--brand), var(--brand-2)); border-radius:999px;"></div>
-      </div>
-
-      <!-- ✅ ปุ่ม 3 หัวข้อ -->
-      ${renderStagePills(activeIdx)}
-    `;
+ function renderSummary(data, latestTh, events){
+  if (!latestTh) {
+    summary.style.display = "none";
+    summary.innerHTML = "";
+    return;
   }
+
+  summary.style.display = "block";
+
+  const badge = badgeOf(latestTh);
+
+  // ✅ percent เดียว ใช้ทั้งแถบ + step
+  const progressPercent = calcPercentFromEvents(events);
+
+  // group -> step index
+  const g = groupOf(latestTh);
+  const activeIdx = stageIndexFromGroup(g);
+
+  summary.innerHTML = `
+    <div class="summaryTop">
+      <div class="kv">
+        <div>
+          <b>อัปเดตล่าสุด</b>
+          <span class="value">${data.last_update || data.lastUpdate || "-"}</span>
+        </div>
+      </div>
+
+      <span class="badge ${badge.cls}">
+        <span class="dot"></span>
+        ${badge.label}
+      </span>
+    </div>
+
+    <!-- ✅ เหลือแค่แถบ (เหมือนภาพที่สอง) -->
+    <div style="margin-top:10px; display:flex; align-items:center; justify-content:space-between;">
+      <div class="muted" style="font-weight:800;">ความคืบหน้า</div>
+      <div style="font-weight:900;">${progressPercent}%</div>
+    </div>
+
+    <div style="
+      margin-top:8px;
+      height:10px;
+      border-radius:999px;
+      background:rgba(100,116,139,.18);
+      overflow:hidden;
+      border:1px solid rgba(100,116,139,.18);
+    ">
+      <div style="
+        height:100%;
+        width:${progressPercent}%;
+        background:linear-gradient(135deg,var(--brand),var(--brand-2));
+        border-radius:999px;
+      "></div>
+    </div>
+
+    <!-- ✅ step ด้านล่าง = ตัวกำหนด percent -->
+    ${renderStagePills(activeIdx)}
+  `;
+}
 
   function renderGroupedTimeline(events){
     const arr = Array.isArray(events) ? events : (events ? [events] : []);

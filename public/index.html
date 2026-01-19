@@ -275,6 +275,37 @@
         width:2px; height:10px;
       }
     }
+    /* ===== Progress bar ===== */
+.progressWrap{
+  margin-top: 12px;
+  padding: 10px 12px;
+  border-radius: 14px;
+  border: 1px solid var(--border);
+  background: linear-gradient(180deg, rgba(15,95,191,.05), rgba(15,95,191,.02));
+}
+.progressHead{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  margin-bottom: 8px;
+}
+.progressHead b{font-size:13px}
+.progressBar{
+  width:100%;
+  height:10px;
+  border-radius:999px;
+  background: rgba(100,116,139,.18);
+  overflow:hidden;
+  border:1px solid rgba(100,116,139,.18);
+}
+.progressFill{
+  height:100%;
+  width:0%;
+  background: linear-gradient(135deg, var(--brand), var(--brand-2));
+  border-radius:999px;
+}
+
   </style>
 </head>
 
@@ -336,37 +367,39 @@
   if (yearEl) yearEl.textContent = String(new Date().getFullYear());
 
   // ==============================
-  // 1) Mapping จีน -> ไทย + กลุ่มตามประเทศ (TW/HK)
+  // 1) Mapping จีน -> ไทย + กลุ่มตามประเทศ (TW/HK) + percent
   // ==============================
   const STATUS_MAP = [
     // ===== TW: ขนส่ง(ปลายทาง) =====
-    { zh: "順利送達", th: "พัสดุถึงผู้รับเรียบร้อยแล้ว", group_tw: "ขนส่ง(ปลายทาง)" },
-    { zh: "配送中", th: "อยู่ระหว่างจัดส่ง", group_tw: "ขนส่ง(ปลายทาง)" },
-    { zh: "已集貨", th: "พัสดุอยู่ศูนย์คัดแยกพัสดุ", group_tw: "ขนส่ง(ปลายทาง)" },
+    { zh: "順利送達", th: "พัสดุถึงผู้รับเรียบร้อยแล้ว", group_tw: "ขนส่ง(ปลายทาง)", percent: 100 },
+    { zh: "配送中", th: "อยู่ระหว่างจัดส่ง", group_tw: "ขนส่ง(ปลายทาง)", percent: 90 },
+    { zh: "已集貨", th: "พัสดุอยู่ศูนย์คัดแยกพัสดุ", group_tw: "ขนส่ง(ปลายทาง)", percent: 80 },
 
     // ===== TW: ศุลกากร(ปลายทาง) =====
-    { zh: "出倉處理", th: "กำลังดำเนินการนำสินค้าออกจากคลัง", group_tw: "ศุลกากร(ปลายทาง)" },
-    { zh: "連線收單建檔", th: "ระบบศุลกากรรับและบันทึกข้อมูลเรียบร้อยแล้ว", group_tw: "ศุลกากร(ปลายทาง)" },
-    { zh: "由於海關系統查無此包裹申報人資料", th: "เนื่องจากระบบศุลกากรไม่พบข้อมูลผู้เดินพิธีการ โปรดตรวจสอบว่าผู้รับพัสดุได้ลงทะเบียนกับ EZ WAY แล้วหรือไม่ หากยังไม่ได้ลงทะเบียนโปรดลงทะเบียนให้เรียบร้อย ถ่ายภาพหน้าจอให้ติดชื่อ/หมายเลขโทรศัพท์และหมายเลขบัตรประชาชนของผู้เดินพิธีการ แล้วส่งให้เจ้าหน้าที่ลูกค้าสัมพันธ์ของWeiming หลังจากได้รับข้อมูลแล้ว พัสดุจะได้รับการปล่อยภายในประมาณ 1-2 วันทำการ", group_tw: "ศุลกากร(ปลายทาง)" },
-    { zh: "不受理不可補正之錯單", th: "ข้อมูลที่ใช้เดินพิธีการไม่สอดคล้องกัน โปรดติดต่อเจ้าหน้าที่", group_tw: "ศุลกากร(ปลายทาง)" },
+    { zh: "出倉處理", th: "กำลังดำเนินการนำสินค้าออกจากคลัง", group_tw: "ศุลกากร(ปลายทาง)", percent: 60 },
+    { zh: "連線收單建檔", th: "ระบบศุลกากรรับและบันทึกข้อมูลเรียบร้อยแล้ว", group_tw: "ศุลกากร(ปลายทาง)", percent: 70 },
+
+    // EZ WAY = 50
+    { zh: "由於海關系統查無此包裹申報人資料", th: "เนื่องจากระบบศุลกากรไม่พบข้อมูลผู้เดินพิธีการ โปรดตรวจสอบว่าผู้รับพัสดุได้ลงทะเบียนกับ EZ WAY แล้วหรือไม่ หากยังไม่ได้ลงทะเบียนโปรดลงทะเบียนให้เรียบร้อย ถ่ายภาพหน้าจอให้ติดชื่อ/หมายเลขโทรศัพท์และหมายเลขบัตรประชาชนของผู้เดินพิธีการ แล้วส่งให้เจ้าหน้าที่ลูกค้าสัมพันธ์ของWeiming หลังจากได้รับข้อมูลแล้ว พัสดุจะได้รับการปล่อยภายในประมาณ 1-2 วันทำการ", group_tw: "ศุลกากร(ปลายทาง)", percent: 50 },
+
+    // ข้อมูลไม่สอดคล้อง = 40
+    { zh: "不受理不可補正之錯單", th: "ข้อมูลที่ใช้เดินพิธีการไม่สอดคล้องกัน โปรดติดต่อเจ้าหน้าที่", group_tw: "ศุลกากร(ปลายทาง)", percent: 40 },
 
     // ===== HK: ขนส่ง(ปลายทาง) =====
-    { zh: "您的快件已派送成功", th: "พัสดุถึงผู้รับเรียบร้อยแล้ว", group_hk: "ขนส่ง(ปลายทาง)" },
-    { zh: "快件派送不成功", th: "จัดส่งไม่สำเร็จ ติดต่อผู้รับไม่ได้ กำลังดำเนินการส่งใหม่", group_hk: "ขนส่ง(ปลายทาง)" },
-    { zh: "快件交给", th: "อยู่ระหว่างจัดส่ง", group_hk: "ขนส่ง(ปลายทาง)" },
-    { zh: "快件到达", th: "พัสดุถึงศูนย์คัดแยกพัสดุ", group_hk: "ขนส่ง(ปลายทาง)" },
+    { zh: "您的快件已派送成功", th: "พัสดุถึงผู้รับเรียบร้อยแล้ว", group_hk: "ขนส่ง(ปลายทาง)", percent: 100 },
+    { zh: "快件派送不成功", th: "จัดส่งไม่สำเร็จ ติดต่อผู้รับไม่ได้ กำลังดำเนินการส่งใหม่", group_hk: "ขนส่ง(ปลายทาง)", percent: 90 },
+    { zh: "快件交给", th: "อยู่ระหว่างจัดส่ง", group_hk: "ขนส่ง(ปลายทาง)", percent: 90 },
+    { zh: "快件到达", th: "พัสดุถึงศูนย์คัดแยกพัสดุ", group_hk: "ขนส่ง(ปลายทาง)", percent: 80 },
 
     // ===== TW/HK: คลังสินค้า(ต้นทาง) =====
-    { zh: "您的貨物已準備從集運倉出倉", th: "พัสดุของคุณออกคลัง เพื่อเตรียมส่งไปยังสนามบินแล้ว", group_tw: "คลังสินค้า(ต้นทาง)", group_hk: "คลังสินค้า(ต้นทาง)" },
-    { zh: "已經打印好地址面單", th: "พิมพ์ใบปะหน้าที่อยู่เรียบร้อยแล้ว", group_tw: "คลังสินค้า(ต้นทาง)", group_hk: "คลังสินค้า(ต้นทาง)" },
-    { zh: "已經打印好地址面單!", th: "พิมพ์ใบปะหน้าที่อยู่เรียบร้อยแล้ว", group_tw: "คลังสินค้า(ต้นทาง)", group_hk: "คลังสินค้า(ต้นทาง)" },
+    { zh: "您的貨物已準備從集運倉出倉", th: "พัสดุของคุณออกคลัง เพื่อเตรียมส่งไปยังสนามบินแล้ว", group_tw: "คลังสินค้า(ต้นทาง)", group_hk: "คลังสินค้า(ต้นทาง)", percent: 30 },
+    { zh: "已經打印好地址面單", th: "พิมพ์ใบปะหน้าที่อยู่เรียบร้อยแล้ว", group_tw: "คลังสินค้า(ต้นทาง)", group_hk: "คลังสินค้า(ต้นทาง)", percent: 20 },
+    { zh: "已經打印好地址面單!", th: "พิมพ์ใบปะหน้าที่อยู่เรียบร้อยแล้ว", group_tw: "คลังสินค้า(ต้นทาง)", group_hk: "คลังสินค้า(ต้นทาง)", percent: 20 },
 
-    // สร้างออเดอร์ (HK ตามตาราง + กันหลุดหลายเวอร์ชัน)
-    { zh: "您已下單成功!請等待倉库人員作業出貸", th: "สร้างออเดอร์การจัดส่งเรียบร้อย", group_hk: "คลังสินค้า(ต้นทาง)" },
-    { zh: "您已下單成功!請等待倉庫人員作業出貨", th: "สร้างออเดอร์การจัดส่งเรียบร้อย", group_hk: "คลังสินค้า(ต้นทาง)" },
-
-    // เผื่อ TW/ระบบเดิมส่งสั้น
-    { zh: "您已下單成功", th: "สร้างออเดอร์การจัดส่งเรียบร้อย", group_tw: "คลังสินค้า(ต้นทาง)" },
+    // สร้างออเดอร์ = 10
+    { zh: "您已下單成功!請等待倉库人員作業出貸", th: "สร้างออเดอร์การจัดส่งเรียบร้อย", group_hk: "คลังสินค้า(ต้นทาง)", percent: 10 },
+    { zh: "您已下單成功!請等待倉庫人員作業出貨", th: "สร้างออเดอร์การจัดส่งเรียบร้อย", group_hk: "คลังสินค้า(ต้นทาง)", percent: 10 },
+    { zh: "您已下單成功", th: "สร้างออเดอร์การจัดส่งเรียบร้อย", group_tw: "คลังสินค้า(ต้นทาง)", percent: 10 },
   ];
 
   const GROUPS_BY_LANE = {
@@ -428,6 +461,47 @@
     if (/(^|[^A-Z])HK([^A-Z]|$)/i.test(s) || s.includes("ฮ่องกง")) return "HK";
 
     return "DEFAULT";
+  }
+
+  function parseTimeLoose(t){
+    const s = normalizeText(t || "");
+    if (!s || s === "-") return 0;
+    const iso = s.includes("T") ? s : s.replace(" ", "T");
+    const ms = Date.parse(iso);
+    return Number.isFinite(ms) ? ms : 0;
+  }
+
+  function getLatestFromEvents(events){
+    const arr = Array.isArray(events) ? events : (events ? [events] : []);
+    if (!arr.length) return null;
+
+    return arr.reduce((latest, cur) => {
+      const tCur = parseTimeLoose(pickTimeText(cur));
+      const tLat = parseTimeLoose(pickTimeText(latest));
+      return tCur >= tLat ? cur : latest;
+    }, arr[0]);
+  }
+
+  function calcPercentFromEvents(events){
+    const arr = Array.isArray(events) ? events : (events ? [events] : []);
+    let maxP = 0;
+
+    for (const e of arr){
+      const raw = pickStatusText(e);
+
+      // match จากจีนก่อน
+      let m = matchStatus(raw);
+
+      // fallback: ถ้า raw เป็นไทย ให้หา percent จาก th
+      if (!m && raw) {
+        const th = normalizeText(raw);
+        m = STATUS_MAP.find(x => normalizeText(x.th) === th) || null;
+      }
+
+      const p = m && typeof m.percent === "number" ? m.percent : 0;
+      if (p > maxP) maxP = p;
+    }
+    return maxP;
   }
 
   // ==========================================
@@ -575,6 +649,8 @@
     const labels = GROUPS_BY_LANE[lane] || GROUPS_BY_LANE.DEFAULT;
     const step = calcStepFromEvents(events, lane);
 
+    const progressPercent = calcPercentFromEvents(events);
+
     summary.innerHTML = `
       <div class="summaryTop">
         <div class="kv">
@@ -591,6 +667,16 @@
         ${latestTh}
       </div>
 
+      <div class="progressWrap">
+        <div class="progressHead">
+          <b>ความคืบหน้า</b>
+          <span style="font-weight:900">${progressPercent}%</span>
+        </div>
+        <div class="progressBar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${progressPercent}">
+          <div class="progressFill" style="width:${progressPercent}%"></div>
+        </div>
+      </div>
+
       ${renderStepper(labels, step)}
     `;
   }
@@ -602,20 +688,23 @@
     const translated = arr.map(e => {
       const raw = pickStatusText(e);
       const m = matchStatus(raw);
-      if (!m) return null;
+
+      // ถ้าแมตช์จีนไม่ได้ แต่เป็นไทย ให้จับคู่จาก th
+      const m2 = m || (raw ? (STATUS_MAP.find(x => normalizeText(x.th) === normalizeText(raw)) || null) : null);
+      if (!m2) return null;
 
       const group =
-        lane === "HK" ? (m.group_hk || null) :
-        lane === "TW" ? (m.group_tw || null) :
-        (m.group_tw || null);
+        lane === "HK" ? (m2.group_hk || null) :
+        lane === "TW" ? (m2.group_tw || null) :
+        (m2.group_tw || null);
 
       if (!group) return null;
 
       return {
         time: pickTimeText(e),
-        th: m.th,
+        th: m2.th,
         group,
-        key: normalizeZhKey(m.zh), // ✅ กันซ้ำด้วยจีน
+        key: normalizeZhKey(m2.zh || m2.th), // กันซ้ำ
       };
     }).filter(Boolean);
 
@@ -683,7 +772,7 @@
   }
 
   // ==========================================
-  // 6) Run (สำคัญ: ต้องมี)
+  // 6) Run
   // ==========================================
   async function run(){
     const no = (noEl.value || "").trim();
@@ -710,13 +799,14 @@
       }
 
       const lane = getLane(data, no);
-
       const events = data.events || data.history || data.traces || data.track || [];
 
-      // ✅ latest ใช้ matchStatus ด้วย (กันประโยคจีนยาว)
-      const rawLatest = pickStatusText(data) || pickStatusText(Array.isArray(events) ? events[0] : events);
+      // ✅ เลือกสถานะล่าสุดจากเวลา + fallback ไทย
+      const latestEvent = getLatestFromEvents(events);
+      const rawLatest = pickStatusText(latestEvent) || pickStatusText(data);
+
       const mLatest = matchStatus(rawLatest);
-      const latestTh = mLatest ? mLatest.th : null;
+      const latestTh = mLatest ? mLatest.th : (toThaiStatus(rawLatest) || rawLatest || null);
 
       renderSummary(data, latestTh, events, lane);
       renderGroupedTimeline(events, lane);
@@ -731,5 +821,3 @@
   btn.addEventListener("click", run);
   noEl.addEventListener("keydown", (e) => { if(e.key === "Enter") run(); });
 </script>
-</body>
-</html>

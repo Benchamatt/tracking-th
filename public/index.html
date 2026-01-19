@@ -5,473 +5,155 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Weiming Tracking</title>
 
- <script>
-  const $ = (id) => document.getElementById(id);
-  const summary = $("summary");
-  const history = $("history");
-  const groupsEl = $("groups");
-  const btn = $("btn");
-  const noEl = $("no");
+  <style>
+    /* ====== ใส่ CSS เดิมของคุณไว้ด้านบน (ถ้ามี) ====== */
+    /* (ถ้าคุณมี CSS หลักอยู่แล้ว ให้คงไว้ก่อน) */
 
-  const yearEl = $("year");
-  if (yearEl) yearEl.textContent = String(new Date().getFullYear());
+    /* =========================
+       Smooth Corporate (Keep original layout)
+       ========================= */
+    :root{
+      --brand:#0f5fbf;
+      --brand-2:#0a3f7a;
 
-  // ==============================
-  // 1) Mapping จีน -> ไทย + กลุ่มตามประเทศ (TW/HK) + percent
-  // ==============================
-  const STATUS_MAP = [
-    // ===== TW: ขนส่ง(ปลายทาง) =====
-    { zh: "順利送達", th: "พัสดุถึงผู้รับเรียบร้อยแล้ว", group_tw: "ขนส่ง(ปลายทาง)", percent: 100 },
-    { zh: "配送中", th: "อยู่ระหว่างจัดส่ง", group_tw: "ขนส่ง(ปลายทาง)", percent: 90 },
-    { zh: "已集貨", th: "พัสดุอยู่ศูนย์คัดแยกพัสดุ", group_tw: "ขนส่ง(ปลายทาง)", percent: 80 },
+      --bg:#f6f8fb;
+      --surface:#ffffff;
+      --surface-2:#f2f5fa;
 
-    // ===== TW: ศุลกากร(ปลายทาง) =====
-    { zh: "出倉處理", th: "กำลังดำเนินการนำสินค้าออกจากคลัง", group_tw: "ศุลกากร(ปลายทาง)", percent: 60 },
-    { zh: "連線收單建檔", th: "ระบบศุลกากรรับและบันทึกข้อมูลเรียบร้อยแล้ว", group_tw: "ศุลกากร(ปลายทาง)", percent: 70 },
+      --text:#0f172a;
+      --muted:#607189;
 
-    // EZ WAY = 50
-    { zh: "由於海關系統查無此包裹申報人資料", th: "เนื่องจากระบบศุลกากรไม่พบข้อมูลผู้เดินพิธีการ โปรดตรวจสอบว่าผู้รับพัสดุได้ลงทะเบียนกับ EZ WAY แล้วหรือไม่ หากยังไม่ได้ลงทะเบียนโปรดลงทะเบียนให้เรียบร้อย ถ่ายภาพหน้าจอให้ติดชื่อ/หมายเลขโทรศัพท์และหมายเลขบัตรประชาชนของผู้เดินพิธีการ แล้วส่งให้เจ้าหน้าที่ลูกค้าสัมพันธ์ของWeiming หลังจากได้รับข้อมูลแล้ว พัสดุจะได้รับการปล่อยภายในประมาณ 1-2 วันทำการ", group_tw: "ศุลกากร(ปลายทาง)", percent: 50 },
+      --border:#e1e8f2;
+      --shadow: 0 10px 24px rgba(2, 6, 23, 0.07);
 
-    // ข้อมูลไม่สอดคล้อง = 40
-    { zh: "不受理不可補正之錯單", th: "ข้อมูลที่ใช้เดินพิธีการไม่สอดคล้องกัน โปรดติดต่อเจ้าหน้าที่", group_tw: "ศุลกากร(ปลายทาง)", percent: 40 },
-
-    // ===== HK: ขนส่ง(ปลายทาง) =====
-    { zh: "您的快件已派送成功", th: "พัสดุถึงผู้รับเรียบร้อยแล้ว", group_hk: "ขนส่ง(ปลายทาง)", percent: 100 },
-    { zh: "快件派送不成功", th: "จัดส่งไม่สำเร็จ ติดต่อผู้รับไม่ได้ กำลังดำเนินการส่งใหม่", group_hk: "ขนส่ง(ปลายทาง)", percent: 90 },
-    { zh: "快件交给", th: "อยู่ระหว่างจัดส่ง", group_hk: "ขนส่ง(ปลายทาง)", percent: 90 },
-    { zh: "快件到达", th: "พัสดุถึงศูนย์คัดแยกพัสดุ", group_hk: "ขนส่ง(ปลายทาง)", percent: 80 },
-
-    // ===== TW/HK: คลังสินค้า(ต้นทาง) =====
-    { zh: "您的貨物已準備從集運倉出倉", th: "พัสดุของคุณออกคลัง เพื่อเตรียมส่งไปยังสนามบินแล้ว", group_tw: "คลังสินค้า(ต้นทาง)", group_hk: "คลังสินค้า(ต้นทาง)", percent: 30 },
-    { zh: "已經打印好地址面單", th: "พิมพ์ใบปะหน้าที่อยู่เรียบร้อยแล้ว", group_tw: "คลังสินค้า(ต้นทาง)", group_hk: "คลังสินค้า(ต้นทาง)", percent: 20 },
-    { zh: "已經打印好地址面單!", th: "พิมพ์ใบปะหน้าที่อยู่เรียบร้อยแล้ว", group_tw: "คลังสินค้า(ต้นทาง)", group_hk: "คลังสินค้า(ต้นทาง)", percent: 20 },
-
-    // สร้างออเดอร์ = 10
-    { zh: "您已下單成功!請等待倉库人員作業出貸", th: "สร้างออเดอร์การจัดส่งเรียบร้อย", group_hk: "คลังสินค้า(ต้นทาง)", percent: 10 },
-    { zh: "您已下單成功!請等待倉庫人員作業出貨", th: "สร้างออเดอร์การจัดส่งเรียบร้อย", group_hk: "คลังสินค้า(ต้นทาง)", percent: 10 },
-    { zh: "您已下單成功", th: "สร้างออเดอร์การจัดส่งเรียบร้อย", group_tw: "คลังสินค้า(ต้นทาง)", percent: 10 },
-  ];
-
-  const GROUPS_BY_LANE = {
-    TW: ["ขนส่ง(ปลายทาง)", "ศุลกากร(ปลายทาง)", "คลังสินค้า(ต้นทาง)"],
-    HK: ["ขนส่ง(ปลายทาง)", "คลังสินค้า(ต้นทาง)"],
-    DEFAULT: ["ขนส่ง(ปลายทาง)", "ศุลกากร(ปลายทาง)", "คลังสินค้า(ต้นทาง)"],
-  };
-
-  // ==========================================
-  // 2) Utilities
-  // ==========================================
-  function normalizeText(s) {
-    return (s || "")
-      .replace(/[“”]/g, '"')
-      .replace(/\s+/g, " ")
-      .trim();
-  }
-
-  function hasChinese(s){
-    return /[\u4e00-\u9fff]/.test(s || "");
-  }
-
-  function extractZh(mixed) {
-    const s = normalizeText(mixed);
-    const m = s.match(/[（(]([^）)]+)[）)]/);
-    if (m && m[1]) return normalizeText(m[1]);
-    return s;
-  }
-
-  function pickStatusText(obj) {
-    if (!obj || typeof obj !== "object") return "";
-    const keys = [
-      "status_zh","status_cn","status","status_text","statusText",
-      "latest_status_zh","latest_status_cn","latest_status","latestStatus",
-      "desc_zh","description_zh","description","remark","remark_zh",
-      "message","state","event"
-    ];
-    for (const k of keys) {
-      const v = obj[k];
-      if (typeof v === "string" && v.trim()) return v;
-    }
-    return "";
-  }
-
-  function pickTimeText(obj) {
-    if (!obj || typeof obj !== "object") return "-";
-    return obj.time || obj.datetime || obj.dateTime || obj.date_time || obj.timestamp || "-";
-  }
-
-  function getLane(data, trackingNo){
-    const no = normalizeText(trackingNo || "");
-    if (/^SF/i.test(no)) return "HK";
-
-    const s = normalizeText(
-      data?.lane || data?.region || data?.destination || data?.country || data?.to_country || ""
-    );
-
-    if (/(^|[^A-Z])TW([^A-Z]|$)/i.test(s) || s.includes("ไต้หวัน")) return "TW";
-    if (/(^|[^A-Z])HK([^A-Z]|$)/i.test(s) || s.includes("ฮ่องกง")) return "HK";
-
-    return "DEFAULT";
-  }
-
-  function parseTimeLoose(t){
-    const s = normalizeText(t || "");
-    if (!s || s === "-") return 0;
-    const iso = s.includes("T") ? s : s.replace(" ", "T");
-    const ms = Date.parse(iso);
-    return Number.isFinite(ms) ? ms : 0;
-  }
-
-  function getLatestFromEvents(events){
-    const arr = Array.isArray(events) ? events : (events ? [events] : []);
-    if (!arr.length) return null;
-
-    return arr.reduce((latest, cur) => {
-      const tCur = parseTimeLoose(pickTimeText(cur));
-      const tLat = parseTimeLoose(pickTimeText(latest));
-      return tCur >= tLat ? cur : latest;
-    }, arr[0]);
-  }
-
-  function calcPercentFromEvents(events){
-    const arr = Array.isArray(events) ? events : (events ? [events] : []);
-    let maxP = 0;
-
-    for (const e of arr){
-      const raw = pickStatusText(e);
-
-      // match จากจีนก่อน
-      let m = matchStatus(raw);
-
-      // fallback: ถ้า raw เป็นไทย ให้หา percent จาก th
-      if (!m && raw) {
-        const th = normalizeText(raw);
-        m = STATUS_MAP.find(x => normalizeText(x.th) === th) || null;
-      }
-
-      const p = m && typeof m.percent === "number" ? m.percent : 0;
-      if (p > maxP) maxP = p;
-    }
-    return maxP;
-  }
-
-  // ==========================================
-  // 3) Matching (ทน ! / ข้อความต่อท้าย)
-  // ==========================================
-  function normalizeZhKey(s){
-    return normalizeText(s)
-      .replace(/[!！]/g, "")
-      .replace(/\s+/g, " ")
-      .trim();
-  }
-
-  function extractStatusKeyZh(rawAny){
-    const raw = extractZh(rawAny);
-    if (!raw) return "";
-    const s = normalizeZhKey(raw);
-
-    if (s.includes("：")) return s.split("：")[0].trim();
-    if (s.includes(":"))  return s.split(":")[0].trim();
-
-    let cut = s
-      .split("（")[0].split("(")[0]
-      .split("【")[0].split("[")[0]
-      .trim();
-
-    cut = cut.split("，")[0].split(",")[0].trim();
-    return cut || s;
-  }
-
-  function matchStatus(rawAny){
-    const raw = extractZh(rawAny);
-    if (!raw) return null;
-    if (!hasChinese(raw)) return null;
-
-    const key  = normalizeZhKey(extractStatusKeyZh(rawAny));
-    const full = normalizeZhKey(raw);
-
-    const exactBy = (z) => STATUS_MAP.find(x => normalizeZhKey(x.zh) === z) || null;
-
-    let hit = exactBy(key);
-    if (hit) return hit;
-
-    hit = exactBy(full);
-    if (hit) return hit;
-
-    hit = STATUS_MAP.find(x => {
-      const k = normalizeZhKey(x.zh);
-      return full.includes(k) || key.includes(k) || k.includes(key);
-    }) || null;
-
-    return hit;
-  }
-
-  function toThaiStatus(rawAny) {
-    const m = matchStatus(rawAny);
-    return m ? m.th : null;
-  }
-
-  function groupOfRaw(rawAny, lane){
-    const m = matchStatus(rawAny);
-    if (!m) return null;
-
-    if (lane === "HK") return m.group_hk || null;
-    if (lane === "TW") return m.group_tw || null;
-    return m.group_tw || null;
-  }
-
-  // ==========================================
-  // 4) Stepper + Badge
-  // ==========================================
-  function calcStepFromEvents(events, lane){
-    const arr = Array.isArray(events) ? events : (events ? [events] : []);
-    const labels = GROUPS_BY_LANE[lane] || GROUPS_BY_LANE.DEFAULT;
-
-    const groupsFound = new Set(
-      arr.map(e => groupOfRaw(pickStatusText(e), lane)).filter(Boolean)
-    );
-
-    if (lane === "HK") {
-      const hasOrigin = groupsFound.has(labels[1]);
-      const hasLast  = groupsFound.has(labels[0]);
-      if (hasLast) return 2;
-      if (hasOrigin) return 1;
-      return 0;
+      --ring: rgba(15,95,191,.18);
     }
 
-    const hasOrigin  = groupsFound.has(labels[2]);
-    const hasCustoms = groupsFound.has(labels[1]);
-    const hasLast    = groupsFound.has(labels[0]);
-
-    if (hasLast) return 3;
-    if (hasCustoms) return 2;
-    if (hasOrigin) return 1;
-    return 0;
-  }
-
-  function badgeOf(th){
-    if (!th) return { cls:"warn", label:"กำลังดำเนินการ" };
-    if (th.includes("ถึงผู้รับ")) return { cls:"ok", label:"ถึงแล้ว" };
-    if (th.includes("โปรดตรวจสอบ") || th.includes("ไม่สอดคล้อง") || th.includes("ติดต่อ") || th.includes("จัดส่งไม่สำเร็จ")) {
-      return { cls:"bad", label:"มีปัญหา" };
-    }
-    return { cls:"warn", label:"กำลังขนส่ง" };
-  }
-
-  function renderStepper(labels, step){
-    const reversed = [...labels].reverse(); // ต้นทาง -> ปลายทาง
-    const n = reversed.length;
-
-    const stepsHtml = reversed.map((title, idx) => {
-      const pos = idx + 1;
-      const cls = (step >= pos) ? (step === pos ? "active" : "done") : "";
-      const finalCls = (pos === n && step >= pos) ? "active done" : cls;
-
-      return `
-        <div class="step ${finalCls}">
-          <div class="stepTop">
-            <span class="stepDot"></span>
-            <span class="stepTitle">${title}</span>
-          </div>
-        </div>
-      `;
-    }).join("");
-
-    return `
-      <div class="stepper">
-        <div class="steps">${stepsHtml}</div>
-      </div>
-    `;
-  }
-
-  // ==========================================
-  // 5) Render
-  // ==========================================
-  function renderSummary(data, latestTh, events, lane){
-    if (!latestTh) {
-      summary.style.display = "none";
-      summary.innerHTML = "";
-      return;
+    body{
+      background: radial-gradient(1200px 600px at 20% -10%, rgba(15,95,191,.08), transparent 60%),
+                  radial-gradient(1000px 500px at 90% 0%, rgba(15,95,191,.06), transparent 55%),
+                  var(--bg);
+      color: var(--text);
     }
 
-    summary.style.display = "block";
-
-    const badge = badgeOf(latestTh);
-    const labels = GROUPS_BY_LANE[lane] || GROUPS_BY_LANE.DEFAULT;
-    const step = calcStepFromEvents(events, lane);
-
-    const progressPercent = calcPercentFromEvents(events);
-
-    summary.innerHTML = `
-      <div class="summaryTop">
-        <div class="kv">
-          <div><b>อัปเดตล่าสุด</b> <span class="value">${data.last_update || data.lastUpdate || "-"}</span></div>
-        </div>
-
-        <span class="badge ${badge.cls}">
-          <span class="dot"></span>
-          ${badge.label}
-        </span>
-      </div>
-
-      <div style="margin-top:6px;font-size:18px;font-weight:800">
-        ${latestTh}
-      </div>
-
-      <div class="progressWrap">
-        <div class="progressHead">
-          <b>ความคืบหน้า</b>
-          <span style="font-weight:900">${progressPercent}%</span>
-        </div>
-        <div class="progressBar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${progressPercent}">
-          <div class="progressFill" style="width:${progressPercent}%"></div>
-        </div>
-      </div>
-
-      ${renderStepper(labels, step)}
-    `;
-  }
-
-  function renderGroupedTimeline(events, lane){
-    const GROUP_ORDER = GROUPS_BY_LANE[lane] || GROUPS_BY_LANE.DEFAULT;
-    const arr = Array.isArray(events) ? events : (events ? [events] : []);
-
-    const translated = arr.map(e => {
-      const raw = pickStatusText(e);
-      const m = matchStatus(raw);
-
-      // ถ้าแมตช์จีนไม่ได้ แต่เป็นไทย ให้จับคู่จาก th
-      const m2 = m || (raw ? (STATUS_MAP.find(x => normalizeText(x.th) === normalizeText(raw)) || null) : null);
-      if (!m2) return null;
-
-      const group =
-        lane === "HK" ? (m2.group_hk || null) :
-        lane === "TW" ? (m2.group_tw || null) :
-        (m2.group_tw || null);
-
-      if (!group) return null;
-
-      return {
-        time: pickTimeText(e),
-        th: m2.th,
-        group,
-        key: normalizeZhKey(m2.zh || m2.th), // กันซ้ำ
-      };
-    }).filter(Boolean);
-
-    if (!translated.length) {
-      if (history) history.style.display = "none";
-      return;
+    .topbar{
+      border-color: var(--border);
+      box-shadow: var(--shadow);
+      border-radius: 18px;
     }
 
-    const seen = new Set();
-    const deduped = [];
-    for (const x of translated) {
-      if (seen.has(x.key)) continue;
-      seen.add(x.key);
-      deduped.push(x);
+    .logo{
+      box-shadow: 0 10px 16px rgba(15,95,191,.18);
+      border-radius: 12px;
     }
 
-    const buckets = new Map(GROUP_ORDER.map(g => [g, []]));
-    for (const x of deduped) {
-      if (!buckets.has(x.group)) continue;
-      buckets.get(x.group).push(x);
+    .card{
+      border-color: var(--border);
+      box-shadow: var(--shadow);
+      border-radius: 18px;
     }
 
-    const html = GROUP_ORDER
-      .filter(g => (buckets.get(g) || []).length > 0)
-      .map(g => {
-        const items = buckets.get(g) || [];
-        const itemsHtml = items.map(it => `
-          <div class="event">
-            <div class="time">${it.time || "-"}</div>
-            <div class="text">${it.th}</div>
-          </div>
-        `).join("");
+    .card{ padding: 18px; }
+    .grid{ gap: 16px; }
+    .searchRow{ gap: 12px; }
 
-        return `
-          <div class="group">
-            <div class="groupTitle"><div>${g}</div></div>
-            <div class="timeline">${itemsHtml}</div>
-          </div>
-        `;
-      })
-      .join("");
-
-    groupsEl.innerHTML = html;
-    history.style.display = "block";
-  }
-
-  function setLoading(){
-    summary.style.display = "block";
-    history.style.display = "none";
-    summary.innerHTML = `
-      <div class="loading">
-        <span class="spinner" aria-hidden="true"></span>
-        <div>
-          <div style="font-weight:800;color:#0f172a">กำลังค้นหา...</div>
-          <div class="small">โปรดรอสักครู่</div>
-        </div>
-      </div>
-    `;
-  }
-
-  function setError(msg){
-    summary.style.display = "block";
-    history.style.display = "none";
-    summary.innerHTML = `<div class="errorBox"><b>ไม่สำเร็จ:</b> ${msg || "เกิดข้อผิดพลาด"}</div>`;
-  }
-
-  // ==========================================
-  // 6) Run
-  // ==========================================
-  async function run(){
-    const no = (noEl.value || "").trim();
-    if(!no){ alert("กรุณากรอกเลขพัสดุ"); return; }
-
-    btn.disabled = true;
-    setLoading();
-
-    try{
-      const url = `/api/track?no=${encodeURIComponent(no)}`;
-      const r = await fetch(url, { cache: "no-store" });
-      const text = await r.text();
-
-      let data;
-      try { data = JSON.parse(text); }
-      catch {
-        setError(`API ไม่ได้ส่ง JSON (HTTP ${r.status})`);
-        return;
-      }
-
-      if(!r.ok){
-        setError(data.error || `HTTP ${r.status}`);
-        return;
-      }
-
-      const lane = getLane(data, no);
-      const events = data.events || data.history || data.traces || data.track || [];
-
-      // ✅ เลือกสถานะล่าสุดจากเวลา + fallback ไทย
-      const latestEvent = getLatestFromEvents(events);
-      const rawLatest = pickStatusText(latestEvent) || pickStatusText(data);
-
-      const mLatest = matchStatus(rawLatest);
-      const latestTh = mLatest ? mLatest.th : (toThaiStatus(rawLatest) || rawLatest || null);
-
-      renderSummary(data, latestTh, events, lane);
-      renderGroupedTimeline(events, lane);
-
-    }catch(e){
-      setError(String(e));
-    }finally{
-      btn.disabled = false;
+    .card h2{
+      font-size: 14px;
+      font-weight: 900;
+      letter-spacing: .2px;
+      margin-bottom: 10px;
     }
-  }
+    .muted{ color: var(--muted); }
+    .small{ color: var(--muted); }
 
-  btn.addEventListener("click", run);
-  noEl.addEventListener("keydown", (e) => { if(e.key === "Enter") run(); });
-</script>
+    input{
+      background: rgba(255,255,255,.85);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      transition: border-color .18s ease, box-shadow .18s ease, background .18s ease;
+    }
+    input:focus{
+      outline: none;
+      border-color: rgba(15,95,191,.35);
+      box-shadow: 0 0 0 4px var(--ring);
+      background: #fff;
+    }
 
+    .btn{
+      border-radius: 14px;
+      font-weight: 800;
+      box-shadow: 0 10px 16px rgba(15,95,191,.18);
+    }
+    .btn:hover{ filter: brightness(1.02); }
+    .btn:active{ transform: translateY(1px); }
+
+    .badge{
+      border: 1px solid rgba(15,95,191,.18);
+      background: rgba(15,95,191,.08);
+      color: var(--brand);
+      font-weight: 900;
+    }
+    .badge.ok{ background: rgba(15,118,110,.10); border-color: rgba(15,118,110,.20); }
+    .badge.warn{ background: rgba(180,83,9,.10); border-color: rgba(180,83,9,.20); }
+    .badge.bad{ background: rgba(185,28,28,.10); border-color: rgba(185,28,28,.20); }
+
+    .progressWrap{
+      border-radius: 14px;
+      border: 1px solid var(--border);
+      background: linear-gradient(180deg, rgba(255,255,255,.96), rgba(255,255,255,.90));
+    }
+    .progressBar{
+      height: 10px;
+      background: rgba(100,116,139,.14);
+      border: 1px solid rgba(100,116,139,.14);
+    }
+    .progressFill{
+      background: linear-gradient(90deg, var(--brand), var(--brand-2));
+      transition: width .45s ease;
+    }
+
+    .step{
+      border-radius: 14px;
+      border-color: var(--border);
+      background: rgba(255,255,255,.75);
+    }
+    .step:not(:last-child)::after{
+      background: rgba(100,116,139,.18);
+    }
+    .stepDot{
+      border-color: rgba(100,116,139,.14);
+      background: rgba(100,116,139,.18);
+    }
+    .step.active{
+      background: rgba(15,95,191,.06);
+      border-color: rgba(15,95,191,.22);
+    }
+    .step.done{
+      background: rgba(15,95,191,.04);
+      border-color: rgba(15,95,191,.14);
+    }
+
+    .groupTitle{
+      border-radius: 14px;
+      border-color: var(--border);
+      background: linear-gradient(180deg, rgba(15,95,191,.05), rgba(15,95,191,.02));
+    }
+    .event{
+      border-radius: 14px;
+      border-color: var(--border);
+      background: rgba(255,255,255,.75);
+    }
+    .timeline:before{
+      background: linear-gradient(to bottom, rgba(15,95,191,.28), rgba(15,95,191,.08));
+    }
+    .event:before{
+      border-color: rgba(15,95,191,.45);
+      box-shadow: 0 0 0 3px rgba(15,95,191,.08);
+    }
+
+    .footer{ color: var(--muted); }
+    .footer a{ color: var(--muted); }
+  </style>
 </head>
 
 <body>
@@ -520,469 +202,22 @@
     </div>
   </div>
 
-<script>
-  const $ = (id) => document.getElementById(id);
-  const summary = $("summary");
-  const history = $("history");
-  const groupsEl = $("groups");
-  const btn = $("btn");
-  const noEl = $("no");
-
-  const yearEl = $("year");
-  if (yearEl) yearEl.textContent = String(new Date().getFullYear());
-
-  // ==============================
-  // 1) Mapping จีน -> ไทย + กลุ่มตามประเทศ (TW/HK) + percent
-  // ==============================
-  const STATUS_MAP = [
-    // ===== TW: ขนส่ง(ปลายทาง) =====
-    { zh: "順利送達", th: "พัสดุถึงผู้รับเรียบร้อยแล้ว", group_tw: "ขนส่ง(ปลายทาง)", percent: 100 },
-    { zh: "配送中", th: "อยู่ระหว่างจัดส่ง", group_tw: "ขนส่ง(ปลายทาง)", percent: 90 },
-    { zh: "已集貨", th: "พัสดุอยู่ศูนย์คัดแยกพัสดุ", group_tw: "ขนส่ง(ปลายทาง)", percent: 80 },
-
-    // ===== TW: ศุลกากร(ปลายทาง) =====
-    { zh: "出倉處理", th: "กำลังดำเนินการนำสินค้าออกจากคลัง", group_tw: "ศุลกากร(ปลายทาง)", percent: 60 },
-    { zh: "連線收單建檔", th: "ระบบศุลกากรรับและบันทึกข้อมูลเรียบร้อยแล้ว", group_tw: "ศุลกากร(ปลายทาง)", percent: 70 },
-
-    // EZ WAY = 50
-    { zh: "由於海關系統查無此包裹申報人資料", th: "เนื่องจากระบบศุลกากรไม่พบข้อมูลผู้เดินพิธีการ โปรดตรวจสอบว่าผู้รับพัสดุได้ลงทะเบียนกับ EZ WAY แล้วหรือไม่ หากยังไม่ได้ลงทะเบียนโปรดลงทะเบียนให้เรียบร้อย ถ่ายภาพหน้าจอให้ติดชื่อ/หมายเลขโทรศัพท์และหมายเลขบัตรประชาชนของผู้เดินพิธีการ แล้วส่งให้เจ้าหน้าที่ลูกค้าสัมพันธ์ของWeiming หลังจากได้รับข้อมูลแล้ว พัสดุจะได้รับการปล่อยภายในประมาณ 1-2 วันทำการ", group_tw: "ศุลกากร(ปลายทาง)", percent: 50 },
-
-    // ข้อมูลไม่สอดคล้อง = 40
-    { zh: "不受理不可補正之錯單", th: "ข้อมูลที่ใช้เดินพิธีการไม่สอดคล้องกัน โปรดติดต่อเจ้าหน้าที่", group_tw: "ศุลกากร(ปลายทาง)", percent: 40 },
-
-    // ===== HK: ขนส่ง(ปลายทาง) =====
-    { zh: "您的快件已派送成功", th: "พัสดุถึงผู้รับเรียบร้อยแล้ว", group_hk: "ขนส่ง(ปลายทาง)", percent: 100 },
-    { zh: "快件派送不成功", th: "จัดส่งไม่สำเร็จ ติดต่อผู้รับไม่ได้ กำลังดำเนินการส่งใหม่", group_hk: "ขนส่ง(ปลายทาง)", percent: 90 },
-    { zh: "快件交给", th: "อยู่ระหว่างจัดส่ง", group_hk: "ขนส่ง(ปลายทาง)", percent: 90 },
-    { zh: "快件到达", th: "พัสดุถึงศูนย์คัดแยกพัสดุ", group_hk: "ขนส่ง(ปลายทาง)", percent: 80 },
-
-    // ===== TW/HK: คลังสินค้า(ต้นทาง) =====
-    { zh: "您的貨物已準備從集運倉出倉", th: "พัสดุของคุณออกคลัง เพื่อเตรียมส่งไปยังสนามบินแล้ว", group_tw: "คลังสินค้า(ต้นทาง)", group_hk: "คลังสินค้า(ต้นทาง)", percent: 30 },
-    { zh: "已經打印好地址面單", th: "พิมพ์ใบปะหน้าที่อยู่เรียบร้อยแล้ว", group_tw: "คลังสินค้า(ต้นทาง)", group_hk: "คลังสินค้า(ต้นทาง)", percent: 20 },
-    { zh: "已經打印好地址面單!", th: "พิมพ์ใบปะหน้าที่อยู่เรียบร้อยแล้ว", group_tw: "คลังสินค้า(ต้นทาง)", group_hk: "คลังสินค้า(ต้นทาง)", percent: 20 },
-
-    // สร้างออเดอร์ = 10
-    { zh: "您已下單成功!請等待倉库人員作業出貸", th: "สร้างออเดอร์การจัดส่งเรียบร้อย", group_hk: "คลังสินค้า(ต้นทาง)", percent: 10 },
-    { zh: "您已下單成功!請等待倉庫人員作業出貨", th: "สร้างออเดอร์การจัดส่งเรียบร้อย", group_hk: "คลังสินค้า(ต้นทาง)", percent: 10 },
-    { zh: "您已下單成功", th: "สร้างออเดอร์การจัดส่งเรียบร้อย", group_tw: "คลังสินค้า(ต้นทาง)", percent: 10 },
-  ];
-
-  const GROUPS_BY_LANE = {
-    TW: ["ขนส่ง(ปลายทาง)", "ศุลกากร(ปลายทาง)", "คลังสินค้า(ต้นทาง)"],
-    HK: ["ขนส่ง(ปลายทาง)", "คลังสินค้า(ต้นทาง)"],
-    DEFAULT: ["ขนส่ง(ปลายทาง)", "ศุลกากร(ปลายทาง)", "คลังสินค้า(ต้นทาง)"],
-  };
-
-  // ==========================================
-  // 2) Utilities
-  // ==========================================
-  function normalizeText(s) {
-    return (s || "")
-      .replace(/[“”]/g, '"')
-      .replace(/\s+/g, " ")
-      .trim();
-  }
-
-  function hasChinese(s){
-    return /[\u4e00-\u9fff]/.test(s || "");
-  }
-
-  function extractZh(mixed) {
-    const s = normalizeText(mixed);
-    const m = s.match(/[（(]([^）)]+)[）)]/);
-    if (m && m[1]) return normalizeText(m[1]);
-    return s;
-  }
-
-  function pickStatusText(obj) {
-    if (!obj || typeof obj !== "object") return "";
-    const keys = [
-      "status_zh","status_cn","status","status_text","statusText",
-      "latest_status_zh","latest_status_cn","latest_status","latestStatus",
-      "desc_zh","description_zh","description","remark","remark_zh",
-      "message","state","event"
-    ];
-    for (const k of keys) {
-      const v = obj[k];
-      if (typeof v === "string" && v.trim()) return v;
-    }
-    return "";
-  }
-
-  function pickTimeText(obj) {
-    if (!obj || typeof obj !== "object") return "-";
-    return obj.time || obj.datetime || obj.dateTime || obj.date_time || obj.timestamp || "-";
-  }
-
-  function getLane(data, trackingNo){
-    const no = normalizeText(trackingNo || "");
-    if (/^SF/i.test(no)) return "HK";
-
-    const s = normalizeText(
-      data?.lane || data?.region || data?.destination || data?.country || data?.to_country || ""
-    );
-
-    if (/(^|[^A-Z])TW([^A-Z]|$)/i.test(s) || s.includes("ไต้หวัน")) return "TW";
-    if (/(^|[^A-Z])HK([^A-Z]|$)/i.test(s) || s.includes("ฮ่องกง")) return "HK";
-
-    return "DEFAULT";
-  }
-
-  function parseTimeLoose(t){
-    const s = normalizeText(t || "");
-    if (!s || s === "-") return 0;
-    const iso = s.includes("T") ? s : s.replace(" ", "T");
-    const ms = Date.parse(iso);
-    return Number.isFinite(ms) ? ms : 0;
-  }
-
-  function getLatestFromEvents(events){
-    const arr = Array.isArray(events) ? events : (events ? [events] : []);
-    if (!arr.length) return null;
-
-    return arr.reduce((latest, cur) => {
-      const tCur = parseTimeLoose(pickTimeText(cur));
-      const tLat = parseTimeLoose(pickTimeText(latest));
-      return tCur >= tLat ? cur : latest;
-    }, arr[0]);
-  }
-
-  function calcPercentFromEvents(events){
-    const arr = Array.isArray(events) ? events : (events ? [events] : []);
-    let maxP = 0;
-
-    for (const e of arr){
-      const raw = pickStatusText(e);
-
-      // match จากจีนก่อน
-      let m = matchStatus(raw);
-
-      // fallback: ถ้า raw เป็นไทย ให้หา percent จาก th
-      if (!m && raw) {
-        const th = normalizeText(raw);
-        m = STATUS_MAP.find(x => normalizeText(x.th) === th) || null;
-      }
-
-      const p = m && typeof m.percent === "number" ? m.percent : 0;
-      if (p > maxP) maxP = p;
-    }
-    return maxP;
-  }
-
-  // ==========================================
-  // 3) Matching (ทน ! / ข้อความต่อท้าย)
-  // ==========================================
-  function normalizeZhKey(s){
-    return normalizeText(s)
-      .replace(/[!！]/g, "")
-      .replace(/\s+/g, " ")
-      .trim();
-  }
-
-  function extractStatusKeyZh(rawAny){
-    const raw = extractZh(rawAny);
-    if (!raw) return "";
-    const s = normalizeZhKey(raw);
-
-    if (s.includes("：")) return s.split("：")[0].trim();
-    if (s.includes(":"))  return s.split(":")[0].trim();
-
-    let cut = s
-      .split("（")[0].split("(")[0]
-      .split("【")[0].split("[")[0]
-      .trim();
-
-    cut = cut.split("，")[0].split(",")[0].trim();
-    return cut || s;
-  }
-
-  function matchStatus(rawAny){
-    const raw = extractZh(rawAny);
-    if (!raw) return null;
-    if (!hasChinese(raw)) return null;
-
-    const key  = normalizeZhKey(extractStatusKeyZh(rawAny));
-    const full = normalizeZhKey(raw);
-
-    const exactBy = (z) => STATUS_MAP.find(x => normalizeZhKey(x.zh) === z) || null;
-
-    let hit = exactBy(key);
-    if (hit) return hit;
-
-    hit = exactBy(full);
-    if (hit) return hit;
-
-    hit = STATUS_MAP.find(x => {
-      const k = normalizeZhKey(x.zh);
-      return full.includes(k) || key.includes(k) || k.includes(key);
-    }) || null;
-
-    return hit;
-  }
-
-  function toThaiStatus(rawAny) {
-    const m = matchStatus(rawAny);
-    return m ? m.th : null;
-  }
-
-  function groupOfRaw(rawAny, lane){
-    const m = matchStatus(rawAny);
-    if (!m) return null;
-
-    if (lane === "HK") return m.group_hk || null;
-    if (lane === "TW") return m.group_tw || null;
-    return m.group_tw || null;
-  }
-
-  // ==========================================
-  // 4) Stepper + Badge
-  // ==========================================
-  function calcStepFromEvents(events, lane){
-    const arr = Array.isArray(events) ? events : (events ? [events] : []);
-    const labels = GROUPS_BY_LANE[lane] || GROUPS_BY_LANE.DEFAULT;
-
-    const groupsFound = new Set(
-      arr.map(e => groupOfRaw(pickStatusText(e), lane)).filter(Boolean)
-    );
-
-    if (lane === "HK") {
-      const hasOrigin = groupsFound.has(labels[1]);
-      const hasLast  = groupsFound.has(labels[0]);
-      if (hasLast) return 2;
-      if (hasOrigin) return 1;
-      return 0;
-    }
-
-    const hasOrigin  = groupsFound.has(labels[2]);
-    const hasCustoms = groupsFound.has(labels[1]);
-    const hasLast    = groupsFound.has(labels[0]);
-
-    if (hasLast) return 3;
-    if (hasCustoms) return 2;
-    if (hasOrigin) return 1;
-    return 0;
-  }
-
-  function badgeOf(th){
-    if (!th) return { cls:"warn", label:"กำลังดำเนินการ" };
-    if (th.includes("ถึงผู้รับ")) return { cls:"ok", label:"ถึงแล้ว" };
-    if (th.includes("โปรดตรวจสอบ") || th.includes("ไม่สอดคล้อง") || th.includes("ติดต่อ") || th.includes("จัดส่งไม่สำเร็จ")) {
-      return { cls:"bad", label:"มีปัญหา" };
-    }
-    return { cls:"warn", label:"กำลังขนส่ง" };
-  }
-
-  function renderStepper(labels, step){
-    const reversed = [...labels].reverse(); // ต้นทาง -> ปลายทาง
-    const n = reversed.length;
-
-    const stepsHtml = reversed.map((title, idx) => {
-      const pos = idx + 1;
-      const cls = (step >= pos) ? (step === pos ? "active" : "done") : "";
-      const finalCls = (pos === n && step >= pos) ? "active done" : cls;
-
-      return `
-        <div class="step ${finalCls}">
-          <div class="stepTop">
-            <span class="stepDot"></span>
-            <span class="stepTitle">${title}</span>
-          </div>
-        </div>
-      `;
-    }).join("");
-
-    return `
-      <div class="stepper">
-        <div class="steps">${stepsHtml}</div>
-      </div>
-    `;
-  }
-
-  // ==========================================
-  // 5) Render
-  // ==========================================
-  function renderSummary(data, latestTh, events, lane){
-    if (!latestTh) {
-      summary.style.display = "none";
-      summary.innerHTML = "";
-      return;
-    }
-
-    summary.style.display = "block";
-
-    const badge = badgeOf(latestTh);
-    const labels = GROUPS_BY_LANE[lane] || GROUPS_BY_LANE.DEFAULT;
-    const step = calcStepFromEvents(events, lane);
-
-    const progressPercent = calcPercentFromEvents(events);
-
-    summary.innerHTML = `
-      <div class="summaryTop">
-        <div class="kv">
-          <div><b>อัปเดตล่าสุด</b> <span class="value">${data.last_update || data.lastUpdate || "-"}</span></div>
-        </div>
-
-        <span class="badge ${badge.cls}">
-          <span class="dot"></span>
-          ${badge.label}
-        </span>
-      </div>
-
-      <div style="margin-top:6px;font-size:18px;font-weight:800">
-        ${latestTh}
-      </div>
-
-      <div class="progressWrap">
-        <div class="progressHead">
-          <b>ความคืบหน้า</b>
-          <span style="font-weight:900">${progressPercent}%</span>
-        </div>
-        <div class="progressBar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${progressPercent}">
-          <div class="progressFill" style="width:${progressPercent}%"></div>
-        </div>
-      </div>
-
-      ${renderStepper(labels, step)}
-    `;
-  }
-
-  function renderGroupedTimeline(events, lane){
-    const GROUP_ORDER = GROUPS_BY_LANE[lane] || GROUPS_BY_LANE.DEFAULT;
-    const arr = Array.isArray(events) ? events : (events ? [events] : []);
-
-    const translated = arr.map(e => {
-      const raw = pickStatusText(e);
-      const m = matchStatus(raw);
-
-      // ถ้าแมตช์จีนไม่ได้ แต่เป็นไทย ให้จับคู่จาก th
-      const m2 = m || (raw ? (STATUS_MAP.find(x => normalizeText(x.th) === normalizeText(raw)) || null) : null);
-      if (!m2) return null;
-
-      const group =
-        lane === "HK" ? (m2.group_hk || null) :
-        lane === "TW" ? (m2.group_tw || null) :
-        (m2.group_tw || null);
-
-      if (!group) return null;
-
-      return {
-        time: pickTimeText(e),
-        th: m2.th,
-        group,
-        key: normalizeZhKey(m2.zh || m2.th), // กันซ้ำ
-      };
-    }).filter(Boolean);
-
-    if (!translated.length) {
-      if (history) history.style.display = "none";
-      return;
-    }
-
-    const seen = new Set();
-    const deduped = [];
-    for (const x of translated) {
-      if (seen.has(x.key)) continue;
-      seen.add(x.key);
-      deduped.push(x);
-    }
-
-    const buckets = new Map(GROUP_ORDER.map(g => [g, []]));
-    for (const x of deduped) {
-      if (!buckets.has(x.group)) continue;
-      buckets.get(x.group).push(x);
-    }
-
-    const html = GROUP_ORDER
-      .filter(g => (buckets.get(g) || []).length > 0)
-      .map(g => {
-        const items = buckets.get(g) || [];
-        const itemsHtml = items.map(it => `
-          <div class="event">
-            <div class="time">${it.time || "-"}</div>
-            <div class="text">${it.th}</div>
-          </div>
-        `).join("");
-
-        return `
-          <div class="group">
-            <div class="groupTitle"><div>${g}</div></div>
-            <div class="timeline">${itemsHtml}</div>
-          </div>
-        `;
-      })
-      .join("");
-
-    groupsEl.innerHTML = html;
-    history.style.display = "block";
-  }
-
-  function setLoading(){
-    summary.style.display = "block";
-    history.style.display = "none";
-    summary.innerHTML = `
-      <div class="loading">
-        <span class="spinner" aria-hidden="true"></span>
-        <div>
-          <div style="font-weight:800;color:#0f172a">กำลังค้นหา...</div>
-          <div class="small">โปรดรอสักครู่</div>
-        </div>
-      </div>
-    `;
-  }
-
-  function setError(msg){
-    summary.style.display = "block";
-    history.style.display = "none";
-    summary.innerHTML = `<div class="errorBox"><b>ไม่สำเร็จ:</b> ${msg || "เกิดข้อผิดพลาด"}</div>`;
-  }
-
-  // ==========================================
-  // 6) Run
-  // ==========================================
-  async function run(){
-    const no = (noEl.value || "").trim();
-    if(!no){ alert("กรุณากรอกเลขพัสดุ"); return; }
-
-    btn.disabled = true;
-    setLoading();
-
-    try{
-      const url = `/api/track?no=${encodeURIComponent(no)}`;
-      const r = await fetch(url, { cache: "no-store" });
-      const text = await r.text();
-
-      let data;
-      try { data = JSON.parse(text); }
-      catch {
-        setError(`API ไม่ได้ส่ง JSON (HTTP ${r.status})`);
-        return;
-      }
-
-      if(!r.ok){
-        setError(data.error || `HTTP ${r.status}`);
-        return;
-      }
-
-      const lane = getLane(data, no);
-      const events = data.events || data.history || data.traces || data.track || [];
-
-      // ✅ เลือกสถานะล่าสุดจากเวลา + fallback ไทย
-      const latestEvent = getLatestFromEvents(events);
-      const rawLatest = pickStatusText(latestEvent) || pickStatusText(data);
-
-      const mLatest = matchStatus(rawLatest);
-      const latestTh = mLatest ? mLatest.th : (toThaiStatus(rawLatest) || rawLatest || null);
-
-      renderSummary(data, latestTh, events, lane);
-      renderGroupedTimeline(events, lane);
-
-    }catch(e){
-      setError(String(e));
-    }finally{
-      btn.disabled = false;
-    }
-  }
-
-  btn.addEventListener("click", run);
-  noEl.addEventListener("keydown", (e) => { if(e.key === "Enter") run(); });
-</script>
+  <!-- ✅ JS ต้องอยู่ท้าย body และมีแค่ก้อนเดียว -->
+  <script>
+    // =============== JS ของคุณ: วาง "ทั้งก้อน" ที่คุณใช้อยู่ (ชุดล่าสุด) ตรงนี้ ===============
+    // หมายเหตุ: ห้ามประกาศซ้ำ 2 รอบ
+
+    const $ = (id) => document.getElementById(id);
+    const summary = $("summary");
+    const history = $("history");
+    const groupsEl = $("groups");
+    const btn = $("btn");
+    const noEl = $("no");
+
+    const yearEl = $("year");
+    if (yearEl) yearEl.textContent = String(new Date().getFullYear());
+
+    // ... (คัดลอก JS ทั้งหมดของคุณมาต่อจากนี้ได้เลย)
+  </script>
+</body>
+</html>

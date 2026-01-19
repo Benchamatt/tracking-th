@@ -295,21 +295,21 @@
   if (yearEl) yearEl.textContent = String(new Date().getFullYear());
 
   // ==============================
-  // 1) Mapping จีน -> ไทย + percent (เปอร์เซ็นต์รายสถานะ)
+  // 1) Mapping จีน -> ไทย + percent (ตามคำสั่งบน)
   // ==============================
   const STATUS_MAP = [
-    // ขนส่ง(ปลายทาง)
+    // ===== หัวข้อที่3 ขนส่ง(ปลายทาง) 100% =====
     { zh: "順利送達", th: "พัสดุถึงผู้รับเรียบร้อยแล้ว", percent: 100 },
     { zh: "配送中", th: "อยู่ระหว่างจัดส่ง", percent: 90 },
     { zh: "已集貨", th: "พัสดุอยู่ศูนย์คัดแยกพัสดุ", percent: 80 },
 
-    // ศุลกากร(ปลายทาง)
-    { zh: "出倉處理", th: "กำลังดำเนินการนำสินค้าออกจากคลัง", percent: 60 },
-    { zh: "連線收單建檔", th: "ระบบศุลกากรรับและบันทึกข้อมูลเรียบร้อยแล้ว", percent: 70 },
+    // ===== หัวข้อที่2 ศุลกากร(ปลายทาง) 70% =====
     { zh: "由於海關系統查無此包裹申報人資料", th: "เนื่องจากระบบศุลกากรไม่พบข้อมูลผู้เดินพิธีการ โปรดตรวจสอบว่าผู้รับพัสดุได้ลงทะเบียนกับ EZ WAY แล้วหรือไม่ หากยังไม่ได้ลงทะเบียนโปรดลงทะเบียนให้เรียบร้อย ถ่ายภาพหน้าจอให้ติดชื่อ/หมายเลขโทรศัพท์และหมายเลขบัตรประชาชนของผู้เดินพิธีการ แล้วส่งให้เจ้าหน้าที่ลูกค้าสัมพันธ์ของWeiming หลังจากได้รับข้อมูลแล้ว พัสดุจะได้รับการปล่อยภายในประมาณ 1-2 วันทำการ", percent: 50 },
     { zh: "不受理不可補正之錯單", th: "ข้อมูลที่ใช้เดินพิธีการไม่สอดคล้องกัน โปรดติดต่อเจ้าหน้าที่", percent: 40 },
+    { zh: "出倉處理", th: "กำลังดำเนินการนำสินค้าออกจากคลัง", percent: 60 },
+    { zh: "連線收單建檔", th: "ระบบศุลกากรรับและบันทึกข้อมูลเรียบร้อยแล้ว", percent: 70 },
 
-    // คลังสินค้า(ต้นทาง)
+    // ===== หัวข้อที่1 คลังสินค้า(ต้นทาง) รวม 30% =====
     { zh: "您的貨物已準備從集運倉出倉", th: "พัสดุของคุณออกคลัง เพื่อเตรียมส่งไปยังสนามบินแล้ว", percent: 30 },
     { zh: "已經打印好地址面單", th: "พิมพ์ใบปะหน้าที่อยู่เรียบร้อยแล้ว", percent: 20 },
     { zh: "已經打印好地址面單!", th: "พิมพ์ใบปะหน้าที่อยู่เรียบร้อยแล้ว", percent: 20 },
@@ -317,16 +317,16 @@
   ];
 
   // ==============================
-  // 2) Percent แบบ "หัวข้อ" ตามที่ขอ
+  // 2) หัวข้อ + percent ที่ต้องโชว์ใน "กรอบสีแดง"
   // ==============================
-  const STAGE_DEF = [
-    { key: "origin",  label: "คลังสินค้า(ต้นทาง)",  milestone: 30 },
-    { key: "customs", label: "ศุลกากร(ปลายทาง)",    milestone: 70 },
-    { key: "lastmile",label: "ขนส่ง(ปลายทาง)",      milestone: 100 },
+  const STAGES = [
+    { key: "ORIGIN",  label: "คลังสินค้า(ต้นทาง)", percent: 30 },
+    { key: "CUSTOMS", label: "ศุลกากร(ปลายทาง)",   percent: 70 },
+    { key: "LASTMILE",label: "ขนส่ง(ปลายทาง)",     percent: 100 },
   ];
 
   // ==========================================
-  // 3) Utilities
+  // Utilities
   // ==========================================
   function normalizeText(s) {
     return (s || "")
@@ -339,7 +339,6 @@
     return /[\u4e00-\u9fff]/.test(s || "");
   }
 
-  // ดึงจีนจากข้อความผสม รองรับ () และ （）
   function extractZh(mixed) {
     const s = normalizeText(mixed);
     const m = s.match(/[（(]([^）)]+)[）)]/);
@@ -386,12 +385,11 @@
   }
 
   // ==========================================
-  // 4) Translate/Match
+  // Matching: raw -> map item
   // ==========================================
   function matchMap(rawAny){
     const raw = extractZh(rawAny);
     if (!raw) return null;
-
     if (!hasChinese(raw)) return null;
 
     const zh = normalizeText(raw);
@@ -413,6 +411,7 @@
     return m && typeof m.percent === "number" ? m.percent : 0;
   }
 
+  // ✅ % ความคืบหน้า: เอา max ของทุก events (ไม่ถอยหลัง)
   function calcPercentFromEvents(events){
     const arr = Array.isArray(events) ? events : (events ? [events] : []);
     let maxP = 0;
@@ -424,21 +423,25 @@
   }
 
   // ==========================================
-  // 5) Grouping (ใช้เพื่อเลือก active step)
+  // Grouping สำหรับ timeline + stage active
   // ==========================================
   const GROUP_ORDER = ["ขนส่ง(ปลายทาง)", "ศุลกากร(ปลายทาง)", "คลังสินค้า(ต้นทาง)"];
 
   function groupOf(th){
     if (!th) return "คลังสินค้า(ต้นทาง)";
 
-    if (th.includes("พัสดุถึงผู้รับเรียบร้อยแล้ว") || th.includes("อยู่ระหว่างจัดส่ง") || th.includes("พัสดุอยู่ศูนย์คัดแยกพัสดุ")) {
+    // last mile
+    if (th.includes("พัสดุถึงผู้รับเรียบร้อยแล้ว") || th.includes("อยู่ระหว่างจัดส่ง") || th.includes("ศูนย์คัดแยกพัสดุ")) {
       return "ขนส่ง(ปลายทาง)";
     }
 
-    if (th.includes("กำลังดำเนินการนำสินค้า") || th.includes("ระบบศุลกากรรับ") || th.includes("เนื่องจากระบบศุลกากรไม่พบข้อมูล") || th.includes("ข้อมูลที่ใช้เดินพิธีการ")) {
+    // customs
+    if (th.includes("กำลังดำเนินการนำสินค้าออกจากคลัง") || th.includes("ระบบศุลกากรรับและบันทึกข้อมูล") ||
+        th.includes("ไม่พบข้อมูลผู้เดินพิธีการ") || th.includes("EZ WAY") || th.includes("ไม่สอดคล้องกัน")) {
       return "ศุลกากร(ปลายทาง)";
     }
 
+    // origin
     if (th.includes("ออกคลัง") || th.includes("ใบปะหน้า") || th.includes("สร้างออเดอร์")) {
       return "คลังสินค้า(ต้นทาง)";
     }
@@ -446,8 +449,8 @@
     return "คลังสินค้า(ต้นทาง)";
   }
 
+  // ✅ active stage index สำหรับ 3 pill (คลัง -> ศุลกากร -> ขนส่ง)
   function stageIndexFromGroup(groupName){
-    // ให้เรียงเหมือนในภาพ: คลัง -> ศุลกากร -> ขนส่ง
     if (groupName === "คลังสินค้า(ต้นทาง)") return 0;
     if (groupName === "ศุลกากร(ปลายทาง)") return 1;
     if (groupName === "ขนส่ง(ปลายทาง)") return 2;
@@ -457,37 +460,36 @@
   function badgeOf(th){
     if (!th) return { cls:"warn", label:"กำลังดำเนินการ" };
     if (th.includes("ถึงผู้รับ")) return { cls:"ok", label:"ถึงแล้ว" };
-    if (th.includes("โปรดตรวจสอบ") || th.includes("ไม่สอดคล้อง") || th.includes("ติดต่อ")) {
+    if (th.includes("โปรดตรวจสอบ") || th.includes("ไม่สอดคล้อง") || th.includes("ติดต่อ") || th.includes("EZ WAY")) {
       return { cls:"bad", label:"มีปัญหา" };
     }
     return { cls:"warn", label:"กำลังขนส่ง" };
   }
 
   // ==========================================
-  // 6) Render: ใส่เปอร์เซ็นต์ + 3 หัวข้อ "ในกรอบสีแดง"
+  // ✅ UI ในกรอบสีแดง: 3 หัวข้อ + percent (30/70/100)
+  // ไม่เพิ่ม CSS class ใหม่ (ใช้ inline อย่างเดียว)
   // ==========================================
   function renderStagePills(activeIdx){
-    // pill style inline (ไม่แตะ CSS เดิม)
     const pillBase = "display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 12px;border-radius:14px;border:1px solid var(--border);background:var(--surface-2);font-size:13px;font-weight:800;";
 
     return `
       <div style="margin-top:12px; display:grid; grid-template-columns: 1fr 1fr 1fr; gap:10px;">
-        ${STAGE_DEF.map((s, idx) => {
+        ${STAGES.map((s, idx) => {
           const done = idx < activeIdx;
           const active = idx === activeIdx;
 
           const bg = active ? "rgba(15,95,191,.10)" : (done ? "rgba(15,95,191,.06)" : "var(--surface-2)");
           const bd = active ? "rgba(15,95,191,.30)" : (done ? "rgba(15,95,191,.18)" : "var(--border)");
           const dot = active || done ? "var(--brand)" : "rgba(100,116,139,.45)";
-          const title = s.label;
 
           return `
             <div style="${pillBase} background:${bg}; border-color:${bd};">
               <div style="display:flex; align-items:center; gap:8px; min-width:0;">
                 <span style="width:8px;height:8px;border-radius:999px;background:${dot};flex:0 0 auto;"></span>
-                <span style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${title}</span>
+                <span style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${s.label}</span>
               </div>
-              <span style="font-weight:900; color:var(--text);">${s.milestone}%</span>
+              <span style="font-weight:900; color:var(--text);">${s.percent}%</span>
             </div>
           `;
         }).join("")}
@@ -495,6 +497,9 @@
     `;
   }
 
+  // ==========================================
+  // Render Summary (กรอบสีแดง)
+  // ==========================================
   function renderSummary(data, latestTh, events){
     if (!latestTh) {
       summary.style.display = "none";
@@ -505,13 +510,10 @@
     summary.style.display = "block";
 
     const badge = badgeOf(latestTh);
+    const progressPercent = calcPercentFromEvents(events); // 10/20/30/40/50/60/70/80/90/100
 
-    // % ตามสถานะจริง (10/20/30/40/50/60/70/80/90/100)
-    const progressPercent = calcPercentFromEvents(events);
-
-    // active step จากกลุ่มของ latest
-    const g = groupOf(latestTh);
-    const activeIdx = stageIndexFromGroup(g);
+    // active stage ตาม latest
+    const activeIdx = stageIndexFromGroup(groupOf(latestTh));
 
     summary.innerHTML = `
       <div class="summaryTop">
@@ -529,7 +531,7 @@
         ${latestTh}
       </div>
 
-      <!-- ✅ เปอร์เซ็นต์ความคืบหน้าตาม mapping (เช่น 70%) อยู่ในกรอบแดง -->
+      <!-- ✅ Progress bar ในกรอบสีแดง -->
       <div style="margin-top:10px; display:flex; align-items:center; justify-content:space-between; gap:10px;">
         <div class="muted" style="font-weight:800;">ความคืบหน้า</div>
         <div style="font-size:14px; font-weight:900;">${progressPercent}%</div>
@@ -538,7 +540,7 @@
         <div style="height:100%; width:${progressPercent}%; background:linear-gradient(135deg, var(--brand), var(--brand-2)); border-radius:999px;"></div>
       </div>
 
-      <!-- ✅ 3 หัวข้อ + milestone percent (30/70/100) อยู่ในกรอบแดง -->
+      <!-- ✅ 3 หัวข้อ 30/70/100 ในกรอบสีแดง -->
       ${renderStagePills(activeIdx)}
     `;
   }
@@ -616,7 +618,7 @@
   }
 
   // ==========================================
-  // 7) Run
+  // Run
   // ==========================================
   async function run(){
     const no = (noEl.value || "").trim();
@@ -644,13 +646,12 @@
 
       const events = data.events || data.history || data.traces || data.track || [];
 
-      // ✅ ใช้ event ที่ "เวลาใหม่สุด" เป็น latest
+      // ✅ latest จากเวลา
       const latestEvent = getLatestFromEvents(events);
       const rawLatest = pickStatusText(latestEvent) || pickStatusText(data);
 
       const latestTh = toThaiStatus(rawLatest);
 
-      // ถ้าไม่ match: ซ่อน summary ตามเดิม
       renderSummary(data, latestTh, events);
       renderGroupedTimeline(events);
 

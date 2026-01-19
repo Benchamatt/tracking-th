@@ -226,7 +226,8 @@
     #groupHint {
       display: none !important;
     }
-  </style>
+</style>
+</head>
 
 <body>
   <div class="wrap" id="app">
@@ -274,11 +275,7 @@
     </div>
   </div>
 
-  <!-- ✅ JS ต้องอยู่ท้าย body และมีแค่ก้อนเดียว -->
   <script>
-    // =============== JS ของคุณ: วาง "ทั้งก้อน" ที่คุณใช้อยู่ (ชุดล่าสุด) ตรงนี้ ===============
-    // หมายเหตุ: ห้ามประกาศซ้ำ 2 รอบ
-
     const $ = (id) => document.getElementById(id);
     const summary = $("summary");
     const history = $("history");
@@ -289,7 +286,98 @@
     const yearEl = $("year");
     if (yearEl) yearEl.textContent = String(new Date().getFullYear());
 
-    // ... (คัดลอก JS ทั้งหมดของคุณมาต่อจากนี้ได้เลย)
-  </script>
-</body>
-</html>
+    // ==============================
+    // Mapping + percent (ตามที่คุณกำหนด)
+    // ==============================
+    const STATUS_MAP = [
+      // ===== ขนส่ง(ปลายทาง) =====
+      { zh: "順利送達", th: "พัสดุถึงผู้รับเรียบร้อยแล้ว", group_tw: "ขนส่ง(ปลายทาง)", percent: 100 },
+      { zh: "配送中", th: "อยู่ระหว่างจัดส่ง", group_tw: "ขนส่ง(ปลายทาง)", percent: 90 },
+      { zh: "已集貨", th: "พัสดุอยู่ศูนย์คัดแยกพัสดุ", group_tw: "ขนส่ง(ปลายทาง)", percent: 80 },
+
+      // ===== ศุลกากร(ปลายทาง) =====
+      { zh: "出倉處理", th: "กำลังดำเนินการนำสินค้าออกจากคลัง", group_tw: "ศุลกากร(ปลายทาง)", percent: 60 },
+      { zh: "連線收單建檔", th: "ระบบศุลกากรรับและบันทึกข้อมูลเรียบร้อยแล้ว", group_tw: "ศุลกากร(ปลายทาง)", percent: 70 },
+
+      // กรณีปัญหา EZ WAY / mismatch (ตามที่คุณให้ล่าสุด)
+      { zh: "由於海關系統查無此包裹申報人資料", th: "เนื่องจากระบบศุลกากรไม่พบข้อมูลผู้เดินพิธีการ โปรดตรวจสอบว่าผู้รับพัสดุได้ลงทะเบียนกับ EZ WAY แล้วหรือไม่ หากยังไม่ได้ลงทะเบียนโปรดลงทะเบียนให้เรียบร้อย ถ่ายภาพหน้าจอให้ติดชื่อ/หมายเลขโทรศัพท์และหมายเลขบัตรประชาชนของผู้เดินพิธีการ แล้วส่งให้เจ้าหน้าที่ลูกค้าสัมพันธ์ของWeiming หลังจากได้รับข้อมูลแล้ว พัสดุจะได้รับการปล่อยภายในประมาณ 1-2 วันทำการ", group_tw: "ศุลกากร(ปลายทาง)", percent: 50 },
+      { zh: "不受理不可補正之錯單", th: "ข้อมูลที่ใช้เดินพิธีการไม่สอดคล้องกัน โปรดติดต่อเจ้าหน้าที่", group_tw: "ศุลกากร(ปลายทาง)", percent: 40 },
+
+      // ===== คลังสินค้า(ต้นทาง) =====
+      { zh: "您的貨物已準備從集運倉出倉", th: "พัสดุของคุณออกคลัง เพื่อเตรียมส่งไปยังสนามบินแล้ว", group_tw: "คลังสินค้า(ต้นทาง)", percent: 30 },
+      { zh: "已經打印好地址面單", th: "พิมพ์ใบปะหน้าที่อยู่เรียบร้อยแล้ว", group_tw: "คลังสินค้า(ต้นทาง)", percent: 20 },
+      { zh: "已經打印好地址面單!", th: "พิมพ์ใบปะหน้าที่อยู่เรียบร้อยแล้ว", group_tw: "คลังสินค้า(ต้นทาง)", percent: 20 },
+      { zh: "您已下單成功", th: "สร้างออเดอร์การจัดส่งเรียบร้อย", group_tw: "คลังสินค้า(ต้นทาง)", percent: 10 },
+
+      // ===== HK (เผื่อเลขขึ้น SF...) =====
+      { zh: "您的快件已派送成功", th: "พัสดุถึงผู้รับเรียบร้อยแล้ว", group_hk: "ขนส่ง(ปลายทาง)", percent: 100 },
+      { zh: "快件交给", th: "อยู่ระหว่างจัดส่ง", group_hk: "ขนส่ง(ปลายทาง)", percent: 90 },
+      { zh: "快件到达", th: "พัสดุถึงศูนย์คัดแยกพัสดุ", group_hk: "ขนส่ง(ปลายทาง)", percent: 80 },
+      { zh: "您已下單成功!請等待倉庫人員作業出貨", th: "สร้างออเดอร์การจัดส่งเรียบร้อย", group_hk: "คลังสินค้า(ต้นทาง)", percent: 10 },
+      { zh: "您已下單成功!請等待倉库人員作業出貸", th: "สร้างออเดอร์การจัดส่งเรียบร้อย", group_hk: "คลังสินค้า(ต้นทาง)", percent: 10 },
+    ];
+
+    const GROUPS_BY_LANE = {
+      TW: ["ขนส่ง(ปลายทาง)", "ศุลกากร(ปลายทาง)", "คลังสินค้า(ต้นทาง)"],
+      HK: ["ขนส่ง(ปลายทาง)", "คลังสินค้า(ต้นทาง)"],
+      DEFAULT: ["ขนส่ง(ปลายทาง)", "ศุลกากร(ปลายทาง)", "คลังสินค้า(ต้นทาง)"],
+    };
+
+    // ==============================
+    // Utilities
+    // ==============================
+    function normalizeText(s) {
+      return (s || "")
+        .replace(/[“”]/g, '"')
+        .replace(/\s+/g, " ")
+        .trim();
+    }
+
+    function hasChinese(s){
+      return /[\u4e00-\u9fff]/.test(s || "");
+    }
+
+    // รองรับกรณี API ส่งไทยล้วน หรือ "(จีน)" ปนมา
+    function extractZh(mixed) {
+      const s = normalizeText(mixed);
+      const m = s.match(/[（(]([^）)]+)[）)]/);
+      if (m && m[1]) return normalizeText(m[1]);
+      return s;
+    }
+
+    function normalizeZhKey(s){
+      return normalizeText(s).replace(/[!！]/g, "").trim();
+    }
+
+    function pickStatusText(obj) {
+      if (!obj || typeof obj !== "object") return "";
+      const keys = [
+        "status_zh","status_cn","status","status_text","statusText",
+        "latest_status_zh","latest_status_cn","latest_status","latestStatus",
+        "desc_zh","description_zh","description","remark","remark_zh",
+        "message","state","event"
+      ];
+      for (const k of keys) {
+        const v = obj[k];
+        if (typeof v === "string" && v.trim()) return v;
+      }
+      return "";
+    }
+
+    function pickTimeText(obj) {
+      if (!obj || typeof obj !== "object") return "-";
+      return obj.time || obj.datetime || obj.dateTime || obj.date_time || obj.timestamp || "-";
+    }
+
+    function parseTimeLoose(t){
+      const s = normalizeText(t || "");
+      if (!s || s === "-") return 0;
+      const iso = s.includes("T") ? s : s.replace(" ", "T");
+      const ms = Date.parse(iso);
+      return Number.isFinite(ms) ? ms : 0;
+    }
+
+    function getLatestFromEvents(events){
+      const arr = Array.isArray(events) ? events : (events ? [events] : []);
+      if (!arr.length) return null;
+      retur

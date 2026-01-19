@@ -163,7 +163,7 @@
       position:absolute;
       left:7px; top:2px; bottom:2px;
       width:2px;
-      background: linear-gradient(to bottom, rgba(15,95,191,.35), rgba(15,95,191191,.08));
+      background: linear-gradient(to bottom, rgba(15,95,191,.35), rgba(15,95,191,.08)); /* ✅ fix */
     }
 
     .event{
@@ -292,7 +292,7 @@
   if (yearEl) yearEl.textContent = String(new Date().getFullYear());
 
   // ==============================
-  // Mapping จีน -> ไทย + percent (ตามเดิม)
+  // Mapping จีน -> ไทย + percent
   // ==============================
   const STATUS_MAP = [
     { zh: "順利送達", th: "พัสดุถึงผู้รับเรียบร้อยแล้ว", percent: 100 },
@@ -310,7 +310,7 @@
     { zh: "您已下單成功", th: "สร้างออเดอร์การจัดส่งเรียบร้อย", percent: 10 },
   ];
 
-  // 3 หัวข้อ + milestone percent (fix ตามที่ขอ)
+  // 3 หัวข้อ + milestone percent
   const STAGE_DEF = [
     { label: "คลังสินค้า(ต้นทาง)", milestone: 30 },
     { label: "ศุลกากร(ปลายทาง)", milestone: 70 },
@@ -355,9 +355,8 @@
     return obj.time || obj.datetime || obj.dateTime || obj.date_time || obj.timestamp || "-";
   }
 
-  // ===== เลือก latest แบบไม่พึ่ง format เวลา (นิ่งกว่า): สมมติ API ส่งใหม่สุดมาก่อน =====
-  // ถ้าของคุณเป็นเก่า->ใหม่ ให้เปลี่ยนเป็น "ASC"
-  const EVENTS_ORDER = "DESC";
+  // ===== latest แบบไม่พึ่ง format เวลา: ใช้ order ของ events จาก API
+  const EVENTS_ORDER = "DESC"; // ถ้า API ส่งเก่า->ใหม่ ให้เปลี่ยนเป็น "ASC"
   function getLatestByOrder(events, order){
     const arr = Array.isArray(events) ? events : (events ? [events] : []);
     if (!arr.length) return null;
@@ -388,7 +387,6 @@
     return m && typeof m.percent === "number" ? m.percent : 0;
   }
 
-  // ไม่ถอยหลัง: max percent ของทุก events
   function calcPercentFromEvents(events){
     const arr = Array.isArray(events) ? events : (events ? [events] : []);
     let maxP = 0;
@@ -417,7 +415,6 @@
   }
 
   function stageIndexFromPercent(p){
-    // 0=คลัง(<=30), 1=ศุลกากร(<=70), 2=ขนส่ง(<=100)
     if (p >= 100) return 2;
     if (p >= 70) return 1;
     return 0;
@@ -459,67 +456,55 @@
     `;
   }
 
-  // ✅ ตัด "ข้อความสถานะใหญ่" ออก และตัด label "ความคืบหน้า" ออก
-  // ✅ ให้แถบ progress ใช้ percent เดียวกับปุ่มล่าง
- function renderSummary(data, latestTh, events){
-  if (!latestTh) {
-    summary.style.display = "none";
-    summary.innerHTML = "";
-    return;
-  }
+  // ✅ แก้แล้ว: ไม่ใช้ stageIndexFromGroup (ไม่มี) และไม่ต้องพึ่ง latestTh สำหรับ step
+  function renderSummary(data, latestTh, events){
+    if (!latestTh) {
+      summary.style.display = "none";
+      summary.innerHTML = "";
+      return;
+    }
 
-  summary.style.display = "block";
+    summary.style.display = "block";
 
-  const badge = badgeOf(latestTh);
+    const badge = badgeOf(latestTh);
+    const progressPercent = calcPercentFromEvents(events);
+    const activeIdx = stageIndexFromPercent(progressPercent); // ✅ เสถียรสุด
 
-  // ✅ percent เดียว ใช้ทั้งแถบ + step
-  const progressPercent = calcPercentFromEvents(events);
-
-  // group -> step index
-  const g = groupOf(latestTh);
-  const activeIdx = stageIndexFromGroup(g);
-
-  summary.innerHTML = `
-    <div class="summaryTop">
-      <div class="kv">
-        <div>
-          <b>อัปเดตล่าสุด</b>
-          <span class="value">${data.last_update || data.lastUpdate || "-"}</span>
+    summary.innerHTML = `
+      <div class="summaryTop">
+        <div class="kv">
+          <div><b>อัปเดตล่าสุด</b> <span class="value">${data.last_update || data.lastUpdate || "-"}</span></div>
         </div>
+
+        <span class="badge ${badge.cls}">
+          <span class="dot"></span>
+          ${badge.label}
+        </span>
       </div>
 
-      <span class="badge ${badge.cls}">
-        <span class="dot"></span>
-        ${badge.label}
-      </span>
-    </div>
+      <div style="margin-top:10px; display:flex; align-items:center; justify-content:space-between;">
+        <div style="font-weight:900;">${progressPercent}%</div>
+      </div>
 
-    <!-- ✅ เหลือแค่แถบ (เหมือนภาพที่สอง) -->
-    <div style="margin-top:10px; display:flex; align-items:center; justify-content:space-between;">
-      <div class="muted" style="font-weight:800;">ความคืบหน้า</div>
-      <div style="font-weight:900;">${progressPercent}%</div>
-    </div>
-
-    <div style="
-      margin-top:8px;
-      height:10px;
-      border-radius:999px;
-      background:rgba(100,116,139,.18);
-      overflow:hidden;
-      border:1px solid rgba(100,116,139,.18);
-    ">
       <div style="
-        height:100%;
-        width:${progressPercent}%;
-        background:linear-gradient(135deg,var(--brand),var(--brand-2));
+        margin-top:8px;
+        height:10px;
         border-radius:999px;
-      "></div>
-    </div>
+        background:rgba(100,116,139,.18);
+        overflow:hidden;
+        border:1px solid rgba(100,116,139,.18);
+      ">
+        <div style="
+          height:100%;
+          width:${progressPercent}%;
+          background:linear-gradient(135deg,var(--brand),var(--brand-2));
+          border-radius:999px;
+        "></div>
+      </div>
 
-    <!-- ✅ step ด้านล่าง = ตัวกำหนด percent -->
-    ${renderStagePills(activeIdx)}
-  `;
-}
+      ${renderStagePills(activeIdx)}
+    `;
+  }
 
   function renderGroupedTimeline(events){
     const arr = Array.isArray(events) ? events : (events ? [events] : []);
@@ -532,6 +517,7 @@
 
     if (!translated.length) {
       history.style.display = "none";
+      groupsEl.innerHTML = "";
       return;
     }
 
@@ -619,10 +605,8 @@
 
       const events = data.events || data.history || data.traces || data.track || [];
 
-      // ✅ latest แบบไม่พึ่ง format เวลา: ใช้ลำดับ events
       const latestEvent = getLatestByOrder(events, EVENTS_ORDER);
       const rawLatest = pickStatusText(latestEvent) || pickStatusText(data);
-
       const latestTh = toThaiStatus(rawLatest);
 
       renderSummary(data, latestTh, events);

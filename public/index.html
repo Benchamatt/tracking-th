@@ -6,306 +6,228 @@
   <title>Weiming Tracking</title>
 
   <style>
-    :root{
-      --bg:#f6f8fb;
-      --surface:#ffffff;
-      --surface-2:#f1f4f9;
-      --text:#0f172a;
-      --muted:#64748b;
-      --border:#e5e7eb;
-      --shadow: 0 10px 24px rgba(2, 6, 23, 0.08);
+   /* =========================
+   Corporate / Enterprise Theme Overrides
+   วางท้าย <style> เพื่อทับของเดิม
+   ========================= */
 
-      --brand:#0f5fbf;
-      --brand-2:#0a3f7a;
+/* ปรับระบบสี/เงาให้สุภาพ */
+:root{
+  --bg:#f6f8fb;
+  --surface:#ffffff;
+  --surface-2:#f4f6fb;
 
-      --ok:#0f766e;
-      --warn:#b45309;
-      --bad:#b91c1c;
+  --text:#0f172a;
+  --muted:#5b677a;
 
-      --badge-bg: rgba(15, 95, 191, 0.10);
-      --badge-text: #0f5fbf;
+  /* enterprise: border ชัดขึ้น + shadow น้อยลง */
+  --border:#dbe3ef;
+  --shadow: 0 8px 18px rgba(2, 6, 23, 0.06);
 
-      --ring: rgba(15,95,191,.25);
-    }
+  /* คงสีเดิม */
+  --brand:#0f5fbf;
+  --brand-2:#0a3f7a;
+  --ring: rgba(15,95,191,.18);
+}
 
-    *{box-sizing:border-box}
-    html,body{height:100%}
-    body{
-      margin:0;
-      font-family: system-ui, -apple-system, "Segoe UI", Tahoma, sans-serif;
-      background: radial-gradient(1200px 600px at 20% -10%, rgba(15,95,191,.10), transparent 60%),
-                  radial-gradient(1000px 500px at 90% 0%, rgba(15,95,191,.08), transparent 55%),
-                  var(--bg);
-      color:var(--text);
-    }
+/* พื้นหลังเรียบ ลด radial */
+body{
+  background: linear-gradient(180deg, #f7f9fd 0%, #f6f8fb 40%, #f6f8fb 100%);
+  color: var(--text);
+}
 
-    .wrap{max-width:980px;margin:0 auto;padding:20px 14px 28px}
-
-    .topbar{
-      display:flex;align-items:center;justify-content:space-between;gap:12px;
-      padding: 14px 16px;
-      border:1px solid var(--border);
-      border-radius: 16px;
-      background: linear-gradient(135deg, rgba(15,95,191,.12), rgba(15,95,191,.04));
-      box-shadow: var(--shadow);
-    }
-    .brand{display:flex;align-items:center;gap:10px;min-width:0}
-    .logo{
-      width:40px;height:40px;border-radius:12px;
-      background: linear-gradient(135deg, var(--brand), var(--brand-2));
-      display:grid;place-items:center;
-      box-shadow: 0 10px 18px rgba(15,95,191,.25);
-      flex:0 0 auto;
-    }
-    .logo svg{width:22px;height:22px;fill:#fff}
-    .brand h1{margin:0;font-size:16px;letter-spacing:.2px;line-height:1.1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-    .brand .sub{font-size:12px;color:var(--muted);margin-top:2px}
-
-    .grid{
-      display:grid;
-      grid-template-columns: 1.1fr .9fr;
-      gap: 14px;
-      margin-top: 14px;
-    }
-    @media(max-width: 860px){.grid{grid-template-columns:1fr}}
-
-    .card{
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      box-shadow: var(--shadow);
-      padding: 16px;
-      overflow:hidden;
-    }
-    .card h2{margin:0 0 8px 0;font-size:14px;letter-spacing:.2px}
-    .muted{color:var(--muted); font-size:13px}
-    .small{font-size:12px; color:var(--muted)}
-
-    .searchRow{
-      display:grid;
-      grid-template-columns: 1fr 132px;
-      gap: 10px;
-      margin-top: 10px;
-    }
-    @media(max-width:520px){.searchRow{grid-template-columns:1fr}}
-
-    input{
-      width:100%;
-      padding: 12px 14px;
-      border-radius: 14px;
-      border: 1px solid var(--border);
-      background: var(--surface-2);
-      color: var(--text);
-      font-size: 15px;
-    }
-    input:focus{outline:3px solid var(--ring); border-color: transparent}
-
-    .btn{
-      border:none;
-      border-radius: 14px;
-      padding: 12px 14px;
-      background: linear-gradient(135deg, var(--brand), var(--brand-2));
-      color:#fff;
-      font-size:15px;
-      cursor:pointer;
-      box-shadow: 0 12px 18px rgba(15,95,191,.22);
-      transition: transform .06s ease, filter .12s ease;
-    }
-    .btn:hover{filter:brightness(1.02)}
-    .btn:active{transform: translateY(1px)}
-    .btn:disabled{opacity:.6;cursor:not-allowed;box-shadow:none}
-
-    .summaryTop{
-      display:flex;
-      justify-content:space-between;
-      align-items:flex-start;
-      gap:10px;
-      margin-bottom: 10px;
-    }
-    .kv{display:grid;gap:6px}
-    .kv b{font-size:13px}
-    .kv .value{font-size:14px}
-
-    .badge{
-      display:inline-flex;align-items:center;gap:8px;
-      padding: 8px 10px;border-radius: 999px;
-      background: var(--badge-bg);
-      color: var(--badge-text);
-      border: 1px solid rgba(15,95,191,.18);
-      font-size: 12px;
-      font-weight: 700;
-      white-space:nowrap;
-    }
-    .dot{width:8px;height:8px;border-radius:999px;background: currentColor;opacity:.95}
-
-    .badge.ok{background: rgba(15,118,110,.12); color: var(--ok); border-color: rgba(15,118,110,.25)}
-    .badge.warn{background: rgba(180,83,9,.12); color: var(--warn); border-color: rgba(180,83,9,.25)}
-    .badge.bad{background: rgba(185,28,28,.12); color: var(--bad); border-color: rgba(185,28,28,.25)}
-
-    .group{margin-top:12px}
-    .groupTitle{
-      display:flex;align-items:center;justify-content:space-between;gap:10px;
-      padding: 10px 12px;
-      border-radius: 14px;
-      border: 1px solid var(--border);
-      background: linear-gradient(180deg, rgba(15,95,191,.06), rgba(15,95,191,.02));
-      font-weight:800;
-      font-size:13px;
-    }
-
-    .timeline{
-      margin-top: 10px;
-      position:relative;
-      padding-left: 18px;
-    }
-    .timeline:before{
-      content:"";
-      position:absolute;
-      left:7px; top:2px; bottom:2px;
-      width:2px;
-      background: linear-gradient(to bottom, rgba(15,95,191,.35), rgba(15,95,191,.08));
-    }
-
-    .event{
-      position:relative;
-      padding: 10px 10px 10px 12px;
-      border-radius: 14px;
-      border: 1px solid var(--border);
-      background: var(--surface-2);
-      margin-bottom: 10px;
-    }
-    .event:before{
-      content:"";
-      position:absolute;
-      left:-18px;
-      top: 16px;
-      width: 12px;
-      height: 12px;
-      border-radius: 999px;
-      background: var(--surface);
-      border: 3px solid rgba(15,95,191,.55);
-      box-shadow: 0 0 0 3px rgba(15,95,191,.10);
-    }
-    .event .time{font-size:12px;color:var(--muted)}
-    .event .text{font-size:14px;font-weight:700;margin-top:4px;line-height:1.35}
-
-    .errorBox{
-      border: 1px solid rgba(185,28,28,.25);
-      background: rgba(185,28,28,.08);
-      color: var(--bad);
-      border-radius: 14px;
-      padding: 10px 12px;
-      font-size: 13px;
-    }
-
-    .loading{
-      display:flex;align-items:center;gap:10px;
-      font-size:13px;color:var(--muted);
-    }
-    .spinner{
-      width:16px;height:16px;border-radius:999px;
-      border:2px solid rgba(15,95,191,.25);
-      border-top-color: rgba(15,95,191,.85);
-      animation: spin 0.9s linear infinite;
-    }
-    @keyframes spin{to{transform:rotate(360deg)}}
-
-    .footer{
-      margin-top: 14px;
-      padding: 12px 6px 2px;
-      text-align:center;
-      color: var(--muted);
-      font-size: 12px;
-    }
-    .footer a{color: var(--muted); text-decoration:none}
-    .footer a:hover{text-decoration:underline}
-
-    /* ซ่อนกติกา และข้อความจัดกลุ่ม (ถาวร) */
-    #rule,
-    #groupHint { display: none !important; }
-
-    /* ===== Stepper (องค์กร/ทางการ + เส้นเชื่อม) ===== */
-    .stepper{margin-top:14px}
-    .steps{display:flex;gap:12px;align-items:stretch}
-    .step{
-      flex:1; position:relative;
-      padding:12px 12px;
-      border-radius:14px;
-      background: var(--surface-2);
-      border:1px solid var(--border);
-    }
-    .step:not(:last-child)::after{
-      content:"";
-      position:absolute;
-      top:19px;
-      right:-12px;
-      width:12px;
-      height:2px;
-      background: rgba(100,116,139,.22);
-    }
-    .stepTop{display:flex;align-items:center;gap:10px}
-    .stepDot{
-      width:12px;height:12px;border-radius:999px;
-      background: rgba(100,116,139,.22);
-      border:3px solid rgba(100,116,139,.16);
-      flex:0 0 auto;
-    }
-    .stepTitle{
-      font-size:12px;
-      font-weight:900;
-      color:var(--muted);
-      letter-spacing:.2px;
-      line-height:1.2;
-    }
-    .step.active{background: rgba(15,95,191,.06); border-color: rgba(15,95,191,.22)}
-    .step.active .stepDot{
-      background: var(--brand);
-      border-color: rgba(15,95,191,.22);
-      box-shadow: 0 0 0 3px rgba(15,95,191,.10);
-    }
-    .step.active .stepTitle{color: var(--text)}
-    .step.done{background: rgba(15,95,191,.04); border-color: rgba(15,95,191,.14)}
-    .step.done .stepDot{background: var(--brand); border-color: rgba(15,95,191,.18)}
-    .step.done .stepTitle{color: rgba(15,23,42,.90)}
-    .step.done:not(:last-child)::after{background: rgba(15,95,191,.40)}
-    @media(max-width:520px){
-      .steps{flex-direction:column;gap:10px}
-      .step:not(:last-child)::after{
-        top:auto; bottom:-10px; left:18px; right:auto;
-        width:2px; height:10px;
-      }
-    }
-    /* ===== Progress bar ===== */
-.progressWrap{
-  margin-top: 12px;
-  padding: 10px 12px;
-  border-radius: 14px;
+/* Header: ทางการมากขึ้น */
+.topbar{
+  background: #ffffff;
   border: 1px solid var(--border);
-  background: linear-gradient(180deg, rgba(15,95,191,.05), rgba(15,95,191,.02));
+  box-shadow: var(--shadow);
+}
+
+/* Card: enterprise = ขอบชัด เงาเบา */
+.card{
+  background: var(--surface);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow);
+  border-radius: 14px;
+}
+
+/* หัวข้อ: อ่านง่าย ระยะหายใจดี */
+.card h2{
+  font-size: 14px;
+  font-weight: 800;
+  letter-spacing: .2px;
+  margin-bottom: 10px;
+}
+.muted{ color: var(--muted); }
+
+/* input: เรียบ + focus ring ตาม brand */
+input{
+  background: #ffffff;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  transition: box-shadow .18s ease, border-color .18s ease;
+}
+input:focus{
+  outline: none;
+  border-color: rgba(15,95,191,.35);
+  box-shadow: 0 0 0 4px var(--ring);
+}
+
+/* button: สีน้ำเงินเดิม แต่เป็นทรง enterprise */
+.btn{
+  border-radius: 12px;
+  background: linear-gradient(180deg, var(--brand) 0%, var(--brand-2) 100%);
+  box-shadow: 0 10px 18px rgba(15,95,191,.18);
+}
+.btn:hover{ filter: brightness(1.02); }
+.btn:active{ transform: translateY(1px); }
+
+/* Badge: สุภาพ เน้นข้อความชัด */
+.badge{
+  border: 1px solid rgba(15,95,191,.22);
+  background: rgba(15,95,191,.08);
+  color: var(--brand);
+  font-weight: 800;
+}
+.badge.ok{ background: rgba(15,118,110,.10); border-color: rgba(15,118,110,.22); color: var(--ok); }
+.badge.warn{ background: rgba(180,83,9,.10); border-color: rgba(180,83,9,.22); color: var(--warn); }
+.badge.bad{ background: rgba(185,28,28,.10); border-color: rgba(185,28,28,.22); color: var(--bad); }
+
+/* Summary typography: corporate */
+#summary .kv b{ font-size: 12px; color: var(--muted); }
+#summary .value{ font-weight: 700; color: var(--text); }
+#summary > div[style*="font-size:18px"]{
+  font-size: 17px !important;
+  font-weight: 900 !important;
+  letter-spacing: .1px;
+}
+
+/* Progress: เรียบแบบรายงานองค์กร */
+.progressWrap{
+  background: #ffffff;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 12px;
 }
 .progressHead{
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap:10px;
-  margin-bottom: 8px;
+  margin-bottom: 10px;
 }
-.progressHead b{font-size:13px}
+.progressHead b{
+  font-size: 12px;
+  color: var(--muted);
+  letter-spacing: .2px;
+}
 .progressBar{
-  width:100%;
-  height:10px;
-  border-radius:999px;
-  background: rgba(100,116,139,.18);
-  overflow:hidden;
-  border:1px solid rgba(100,116,139,.18);
+  height: 10px;
+  background: #eef2f8;
+  border: 1px solid var(--border);
+  box-shadow: none;
 }
 .progressFill{
-  height:100%;
-  width:0%;
-  background: linear-gradient(135deg, var(--brand), var(--brand-2));
-  border-radius:999px;
+  background: linear-gradient(90deg, var(--brand), var(--brand-2));
+  transition: width .45s ease;
+  box-shadow: none;
 }
 
+/* Stepper: enterprise ชัด, ไม่แฟนซี */
+.stepper{ margin-top: 14px; }
+
+.steps{
+  gap: 10px;
+}
+
+.step{
+  background: #ffffff;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 12px;
+  box-shadow: none;
+}
+.step:hover{
+  transform: none;
+  box-shadow: none;
+}
+
+.step:not(:last-child)::after{
+  background: #d6deeb;
+  height: 2px;
+  top: 21px;
+}
+
+.stepDot{
+  width: 10px;
+  height: 10px;
+  background: #d6deeb;
+  border: 3px solid #eef2f8;
+  box-shadow: none;
+}
+
+.stepTitle{
+  font-size: 12px;
+  font-weight: 900;
+  color: var(--muted);
+}
+
+/* Active/Done ใช้สีน้ำเงินเดิมแบบสุภาพ */
+.step.active{
+  background: rgba(15,95,191,.06);
+  border-color: rgba(15,95,191,.25);
+}
+.step.active .stepDot{
+  background: var(--brand);
+  border-color: rgba(15,95,191,.18);
+}
+.step.active .stepTitle{ color: var(--text); }
+
+.step.done{
+  background: rgba(15,95,191,.03);
+  border-color: rgba(15,95,191,.16);
+}
+.step.done .stepDot{
+  background: var(--brand);
+  border-color: rgba(15,95,191,.14);
+}
+.step.done:not(:last-child)::after{
+  background: rgba(15,95,191,.35);
+}
+
+/* Timeline: อ่านง่ายเหมือน report */
+.groupTitle{
+  background: #ffffff;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  font-weight: 900;
+}
+
+.event{
+  background: #ffffff;
+  border: 1px solid var(--border);
+  box-shadow: none;
+  border-radius: 12px;
+}
+.event .time{
+  font-size: 12px;
+  color: var(--muted);
+}
+.event .text{
+  font-size: 14px;
+  font-weight: 800;
+  line-height: 1.4;
+}
+
+/* จุด timeline ให้สุภาพขึ้น */
+.timeline:before{
+  background: linear-gradient(to bottom, rgba(15,95,191,.26), rgba(15,95,191,.08));
+}
+.event:before{
+  border: 3px solid rgba(15,95,191,.40);
+  box-shadow: none;
+}
+
+/* Footer ให้เรียบ */
+.footer{
+  color: var(--muted);
+}
   </style>
 </head>
 

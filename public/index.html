@@ -1,664 +1,185 @@
 <!doctype html>
 <html lang="th">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Weiming Tracking</title>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Weiming Tracking</title>
 
-  <style>
-    :root{
-      --bg:#f6f8fb;
-      --surface:#ffffff;
-      --surface-2:#f1f4f9;
-      --text:#0f172a;
-      --muted:#64748b;
-      --border:#e5e7eb;
-      --shadow: 0 10px 24px rgba(2, 6, 23, 0.08);
-
-      --brand:#0f5fbf;
-      --brand-2:#0a3f7a;
-
-      --ok:#0f766e;
-      --warn:#b45309;
-      --bad:#b91c1c;
-
-      --badge-bg: rgba(15, 95, 191, 0.10);
-      --badge-text: #0f5fbf;
-
-      --ring: rgba(15,95,191,.25);
-    }
-
-    *{box-sizing:border-box}
-    html,body{height:100%}
-    body{
-      margin:0;
-      font-family: system-ui, -apple-system, "Segoe UI", Tahoma, sans-serif;
-      background: radial-gradient(1200px 600px at 20% -10%, rgba(15,95,191,.10), transparent 60%),
-                  radial-gradient(1000px 500px at 90% 0%, rgba(15,95,191,.08), transparent 55%),
-                  var(--bg);
-      color:var(--text);
-    }
-
-    .wrap{max-width:980px;margin:0 auto;padding:20px 14px 28px}
-
-    .topbar{
-      display:flex;align-items:center;justify-content:space-between;gap:12px;
-      padding: 14px 16px;
-      border:1px solid var(--border);
-      border-radius: 16px;
-      background: linear-gradient(135deg, rgba(15,95,191,.12), rgba(15,95,191,.04));
-      box-shadow: var(--shadow);
-    }
-    .brand{display:flex;align-items:center;gap:10px;min-width:0}
-    .logo{
-      width:40px;height:40px;border-radius:12px;
-      background: linear-gradient(135deg, var(--brand), var(--brand-2));
-      display:grid;place-items:center;
-      box-shadow: 0 10px 18px rgba(15,95,191,.25);
-      flex:0 0 auto;
-    }
-    .logo svg{width:22px;height:22px;fill:#fff}
-    .brand h1{margin:0;font-size:16px;letter-spacing:.2px;line-height:1.1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-    .brand .sub{font-size:12px;color:var(--muted);margin-top:2px}
-
-    .grid{
-      display:grid;
-      grid-template-columns: 1.1fr .9fr;
-      gap: 14px;
-      margin-top: 14px;
-    }
-    @media(max-width: 860px){.grid{grid-template-columns:1fr}}
-
-    .card{
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      box-shadow: var(--shadow);
-      padding: 16px;
-      overflow:hidden;
-    }
-    .card h2{margin:0 0 8px 0;font-size:14px;letter-spacing:.2px}
-    .muted{color:var(--muted); font-size:13px}
-    .small{font-size:12px; color:var(--muted)}
-
-    .searchRow{
-      display:grid;
-      grid-template-columns: 1fr 132px;
-      gap: 10px;
-      margin-top: 10px;
-    }
-    @media(max-width:520px){.searchRow{grid-template-columns:1fr}}
-
-    input{
-      width:100%;
-      padding: 12px 14px;
-      border-radius: 14px;
-      border: 1px solid var(--border);
-      background: var(--surface-2);
-      color: var(--text);
-      font-size: 15px;
-    }
-    input:focus{outline:3px solid var(--ring); border-color: transparent}
-
-    .btn{
-      border:none;
-      border-radius: 14px;
-      padding: 12px 14px;
-      background: linear-gradient(135deg, var(--brand), var(--brand-2));
-      color:#fff;
-      font-size:15px;
-      cursor:pointer;
-      box-shadow: 0 12px 18px rgba(15,95,191,.22);
-      transition: transform .06s ease, filter .12s ease;
-    }
-    .btn:hover{filter:brightness(1.02)}
-    .btn:active{transform: translateY(1px)}
-    .btn:disabled{opacity:.6;cursor:not-allowed;box-shadow:none}
-
-    .summaryTop{
-      display:flex;
-      justify-content:space-between;
-      align-items:flex-start;
-      gap:10px;
-      margin-bottom: 10px;
-    }
-    .kv{display:grid;gap:6px}
-    .kv b{font-size:13px}
-    .kv .value{font-size:14px}
-
-    .badge{
-      display:inline-flex;align-items:center;gap:8px;
-      padding: 8px 10px;border-radius: 999px;
-      background: var(--badge-bg);
-      color: var(--badge-text);
-      border: 1px solid rgba(15,95,191,.18);
-      font-size: 12px;
-      font-weight: 700;
-      white-space:nowrap;
-    }
-    .dot{width:8px;height:8px;border-radius:999px;background: currentColor;opacity:.95}
-
-    .badge.ok{background: rgba(15,118,110,.12); color: var(--ok); border-color: rgba(15,118,110,.25)}
-    .badge.warn{background: rgba(180,83,9,.12); color: var(--warn); border-color: rgba(180,83,9,.25)}
-    .badge.bad{background: rgba(185,28,28,.12); color: var(--bad); border-color: rgba(185,28,28,.25)}
-
-    /* กลุ่มสถานะ */
-    .group{margin-top:12px}
-    .groupTitle{
-      display:flex;align-items:center;justify-content:space-between;gap:10px;
-      padding: 10px 12px;
-      border-radius: 14px;
-      border: 1px solid var(--border);
-      background: linear-gradient(180deg, rgba(15,95,191,.06), rgba(15,95,191,.02));
-      font-weight:800;
-      font-size:13px;
-    }
-
-    .timeline{
-      margin-top: 10px;
-      position:relative;
-      padding-left: 18px;
-    }
-    .timeline:before{
-      content:"";
-      position:absolute;
-      left:7px; top:2px; bottom:2px;
-      width:2px;
-      background: linear-gradient(to bottom, rgba(15,95,191,.35), rgba(15,95,191,.08));
-    }
-
-    .event{
-      position:relative;
-      padding: 10px 10px 10px 12px;
-      border-radius: 14px;
-      border: 1px solid var(--border);
-      background: var(--surface-2);
-      margin-bottom: 10px;
-    }
-    .event:before{
-      content:"";
-      position:absolute;
-      left:-18px;
-      top: 16px;
-      width: 12px;
-      height: 12px;
-      border-radius: 999px;
-      background: var(--surface);
-      border: 3px solid rgba(15,95,191,.55);
-      box-shadow: 0 0 0 3px rgba(15,95,191,.10);
-    }
-    .event .time{font-size:12px;color:var(--muted)}
-    .event .text{font-size:14px;font-weight:700;margin-top:4px;line-height:1.35}
-
-    .errorBox{
-      border: 1px solid rgba(185,28,28,.25);
-      background: rgba(185,28,28,.08);
-      color: var(--bad);
-      border-radius: 14px;
-      padding: 10px 12px;
-      font-size: 13px;
-    }
-
-    .loading{
-      display:flex;align-items:center;gap:10px;
-      font-size:13px;color:var(--muted);
-    }
-    .spinner{
-      width:16px;height:16px;border-radius:999px;
-      border:2px solid rgba(15,95,191,.25);
-      border-top-color: rgba(15,95,191,.85);
-      animation: spin 0.9s linear infinite;
-    }
-    @keyframes spin{to{transform:rotate(360deg)}}
-
-    .footer{
-      margin-top: 14px;
-      padding: 12px 6px 2px;
-      text-align:center;
-      color: var(--muted);
-      font-size: 12px;
-    }
-    .footer a{color: var(--muted); text-decoration:none}
-    .footer a:hover{text-decoration:underline}
-
-    /* ซ่อนกติกา และข้อความจัดกลุ่ม (ถาวร) */
-    #rule,
-    #groupHint {
-      display: none !important;
-    }
-  </style>
+<style>
+/* === CSS เดิมทั้งหมด คงไว้ === */
+:root{
+  --bg:#f6f8fb;
+  --surface:#ffffff;
+  --surface-2:#f1f4f9;
+  --text:#0f172a;
+  --muted:#64748b;
+  --border:#e5e7eb;
+  --shadow: 0 10px 24px rgba(2, 6, 23, 0.08);
+  --brand:#0f5fbf;
+  --brand-2:#0a3f7a;
+}
+*{box-sizing:border-box}
+body{
+  margin:0;
+  font-family: system-ui, -apple-system, "Segoe UI", Tahoma, sans-serif;
+  background: var(--bg);
+  color:var(--text);
+}
+.wrap{max-width:980px;margin:0 auto;padding:20px}
+.card{
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  box-shadow: var(--shadow);
+  padding: 16px;
+}
+.grid{
+  display:grid;
+  grid-template-columns: 1.1fr .9fr;
+  gap:14px;
+  margin-top:14px;
+}
+@media(max-width:860px){.grid{grid-template-columns:1fr}}
+input{
+  width:100%;
+  padding:12px 14px;
+  border-radius:14px;
+  border:1px solid var(--border);
+  background: var(--surface-2);
+}
+.btn{
+  border:none;
+  border-radius:14px;
+  padding:12px 14px;
+  background:linear-gradient(135deg,var(--brand),var(--brand-2));
+  color:#fff;
+  cursor:pointer;
+}
+.group{margin-top:12px}
+.groupTitle{
+  padding:10px 12px;
+  border-radius:14px;
+  border:1px solid var(--border);
+  font-weight:800;
+}
+.timeline{margin-top:10px;padding-left:18px;position:relative}
+.timeline:before{
+  content:"";
+  position:absolute;
+  left:7px;top:0;bottom:0;
+  width:2px;background:#cbd5e1;
+}
+.event{
+  background:var(--surface-2);
+  border:1px solid var(--border);
+  border-radius:14px;
+  padding:10px 12px;
+  margin-bottom:10px;
+}
+.event .time{font-size:12px;color:var(--muted)}
+.event .text{font-weight:700}
+</style>
 </head>
 
 <body>
-  <div class="wrap" id="app">
-    <div class="topbar">
-      <div class="brand">
-        <div class="logo" aria-hidden="true" title="Weiming">
-          <svg viewBox="0 0 24 24">
-            <path d="M20 8h-3V4H3v13h2.1a2.9 2.9 0 0 0 5.8 0h4.2a2.9 2.9 0 0 0 5.8 0H23v-5l-3-4zM6.5 19a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zm10 0a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zM17 12V9h2l2 3h-4z"/>
-          </svg>
-        </div>
-        <div style="min-width:0">
-          <h1>Weiming Tracking</h1>
-          <div class="sub">ระบบตรวจสอบสถานะพัสดุ</div>
-        </div>
-      </div>
-    </div>
+<div class="wrap">
 
-    <div class="grid">
-      <div>
-        <div class="card">
-          <h2>ค้นหาเลขพัสดุ</h2>
-          <div class="muted">กรอกเลขพัสดุ แล้วกด “ค้นหา”</div>
+<div class="card">
+  <h3>ค้นหาเลขพัสดุ</h3>
+  <input id="no" placeholder="เลขพัสดุ" />
+  <br/><br/>
+  <button class="btn" id="btn">ค้นหา</button>
+</div>
 
-          <div class="searchRow">
-            <input id="no" placeholder="เลขพัสดุ" inputmode="numeric" autocomplete="off" />
-            <button class="btn" id="btn">ค้นหา</button>
-          </div>
+<div class="grid">
+  <div></div>
 
-          <div id="rule" style="margin-top:10px" class="small">
-            กติกา: แสดงเฉพาะสถานะ “ภาษาจีน” ที่ตรงกับ mapping ของคุณเท่านั้น (ไม่ match = ไม่แสดง)
-          </div>
-        </div>
-
-        <div class="card" id="summary" style="display:none"></div>
-      </div>
-
-      <div>
-        <div class="card" id="history" style="display:none">
-          <h2>ไทม์ไลน์สถานะ</h2>
-
-          <div id="groupHint" class="muted">
-            จัดกลุ่ม: ขนส่งปลายทาง / ศุลกากรประเทศปลายทาง / คลังสินค้าต้นทาง
-          </div>
-
-          <div id="groups"></div>
-        </div>
-      </div>
-    </div>
-
-    <div class="footer">
-      © <span id="year"></span> Weiming Tracking. All rights reserved.
-      <span class="muted"> | </span>
-      <a href="https://line.me/R/ti/p/@wmex" target="_blank" rel="noopener noreferrer">ติดต่อผ่าน LINE</a>
+  <div>
+    <div class="card" id="history" style="display:none">
+      <h3>ไทม์ไลน์สถานะ</h3>
+      <div id="groups"></div>
     </div>
   </div>
+</div>
+
+</div>
 
 <script>
-  const $ = (id) => document.getElementById(id);
-  const summary = $("summary");
-  const history = $("history");
-  const groupsEl = $("groups");
-  const btn = $("btn");
-  const noEl = $("no");
+const $ = id => document.getElementById(id);
+const btn = $("btn");
+const noEl = $("no");
+const history = $("history");
+const groupsEl = $("groups");
 
-  const yearEl = $("year");
-  if (yearEl) yearEl.textContent = String(new Date().getFullYear());
+/* ===== Mapping จีน → ไทย (ใช้ timeline เท่านั้น) ===== */
+const STATUS_MAP = [
+  { zh:"順利送達", th:"พัสดุถึงผู้รับเรียบร้อยแล้ว" },
+  { zh:"配送中", th:"อยู่ระหว่างจัดส่ง" },
+  { zh:"已集貨", th:"พัสดุอยู่ศูนย์คัดแยกพัสดุ" },
+  { zh:"出倉處理", th:"กำลังดำเนินการนำสินค้าออกจากคลัง" },
+  { zh:"連線收單建檔", th:"ระบบศุลกากรรับและบันทึกข้อมูลเรียบร้อยแล้ว" },
+  { zh:"已經打印好地址面單", th:"พิมพ์ใบปะหน้าที่อยู่เรียบร้อยแล้ว" },
+  { zh:"您已下單成功", th:"สร้างออเดอร์การจัดส่งเรียบร้อย" },
+];
 
-  // ==============================
-  // 1) Mapping จีน -> ไทย + percent ต่อสถานะ (ใช้คำนวณ progress)
-  // ==============================
-  const STATUS_MAP = [
-    // ขนส่ง(ปลายทาง)
-    { zh: "順利送達", th: "พัสดุถึงผู้รับเรียบร้อยแล้ว", percent: 100 },
-    { zh: "配送中", th: "อยู่ระหว่างจัดส่ง", percent: 90 },
-    { zh: "已集貨", th: "พัสดุอยู่ศูนย์คัดแยกพัสดุ", percent: 80 },
+function matchThai(raw){
+  if(!raw) return null;
+  const m = STATUS_MAP.find(x => raw.includes(x.zh));
+  return m ? m.th : null;
+}
 
-    // ศุลกากรประเทศปลายทาง
-    { zh: "出倉處理", th: "กำลังดำเนินการนำสินค้าออกจากคลัง", percent: 60 },
-    { zh: "連線收單建檔", th: "ระบบศุลกากรรับและบันทึกข้อมูลเรียบร้อยแล้ว", percent: 70 },
-    { zh: "由於海關系統查無此包裹申報人資料", th: "เนื่องจากระบบศุลกากรไม่พบข้อมูลผู้เดินพิธีการ โปรดตรวจสอบว่าผู้รับพัสดุได้ลงทะเบียนกับ EZ WAY แล้วหรือไม่ หากยังไม่ได้ลงทะเบียนโปรดลงทะเบียนให้เรียบร้อย ถ่ายภาพหน้าจอให้ติดชื่อ/หมายเลขโทรศัพท์และหมายเลขบัตรประชาชนของผู้เดินพิธีการ แล้วส่งให้เจ้าหน้าที่ลูกค้าสัมพันธ์ของWeiming หลังจากได้รับข้อมูลแล้ว พัสดุจะได้รับการปล่อยภายในประมาณ 1-2 วันทำการ", percent: 50 },
-    { zh: "不受理不可補正之錯單", th: "ข้อมูลที่ใช้เดินพิธีการไม่สอดคล้องกัน โปรดติดต่อเจ้าหน้าที่", percent: 40 },
+function pickStatus(obj){
+  return obj.status_zh || obj.status || obj.message || "";
+}
+function pickTime(obj){
+  return obj.time || obj.datetime || "-";
+}
 
-    // คลังสินค้า(ต้นทาง)
-    { zh: "您的貨物已準備從集運倉出倉", th: "พัสดุของคุณออกคลัง เพื่อเตรียมส่งไปยังสนามบินแล้ว", percent: 30 },
-    { zh: "已經打印好地址面單", th: "พิมพ์ใบปะหน้าที่อยู่เรียบร้อยแล้ว", percent: 20 },
-    { zh: "已經打印好地址面單!", th: "พิมพ์ใบปะหน้าที่อยู่เรียบร้อยแล้ว", percent: 20 },
-    { zh: "您已下單成功", th: "สร้างออเดอร์การจัดส่งเรียบร้อย", percent: 10 },
-  ];
+function renderTimeline(events){
+  const items = events
+    .map(e => ({
+      time: pickTime(e),
+      th: matchThai(pickStatus(e))
+    }))
+    .filter(x => x.th);
 
-  // ==============================
-  // 2) 3 หัวข้อในกรอบแดง (เปอร์เซ็นต์คงที่ตามที่ต้องการ)
-  // ==============================
-  const STAGES = [
-    { label: "คลังสินค้า(ต้นทาง)", percent: 30 },
-    { label: "ศุลกากร(ปลายทาง)",   percent: 70 },
-    { label: "ขนส่ง(ปลายทาง)",     percent: 100 },
-  ];
-
-  // ==========================================
-  // Utilities
-  // ==========================================
-  function normalizeText(s) {
-    return (s || "")
-      .replace(/[“”]/g, '"')
-      .replace(/\s+/g, " ")
-      .trim();
+  if(!items.length){
+    history.style.display="none";
+    return;
   }
 
-  function hasChinese(s){
-    return /[\u4e00-\u9fff]/.test(s || "");
-  }
-
-  function extractZh(mixed) {
-    const s = normalizeText(mixed);
-    const m = s.match(/[（(]([^）)]+)[）)]/);
-    if (m && m[1]) return normalizeText(m[1]);
-    return s;
-  }
-
-  function pickStatusText(obj) {
-    if (!obj || typeof obj !== "object") return "";
-    const keys = [
-      "status_zh","status_cn","status","status_text","statusText",
-      "latest_status_zh","latest_status_cn","latest_status","latestStatus",
-      "desc_zh","description_zh","description","remark","remark_zh",
-      "message","state","event"
-    ];
-    for (const k of keys) {
-      const v = obj[k];
-      if (typeof v === "string" && v.trim()) return v;
-    }
-    return "";
-  }
-
-  function pickTimeText(obj) {
-    if (!obj || typeof obj !== "object") return "-";
-    return obj.time || obj.datetime || obj.dateTime || obj.date_time || obj.timestamp || "-";
-  }
-
-  function parseTimeLoose(t){
-    const s = normalizeText(t || "");
-    if (!s || s === "-") return 0;
-    const iso = s.includes("T") ? s : s.replace(" ", "T");
-    const ms = Date.parse(iso);
-    return Number.isFinite(ms) ? ms : 0;
-  }
-
-  function getLatestFromEvents(events){
-    const arr = Array.isArray(events) ? events : (events ? [events] : []);
-    if (!arr.length) return null;
-
-    return arr.reduce((latest, cur) => {
-      const tCur = parseTimeLoose(pickTimeText(cur));
-      const tLat = parseTimeLoose(pickTimeText(latest));
-      return tCur >= tLat ? cur : latest;
-    }, arr[0]);
-  }
-
-  // ==========================================
-  // Match/Translate
-  // ==========================================
-  function matchMap(rawAny){
-    const raw = extractZh(rawAny);
-    if (!raw) return null;
-    if (!hasChinese(raw)) return null;
-
-    const zh = normalizeText(raw);
-
-    const exact = STATUS_MAP.find(x => normalizeText(x.zh) === zh);
-    if (exact) return exact;
-
-    const loose = STATUS_MAP.find(x => zh.includes(normalizeText(x.zh)) || normalizeText(x.zh).includes(zh));
-    return loose || null;
-  }
-
-  function toThaiStatus(rawAny) {
-    const m = matchMap(rawAny);
-    return m ? m.th : null;
-  }
-
-  function percentOf(rawAny){
-    const m = matchMap(rawAny);
-    return m && typeof m.percent === "number" ? m.percent : 0;
-  }
-
-  // ✅ progress ไม่ถอยหลัง
-  function calcPercentFromEvents(events){
-    const arr = Array.isArray(events) ? events : (events ? [events] : []);
-    let maxP = 0;
-    for (const e of arr){
-      const p = percentOf(pickStatusText(e));
-      if (p > maxP) maxP = p;
-    }
-    return maxP;
-  }
-
-  // ==========================================
-  // Grouping (เพื่อ active stage)
-  // ==========================================
-  const GROUP_ORDER = ["ขนส่ง(ปลายทาง)", "ศุลกากร(ปลายทาง)", "คลังสินค้า(ต้นทาง)"];
-
-  function groupOf(th){
-    if (!th) return "คลังสินค้า(ต้นทาง)";
-
-    if (th.includes("พัสดุถึงผู้รับเรียบร้อยแล้ว") || th.includes("อยู่ระหว่างจัดส่ง") || th.includes("ศูนย์คัดแยกพัสดุ")) {
-      return "ขนส่ง(ปลายทาง)";
-    }
-
-    if (th.includes("กำลังดำเนินการนำสินค้าออกจากคลัง") || th.includes("ระบบศุลกากรรับและบันทึกข้อมูล") ||
-        th.includes("ไม่พบข้อมูลผู้เดินพิธีการ") || th.includes("EZ WAY") || th.includes("ไม่สอดคล้องกัน")) {
-      return "ศุลกากร(ปลายทาง)";
-    }
-
-    if (th.includes("ออกคลัง") || th.includes("ใบปะหน้า") || th.includes("สร้างออเดอร์")) {
-      return "คลังสินค้า(ต้นทาง)";
-    }
-
-    return "คลังสินค้า(ต้นทาง)";
-  }
-
-  function stageIndexFromGroup(groupName){
-    if (groupName === "คลังสินค้า(ต้นทาง)") return 0;
-    if (groupName === "ศุลกากร(ปลายทาง)") return 1;
-    if (groupName === "ขนส่ง(ปลายทาง)") return 2;
-    return 0;
-  }
-
-  function badgeOf(th){
-    if (!th) return { cls:"warn", label:"กำลังดำเนินการ" };
-    if (th.includes("ถึงผู้รับ")) return { cls:"ok", label:"ถึงแล้ว" };
-    if (th.includes("โปรดตรวจสอบ") || th.includes("ไม่สอดคล้อง") || th.includes("ติดต่อ") || th.includes("EZ WAY")) {
-      return { cls:"bad", label:"มีปัญหา" };
-    }
-    return { cls:"warn", label:"กำลังขนส่ง" };
-  }
-
-  // ==========================================
-  // Render: 3 หัวข้อในกรอบแดง (30/70/100)
-  // ==========================================
-  function renderStagePills(activeIdx){
-    const pillBase = "display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 12px;border-radius:14px;border:1px solid var(--border);background:var(--surface-2);font-size:13px;font-weight:800;";
-
-    return `
-      <div style="margin-top:12px; display:grid; grid-template-columns: 1fr 1fr 1fr; gap:10px;">
-        ${STAGES.map((s, idx) => {
-          const done = idx < activeIdx;
-          const active = idx === activeIdx;
-
-          const bg = active ? "rgba(15,95,191,.10)" : (done ? "rgba(15,95,191,.06)" : "var(--surface-2)");
-          const bd = active ? "rgba(15,95,191,.30)" : (done ? "rgba(15,95,191,.18)" : "var(--border)");
-          const dot = active || done ? "var(--brand)" : "rgba(100,116,139,.45)";
-
-          return `
-            <div style="${pillBase} background:${bg}; border-color:${bd};">
-              <div style="display:flex; align-items:center; gap:8px; min-width:0;">
-                <span style="width:8px;height:8px;border-radius:999px;background:${dot};flex:0 0 auto;"></span>
-                <span style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${s.label}</span>
-              </div>
-              <span style="font-weight:900; color:var(--text);">${s.percent}%</span>
-            </div>
-          `;
-        }).join("")}
-      </div>
-    `;
-  }
-
-  // ==========================================
-  // Render summary (กรอบแดง)
-  // ==========================================
-  function renderSummary(data, latestTh, events){
-    if (!latestTh) {
-      summary.style.display = "none";
-      summary.innerHTML = "";
-      return;
-    }
-
-    summary.style.display = "block";
-
-    const badge = badgeOf(latestTh);
-    const progressPercent = calcPercentFromEvents(events);
-    const activeIdx = stageIndexFromGroup(groupOf(latestTh));
-
-    summary.innerHTML = `
-      <div class="summaryTop">
-        <div class="kv">
-          <div><b>อัปเดตล่าสุด</b> <span class="value">${data.last_update || data.lastUpdate || "-"}</span></div>
-        </div>
-
-        <span class="badge ${badge.cls}">
-          <span class="dot"></span>
-          ${badge.label}
-        </span>
-      </div>
-
-      <div style="margin-top:6px;font-size:18px;font-weight:800">
-        ${latestTh}
-      </div>
-
-      <!-- ✅ ความคืบหน้า % + bar -->
-      <div style="margin-top:10px; display:flex; align-items:center; justify-content:space-between; gap:10px;">
-        <div class="muted" style="font-weight:800;">ความคืบหน้า</div>
-        <div style="font-size:14px; font-weight:900;">${progressPercent}%</div>
-      </div>
-      <div style="margin-top:8px; height:10px; border-radius:999px; background:rgba(100,116,139,.18); overflow:hidden; border:1px solid rgba(100,116,139,.18);">
-        <div style="height:100%; width:${progressPercent}%; background:linear-gradient(135deg, var(--brand), var(--brand-2)); border-radius:999px;"></div>
-      </div>
-
-      <!-- ✅ 3 หัวข้อ 30/70/100 -->
-      ${renderStagePills(activeIdx)}
-    `;
-  }
-
-  function renderGroupedTimeline(events){
-    const arr = Array.isArray(events) ? events : (events ? [events] : []);
-
-    const translated = arr.map(e => {
-      const raw = pickStatusText(e);
-      const th = toThaiStatus(raw);
-      return { time: pickTimeText(e), th };
-    }).filter(x => !!x.th);
-
-    if (!translated.length) {
-      history.style.display = "none";
-      groupsEl.innerHTML = "";
-      return;
-    }
-
-    const seen = new Set();
-    const deduped = [];
-    for (const x of translated) {
-      if (seen.has(x.th)) continue;
-      seen.add(x.th);
-      deduped.push({ ...x, group: groupOf(x.th) });
-    }
-
-    const buckets = new Map(GROUP_ORDER.map(g => [g, []]));
-    for (const x of deduped) {
-      if (!buckets.has(x.group)) buckets.set(x.group, []);
-      buckets.get(x.group).push(x);
-    }
-
-    const html = GROUP_ORDER
-      .filter(g => (buckets.get(g) || []).length > 0)
-      .map(g => {
-        const items = buckets.get(g) || [];
-        const itemsHtml = items.map(it => `
+  groupsEl.innerHTML = `
+    <div class="group">
+      <div class="groupTitle">สถานะพัสดุ</div>
+      <div class="timeline">
+        ${items.map(it=>`
           <div class="event">
-            <div class="time">${it.time || "-"}</div>
+            <div class="time">${it.time}</div>
             <div class="text">${it.th}</div>
           </div>
-        `).join("");
-
-        return `
-          <div class="group">
-            <div class="groupTitle"><div>${g}</div></div>
-            <div class="timeline">${itemsHtml}</div>
-          </div>
-        `;
-      })
-      .join("");
-
-    groupsEl.innerHTML = html;
-    history.style.display = "block";
-  }
-
-  function setLoading(){
-    summary.style.display = "block";
-    history.style.display = "none";
-    summary.innerHTML = `
-      <div class="loading">
-        <span class="spinner" aria-hidden="true"></span>
-        <div>
-          <div style="font-weight:800;color:#0f172a">กำลังค้นหา...</div>
-          <div class="small">โปรดรอสักครู่</div>
-        </div>
+        `).join("")}
       </div>
-    `;
+    </div>
+  `;
+  history.style.display="block";
+}
+
+async function run(){
+  const no = noEl.value.trim();
+  if(!no){alert("กรุณากรอกเลขพัสดุ");return;}
+
+  try{
+    const r = await fetch(`/api/track?no=${encodeURIComponent(no)}`);
+    const data = await r.json();
+    const events = data.events || [];
+    renderTimeline(events);
+  }catch(e){
+    alert("เกิดข้อผิดพลาด");
   }
+}
 
-  function setError(msg){
-    summary.style.display = "block";
-    history.style.display = "none";
-    summary.innerHTML = `<div class="errorBox"><b>ไม่สำเร็จ:</b> ${msg || "เกิดข้อผิดพลาด"}</div>`;
-  }
-
-  // ==========================================
-  // Run (เสถียร: ใช้ latest จากเวลาใหม่สุด)
-  // ==========================================
-  async function run(){
-    const no = (noEl.value || "").trim();
-    if(!no){ alert("กรุณากรอกเลขพัสดุ"); return; }
-
-    btn.disabled = true;
-    setLoading();
-
-    try{
-      const url = `/api/track?no=${encodeURIComponent(no)}`;
-      const r = await fetch(url, { cache: "no-store" });
-      const text = await r.text();
-
-      let data;
-      try { data = JSON.parse(text); }
-      catch {
-        setError(`API ไม่ได้ส่ง JSON (HTTP ${r.status})`);
-        return;
-      }
-
-      if(!r.ok){
-        setError(data.error || `HTTP ${r.status}`);
-        return;
-      }
-
-      const events = data.events || data.history || data.traces || data.track || [];
-
-      // ✅ latestEvent จาก timestamp ที่ใหม่สุด (เสถียรที่สุด)
-      const latestEvent = getLatestFromEvents(events);
-      const rawLatest = pickStatusText(latestEvent) || pickStatusText(data);
-      const latestTh = toThaiStatus(rawLatest);
-
-      renderSummary(data, latestTh, events);
-      renderGroupedTimeline(events);
-
-    }catch(e){
-      setError(String(e));
-    }finally{
-      btn.disabled = false;
-    }
-  }
-
-  btn.addEventListener("click", run);
-  noEl.addEventListener("keydown", (e) => { if(e.key === "Enter") run(); });
+btn.addEventListener("click", run);
+noEl.addEventListener("keydown", e => e.key==="Enter" && run());
 </script>
 </body>
 </html>

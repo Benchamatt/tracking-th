@@ -142,6 +142,7 @@
     .badge.warn{background: rgba(180,83,9,.12); color: var(--warn); border-color: rgba(180,83,9,.25)}
     .badge.bad{background: rgba(185,28,28,.12); color: var(--bad); border-color: rgba(185,28,28,.25)}
 
+    /* กลุ่มสถานะ */
     .group{margin-top:12px}
     .groupTitle{
       display:flex;align-items:center;justify-content:space-between;gap:10px;
@@ -220,8 +221,11 @@
     .footer a{color: var(--muted); text-decoration:none}
     .footer a:hover{text-decoration:underline}
 
+    /* ซ่อนกติกา และข้อความจัดกลุ่ม (ถาวร) */
     #rule,
-    #groupHint { display:none !important; }
+    #groupHint {
+      display: none !important;
+    }
   </style>
 </head>
 
@@ -252,6 +256,7 @@
             <button class="btn" id="btn">ค้นหา</button>
           </div>
 
+          <!-- ใส่ id="rule" (ซ่อนด้วย CSS) -->
           <div id="rule" style="margin-top:10px" class="small">
             กติกา: แสดงเฉพาะสถานะ “ภาษาจีน” ที่ตรงกับ mapping ของคุณเท่านั้น (ไม่ match = ไม่แสดง)
           </div>
@@ -263,9 +268,12 @@
       <div>
         <div class="card" id="history" style="display:none">
           <h2>ไทม์ไลน์สถานะ</h2>
+
+          <!-- ใส่ id="groupHint" (ซ่อนด้วย CSS) -->
           <div id="groupHint" class="muted">
             จัดกลุ่ม: ขนส่งปลายทาง / ศุลกากรประเทศปลายทาง / คลังสินค้าต้นทาง
           </div>
+
           <div id="groups"></div>
         </div>
       </div>
@@ -290,34 +298,29 @@
   if (yearEl) yearEl.textContent = String(new Date().getFullYear());
 
   // ==============================
-  // Mapping จีน -> ไทย + percent
+  // 1) Mapping จีน -> ไทย (ของคุณ)
   // ==============================
   const STATUS_MAP = [
-    { zh: "順利送達", th: "พัสดุถึงผู้รับเรียบร้อยแล้ว", percent: 100 },
-    { zh: "配送中", th: "อยู่ระหว่างจัดส่ง", percent: 90 },
-    { zh: "已集貨", th: "พัสดุอยู่ศูนย์คัดแยกพัสดุ", percent: 80 },
+    // ขนส่ง(ปลายทาง)
+    { zh: "順利送達", th: "พัสดุถึงผู้รับเรียบร้อยแล้ว" },
+    { zh: "配送中", th: "อยู่ระหว่างจัดส่ง" },
+    { zh: "已集貨", th: "พัสดุอยู่ศูนย์คัดแยกพัสดุ" },
 
-    { zh: "出倉處理", th: "กำลังดำเนินการนำสินค้าออกจากคลัง", percent: 60 },
-    { zh: "連線收單建檔", th: "ระบบศุลกากรรับและบันทึกข้อมูลเรียบร้อยแล้ว", percent: 70 },
-    { zh: "由於海關系統查無此包裹申報人資料", th: "เนื่องจากระบบศุลกากรไม่พบข้อมูลผู้เดินพิธีการ โปรดตรวจสอบว่าผู้รับพัสดุได้ลงทะเบียนกับ EZ WAY แล้วหรือไม่ หากยังไม่ได้ลงทะเบียนโปรดลงทะเบียนให้เรียบร้อย ถ่ายภาพหน้าจอให้ติดชื่อ/หมายเลขโทรศัพท์และหมายเลขบัตรประชาชนของผู้เดินพิธีการ แล้วส่งให้เจ้าหน้าที่ลูกค้าสัมพันธ์ของWeiming หลังจากได้รับข้อมูลแล้ว พัสดุจะได้รับการปล่อยภายในประมาณ 1-2 วันทำการ", percent: 50 },
-    { zh: "不受理不可補正之錯單", th: "ข้อมูลที่ใช้เดินพิธีการไม่สอดคล้องกัน โปรดติดต่อเจ้าหน้าที่", percent: 40 },
+    // ศุลกากรประเทศปลายทาง
+    { zh: "出倉處理", th: "กำลังดำเนินการนำสินค้าออกจากคลัง" },
+    { zh: "連線收單建檔", th: "ระบบศุลกากรรับและบันทึกข้อมูลเรียบร้อยแล้ว" },
+    { zh: "由於海關系統查無此包裹申報人資料", th: "เนื่องจากระบบศุลกากรไม่พบข้อมูลผู้เดินพิธีการ โปรดตรวจสอบว่าผู้รับพัสดุได้ลงทะเบียนกับ EZ WAY แล้วหรือไม่ หากยังไม่ได้ลงทะเบียนโปรดลงทะเบียนให้เรียบร้อย ถ่ายภาพหน้าจอให้ติดชื่อ/หมายเลขโทรศัพท์และหมายเลขบัตรประชาชนของผู้เดินพิธีการ แล้วส่งให้เจ้าหน้าที่ลูกค้าสัมพันธ์ของWeiming หลังจากได้รับข้อมูลแล้ว พัสดุจะได้รับการปล่อยภายในประมาณ 1-2 วันทำการ" },
+    { zh: "不受理不可補正之錯單", th: "ข้อมูลที่ใช้เดินพิธีการไม่สอดคล้องกัน โปรดติดต่อเจ้าหน้าที่" },
 
-    { zh: "您的貨物已準備從集運倉出倉", th: "พัสดุของคุณออกคลัง เพื่อเตรียมส่งไปยังสนามบินแล้ว", percent: 30 },
-    { zh: "已經打印好地址面單", th: "พิมพ์ใบปะหน้าที่อยู่เรียบร้อยแล้ว", percent: 20 },
-    { zh: "已經打印好地址面單!", th: "พิมพ์ใบปะหน้าที่อยู่เรียบร้อยแล้ว", percent: 20 },
-    { zh: "您已下單成功", th: "สร้างออเดอร์การจัดส่งเรียบร้อย", percent: 10 },
+    // คลังสินค้า(ต้นทาง)
+    { zh: "您的貨物已準備從集運倉出倉", th: "พัสดุของคุณออกคลัง เพื่อเตรียมส่งไปยังสนามบินแล้ว" },
+    { zh: "已經打印好地址面單", th: "พิมพ์ใบปะหน้าที่อยู่เรียบร้อยแล้ว" },
+    { zh: "您已下單成功", th: "สร้างออเดอร์การจัดส่งเรียบร้อย" },
   ];
 
-  // 3 หัวข้อ + milestone percent (fix ตามที่ขอ)
-  const STAGE_DEF = [
-    { label: "คลังสินค้า(ต้นทาง)", milestone: 30 },
-    { label: "ศุลกากร(ปลายทาง)", milestone: 70 },
-    { label: "ขนส่ง(ปลายทาง)", milestone: 100 },
-  ];
-
-  // ==============================
-  // Utilities
-  // ==============================
+  // ==========================================
+  // 2) Utilities
+  // ==========================================
   function normalizeText(s) {
     return (s || "")
       .replace(/[“”]/g, '"')
@@ -329,6 +332,7 @@
     return /[\u4e00-\u9fff]/.test(s || "");
   }
 
+  // ดึงจีนจากข้อความผสม รองรับ () และ （）
   function extractZh(mixed) {
     const s = normalizeText(mixed);
     const m = s.match(/[（(]([^）)]+)[）)]/);
@@ -356,104 +360,49 @@
     return obj.time || obj.datetime || obj.dateTime || obj.date_time || obj.timestamp || "-";
   }
 
-  // ✅ latest แบบ "ไม่พึ่ง format เวลา" (นิ่งกว่า): สมมติ API ส่งใหม่สุดมาก่อน
-  // ถ้า API ของคุณเป็นเก่า->ใหม่ ให้เปลี่ยนเป็น "ASC"
-  const EVENTS_ORDER = "DESC";
-  function getLatestByOrder(events, order){
-    const arr = Array.isArray(events) ? events : (events ? [events] : []);
-    if (!arr.length) return null;
-    return (String(order || "").toUpperCase() === "ASC") ? arr[arr.length - 1] : arr[0];
-  }
-
-  // ==============================
-  // Match map (จีน)
-  // ==============================
-  function matchMap(rawAny){
+  // ==========================================
+  // 3) Translate: match เท่านั้น
+  // ==========================================
+  function toThaiStatus(rawAny) {
     const raw = extractZh(rawAny);
     if (!raw) return null;
+
     if (!hasChinese(raw)) return null;
 
     const zh = normalizeText(raw);
 
     const exact = STATUS_MAP.find(x => normalizeText(x.zh) === zh);
-    if (exact) return exact;
+    if (exact) return exact.th;
 
     const loose = STATUS_MAP.find(x => zh.includes(normalizeText(x.zh)) || normalizeText(x.zh).includes(zh));
-    return loose || null;
+    if (loose) return loose.th;
+
+    return null;
   }
 
-  function toThaiStatus(rawAny) {
-    const m = matchMap(rawAny);
-    return m ? m.th : null;
-  }
+  // ==========================================
+  // 4) Grouping
+  // ==========================================
+  const GROUP_ORDER = ["ขนส่งปลายทาง", "ศุลกากรประเทศปลายทาง", "คลังสินค้าต้นทาง"];
 
-  // ==============================
-  // ✅ ทำให้แถบทำงานกับ "ทุกสถานะ"
-  // - match จีนได้ -> ใช้ percent จาก map
-  // - ไม่ match -> fallback จาก keyword ไทย/อังกฤษ
-  // ==============================
-  function percentFallbackFromThaiOrAny(text){
-    const m = normalizeText(text || "");
+  function groupOf(th){
+    if (!th) return "คลังสินค้าต้นทาง";
 
-    // Delivered / last mile
-    if (m.includes("ถึงผู้รับ") || m.includes("ส่งมอบ") || m.includes("delivered")) return 100;
-    if (m.includes("อยู่ระหว่างจัดส่ง") || m.includes("กำลังจัดส่ง") || m.includes("in transit") || m.includes("delivery")) return 90;
-    if (m.includes("ศูนย์คัดแยก") || m.includes("คัดแยก") || m.includes("sorting")) return 80;
-
-    // Customs
-    if (m.includes("ศุลกากรรับ") || m.includes("บันทึกข้อมูล") || m.includes("received") || m.includes("recorded")) return 70;
-    if (m.includes("นำสินค้าออกจากคลัง") || m.includes("ออกจากคลัง") || m.includes("customs") || m.includes("clearance")) return 60;
-
-    // Customs issues
-    if (m.includes("ไม่พบข้อมูลผู้เดินพิธีการ") || m.includes("ez way")) return 50;
-    if (m.includes("ไม่สอดคล้อง") || m.includes("ติดต่อเจ้าหน้าที่") || m.includes("mismatch")) return 40;
-
-    // Origin
-    if (m.includes("เตรียมส่งไปยังสนามบิน") || m.includes("ออกคลัง")) return 30;
-    if (m.includes("พิมพ์ใบปะหน้า") || m.includes("label")) return 20;
-    if (m.includes("สร้างออเดอร์") || m.includes("order")) return 10;
-
-    return 0;
-  }
-
-  function percentOf(rawAny){
-    const m = matchMap(rawAny);
-    if (m && typeof m.percent === "number") return m.percent;
-    return percentFallbackFromThaiOrAny(rawAny);
-  }
-
-  // ไม่ถอยหลัง: max percent ของทุก events
-  // ถ้าหาไม่ได้เลย -> ใช้ latest event เป็นตัวตั้ง
-  function calcPercentFromEvents(events){
-    const arr = Array.isArray(events) ? events : (events ? [events] : []);
-    if (!arr.length) return 0;
-
-    let maxP = 0;
-    for (const e of arr){
-      const raw = pickStatusText(e);
-      const p = percentOf(raw);
-      if (p > maxP) maxP = p;
+    if (th.includes("พัสดุถึงผู้รับเรียบร้อยแล้ว") || th.includes("อยู่ระหว่างจัดส่ง") || th.includes("พัสดุอยู่ศูนย์คัดแยกพัสดุ")) {
+      return "ขนส่งปลายทาง";
     }
 
-    if (maxP === 0) {
-      const latestEvent = getLatestByOrder(arr, EVENTS_ORDER);
-      const rawLatest = pickStatusText(latestEvent) || "";
-      maxP = percentOf(rawLatest);
+    if (th.includes("กำลังดำเนินการนำสินค้า") || th.includes("ระบบศุลกากรรับ") || th.includes("เนื่องจากระบบศุลกากรไม่พบข้อมูล") || th.includes("ข้อมูลที่ใช้เดินพิธีการ")) {
+      return "ศุลกากรประเทศปลายทาง";
     }
 
-    return maxP;
+    if (th.includes("ออกคลัง") || th.includes("ใบปะหน้า") || th.includes("สร้างออเดอร์")) {
+      return "คลังสินค้าต้นทาง";
+    }
+
+    return "คลังสินค้าต้นทาง";
   }
 
-  function stageIndexFromPercent(p){
-    // 0=คลัง, 1=ศุลกากร, 2=ขนส่ง
-    if (p >= 80) return 2;   // 80/90/100
-    if (p >= 40) return 1;   // 40/50/60/70
-    return 0;                // 10/20/30/อื่น ๆ
-  }
-
-  // ==============================
-  // Badge (คงเดิม)
-  // ==============================
   function badgeOf(th){
     if (!th) return { cls:"warn", label:"กำลังดำเนินการ" };
     if (th.includes("ถึงผู้รับ")) return { cls:"ok", label:"ถึงแล้ว" };
@@ -463,54 +412,19 @@
     return { cls:"warn", label:"กำลังขนส่ง" };
   }
 
-  // ==============================
-  // Render: pill steps (คง UI เดิม)
-  // ==============================
-  function renderStagePills(activeIdx){
-    const pillBase =
-      "display:flex;align-items:center;justify-content:space-between;gap:10px;" +
-      "padding:10px 12px;border-radius:14px;border:1px solid var(--border);" +
-      "background:var(--surface-2);font-size:13px;font-weight:800;";
-
-    return `
-      <div style="margin-top:12px; display:grid; grid-template-columns: 1fr 1fr 1fr; gap:10px;">
-        ${STAGE_DEF.map((s, idx) => {
-          const done = idx < activeIdx;
-          const active = idx === activeIdx;
-
-          const bg = active ? "rgba(15,95,191,.10)" : (done ? "rgba(15,95,191,.06)" : "var(--surface-2)");
-          const bd = active ? "rgba(15,95,191,.30)" : (done ? "rgba(15,95,191,.18)" : "var(--border)");
-          const dot = active || done ? "var(--brand)" : "rgba(100,116,139,.45)";
-
-          return `
-            <div style="${pillBase} background:${bg}; border-color:${bd};">
-              <div style="display:flex; align-items:center; gap:8px; min-width:0;">
-                <span style="width:8px;height:8px;border-radius:999px;background:${dot};flex:0 0 auto;"></span>
-                <span style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${s.label}</span>
-              </div>
-              <span style="font-weight:900; color:var(--text);">${s.milestone}%</span>
-            </div>
-          `;
-        }).join("")}
-      </div>
-    `;
-  }
-
-  // ==============================
-  // Summary: ให้เหมือน "ภาพแถบ" (เอาสถานะใหญ่/ข้อความความคืบหน้าออก)
-  // ==============================
-  function renderSummary(data, latestTh, events){
+  // ==========================================
+  // 5) Render
+  // ==========================================
+  function renderSummary(data, latestTh){
+    // ถ้าไม่ match: ไม่แสดงอะไรเลย (ไม่มีกล่องแดง)
     if (!latestTh) {
-      // ถ้าไม่ match จีนเลย เรา "ยัง" โชว์ summary ได้ ด้วย fallback text (เพื่อให้แถบขึ้น)
-      // แต่ถ้าคุณต้องการซ่อนเสมอเมื่อไม่ match ให้กลับไปซ่อนเหมือนเดิม
-      latestTh = normalizeText(pickStatusText(getLatestByOrder(events, EVENTS_ORDER)) || "") || "";
+      summary.style.display = "none";
+      summary.innerHTML = "";
+      return;
     }
 
     summary.style.display = "block";
-
-    const badge = badgeOf(latestTh || "");
-    const progressPercent = calcPercentFromEvents(events);
-    const activeIdx = stageIndexFromPercent(progressPercent);
+    const badge = badgeOf(latestTh);
 
     summary.innerHTML = `
       <div class="summaryTop">
@@ -524,30 +438,10 @@
         </span>
       </div>
 
-      <div style="margin-top:10px; display:flex; align-items:center; justify-content:space-between;">
-        <div></div>
-        <div style="font-weight:900;">${progressPercent}%</div>
+      <div style="margin-top:6px;font-size:18px;font-weight:800">
+        ${latestTh}
       </div>
-
-      <div style="margin-top:8px;height:10px;border-radius:999px;background:rgba(100,116,139,.18);overflow:hidden;border:1px solid rgba(100,116,139,.18);">
-        <div style="height:100%;width:${progressPercent}%;background:linear-gradient(135deg,var(--brand),var(--brand-2));border-radius:999px;"></div>
-      </div>
-
-      ${renderStagePills(activeIdx)}
     `;
-  }
-
-  // ==============================
-  // Timeline (คงเดิม: แสดงเฉพาะที่ match จีน)
-  // ==============================
-  const GROUP_ORDER = ["ขนส่ง(ปลายทาง)", "ศุลกากร(ปลายทาง)", "คลังสินค้า(ต้นทาง)"];
-
-  function groupOf(th){
-    if (!th) return "คลังสินค้า(ต้นทาง)";
-    if (th.includes("พัสดุถึงผู้รับเรียบร้อยแล้ว") || th.includes("อยู่ระหว่างจัดส่ง") || th.includes("พัสดุอยู่ศูนย์คัดแยกพัสดุ")) return "ขนส่ง(ปลายทาง)";
-    if (th.includes("กำลังดำเนินการนำสินค้า") || th.includes("ระบบศุลกากรรับ") || th.includes("เนื่องจากระบบศุลกากรไม่พบข้อมูล") || th.includes("ข้อมูลที่ใช้เดินพิธีการ")) return "ศุลกากร(ปลายทาง)";
-    if (th.includes("ออกคลัง") || th.includes("ใบปะหน้า") || th.includes("สร้างออเดอร์")) return "คลังสินค้า(ต้นทาง)";
-    return "คลังสินค้า(ต้นทาง)";
   }
 
   function renderGroupedTimeline(events){
@@ -555,14 +449,12 @@
 
     const translated = arr.map(e => {
       const raw = pickStatusText(e);
-      const m = matchMap(raw);
-      if (!m) return null;
-      return { time: pickTimeText(e), th: m.th, group: groupOf(m.th) };
-    }).filter(Boolean);
+      const th = toThaiStatus(raw);
+      return { time: pickTimeText(e), th };
+    }).filter(x => !!x.th);
 
     if (!translated.length) {
-      history.style.display = "none";
-      groupsEl.innerHTML = "";
+      if (history) history.style.display = "none";
       return;
     }
 
@@ -571,7 +463,7 @@
     for (const x of translated) {
       if (seen.has(x.th)) continue;
       seen.add(x.th);
-      deduped.push(x);
+      deduped.push({ ...x, group: groupOf(x.th) });
     }
 
     const buckets = new Map(GROUP_ORDER.map(g => [g, []]));
@@ -591,9 +483,12 @@
           </div>
         `).join("");
 
+        // ไม่แสดง "x รายการ" ตามที่ขอ
         return `
           <div class="group">
-            <div class="groupTitle"><div>${g}</div></div>
+            <div class="groupTitle">
+              <div>${g}</div>
+            </div>
             <div class="timeline">${itemsHtml}</div>
           </div>
         `;
@@ -619,11 +514,15 @@
   }
 
   function setError(msg){
+    // อันนี้ยังคงไว้สำหรับ error จริง ๆ จาก API
     summary.style.display = "block";
     history.style.display = "none";
     summary.innerHTML = `<div class="errorBox"><b>ไม่สำเร็จ:</b> ${msg || "เกิดข้อผิดพลาด"}</div>`;
   }
 
+  // ==========================================
+  // 6) Run
+  // ==========================================
   async function run(){
     const no = (noEl.value || "").trim();
     if(!no){ alert("กรุณากรอกเลขพัสดุ"); return; }
@@ -649,14 +548,10 @@
       }
 
       const events = data.events || data.history || data.traces || data.track || [];
-      const latestEvent = getLatestByOrder(events, EVENTS_ORDER);
-      const rawLatest = pickStatusText(latestEvent) || pickStatusText(data);
+      const rawLatest = pickStatusText(data) || pickStatusText(Array.isArray(events) ? events[0] : events);
+      const latestTh = toThaiStatus(rawLatest);
 
-      // ถ้า match จีนได้ -> จะได้ไทย (สำหรับ badge)
-      // ถ้าไม่ match -> ก็ยังมีแถบจาก fallback percent
-      const latestTh = toThaiStatus(rawLatest) || normalizeText(rawLatest) || "";
-
-      renderSummary(data, latestTh, events);
+      renderSummary(data, latestTh);
       renderGroupedTimeline(events);
 
     }catch(e){

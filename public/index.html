@@ -357,10 +357,11 @@
     const SCHEMA = {
       // ตัวอย่าง: JSON เป็น { data: { events: [...] } } ให้ใช้ ["data","events"]
       eventArrayPaths: [
-        ["events"],           // เผื่อกรณี { events: [...] }
-        ["data", "events"],   // เผื่อกรณี { data: { events: [...] } }
-        ["data", "timeline"]  // เผื่อกรณี { data: { timeline: [...] } }
-      ],
+        ["data","events"]   // <-- แก้ path ตรงนี้ให้ตรงจริง
+  ],
+  timeKeys: ["updateTime"],       // <-- key เวลาในแต่ละ event
+  textKeys: ["statusText"]        // <-- key ข้อความสถานะในแต่ละ event
+};
       timeKeys: ["time", "datetime", "date", "updateTime", "updated_at"],
       textKeys: ["raw", "text", "status", "statusText", "message", "desc"]
     };
@@ -753,7 +754,7 @@
         summary.innerHTML = `<div class="loading"><div class="spinner" aria-hidden="true"></div><div>กำลังดึงข้อมูล...</div></div>`;
 
         const data = await fetchTracking(no);
-        const vm = buildViewModel(no, data);
+        console.log("API response:", data);
 
         if (!vm.ok) {
           showError(vm.error || "ไม่สามารถสร้างผลลัพธ์ได้");

@@ -62,35 +62,32 @@ input{
   border:1px solid var(--border);
   font-weight:800;
 }
- .timeline{
-  margin-top:10px;
-  padding-left:18px;
-  position:relative;
+ timeline{margin-top:10px;padding-left:18px;position:relative}
+  .timeline:before{ 
+  content:"";
+  position:absolute; 
+  left:7px;top:0;bottom:0;
+  width:2px;background:#cbd5e1; }
 
-  display:flex;
-  flex-direction:column;
-  align-items:flex-start;
-}
-.timeline{margin-top:10px;padding-left:18px;position:relative}
 .timeline:before{
   content:"";
   position:absolute;
   left:7px;top:0;bottom:0;
   width:2px;background:#cbd5e1;
 }
-.event{
-  display: inline-block;
-  width: fit-content;
-  max-width: 100%;
+event{ 
+  display: inline-block; 
+  width: fit-content; 
+  max-width: 100%; 
   background:var(--surface-2);
-  border:1px solid var(--border);
-  border-radius:14px;
+  border:1px solid var(--border); 
+  border-radius:14px; 
   padding:10px 12px;
-  margin-bottom:10px;
-}
+  margin-bottom:10px; 
+} 
 .event .time{font-size:12px;color:var(--muted)}
-.event .text{font-weight:700}
-</style>
+.event .text{font-weight:700} 
+</style> 
 </head>
 
 <body>

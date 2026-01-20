@@ -221,58 +221,10 @@
     .footer a{color: var(--muted); text-decoration:none}
     .footer a:hover{text-decoration:underline}
 
-    #rule, #groupHint { display: none !important; }
-
-    /* ===== Stepper ===== */
-    .stepper{margin-top:14px}
-    .steps{display:flex;gap:12px;align-items:stretch}
-    .step{
-      flex:1; position:relative;
-      padding:12px 12px;
-      border-radius:14px;
-      background: var(--surface-2);
-      border:1px solid var(--border);
-    }
-    .step:not(:last-child)::after{
-      content:"";
-      position:absolute;
-      top:19px;
-      right:-12px;
-      width:12px;
-      height:2px;
-      background: rgba(100,116,139,.22);
-    }
-    .stepTop{display:flex;align-items:center;gap:10px}
-    .stepDot{
-      width:12px;height:12px;border-radius:999px;
-      background: rgba(100,116,139,.22);
-      border:3px solid rgba(100,116,139,.16);
-      flex:0 0 auto;
-    }
-    .stepTitle{
-      font-size:12px;
-      font-weight:900;
-      color:var(--muted);
-      letter-spacing:.2px;
-      line-height:1.2;
-    }
-    .step.active{background: rgba(15,95,191,.06); border-color: rgba(15,95,191,.22)}
-    .step.active .stepDot{
-      background: var(--brand);
-      border-color: rgba(15,95,191,.22);
-      box-shadow: 0 0 0 3px rgba(15,95,191,.10);
-    }
-    .step.active .stepTitle{color: var(--text)}
-    .step.done{background: rgba(15,95,191,.04); border-color: rgba(15,95,191,.14)}
-    .step.done .stepDot{background: var(--brand); border-color: rgba(15,95,191,.18)}
-    .step.done .stepTitle{color: rgba(15,23,42,.90)}
-    .step.done:not(:last-child)::after{background: rgba(15,95,191,.40)}
-    @media(max-width:520px){
-      .steps{flex-direction:column;gap:10px}
-      .step:not(:last-child)::after{
-        top:auto; bottom:-10px; left:18px; right:auto;
-        width:2px; height:10px;
-      }
+    /* ซ่อนกติกา และข้อความจัดกลุ่ม (ถาวร) */
+    #rule,
+    #groupHint {
+      display: none !important;
     }
   </style>
 </head>
@@ -282,7 +234,7 @@
     <div class="topbar">
       <div class="brand">
         <div class="logo" aria-hidden="true" title="Weiming">
-          <svg viewBox="0 0 24 24" aria-hidden="true">
+          <svg viewBox="0 0 24 24">
             <path d="M20 8h-3V4H3v13h2.1a2.9 2.9 0 0 0 5.8 0h4.2a2.9 2.9 0 0 0 5.8 0H23v-5l-3-4zM6.5 19a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zm10 0a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zM17 12V9h2l2 3h-4z"/>
           </svg>
         </div>
@@ -304,17 +256,24 @@
             <button class="btn" id="btn">ค้นหา</button>
           </div>
 
-          <div class="small" style="margin-top:10px;">
-            ถ้ายังไม่มี API ให้ปล่อย <b>API_URL</b> ว่าง ระบบจะใช้ข้อมูลตัวอย่าง (MOCK)
+          <!-- ใส่ id="rule" (ซ่อนด้วย CSS) -->
+          <div id="rule" style="margin-top:10px" class="small">
+            กติกา: แสดงเฉพาะสถานะ “ภาษาจีน” ที่ตรงกับ mapping ของคุณเท่านั้น (ไม่ match = ไม่แสดง)
           </div>
         </div>
 
-        <div class="card" id="summary" style="display:none; margin-top:14px;"></div>
+        <div class="card" id="summary" style="display:none"></div>
       </div>
 
       <div>
-        <div class="card" id="history" style="display:none;">
+        <div class="card" id="history" style="display:none">
           <h2>ไทม์ไลน์สถานะ</h2>
+
+          <!-- ใส่ id="groupHint" (ซ่อนด้วย CSS) -->
+          <div id="groupHint" class="muted">
+            จัดกลุ่ม: ขนส่งปลายทาง / ศุลกากรประเทศปลายทาง / คลังสินค้าต้นทาง
+          </div>
+
           <div id="groups"></div>
         </div>
       </div>
@@ -327,9 +286,7 @@
     </div>
   </div>
 
-  <script>
-  "use strict";
-
+<script>
   const $ = (id) => document.getElementById(id);
   const summary = $("summary");
   const history = $("history");
@@ -341,57 +298,29 @@
   if (yearEl) yearEl.textContent = String(new Date().getFullYear());
 
   // ==============================
-  // Config
-  // ==============================
-  // ใส่ API จริงที่ "คืน JSON" เช่น: "https://example.com/api/track?no="
-  const API_URL = ""; // <-- ใส่ของจริงตรงนี้
-
-  // ถ้า API_URL ว่าง -> ใช้ MOCK อัตโนมัติ
-  const USE_MOCK = (API_URL.trim() === "");
-
-  // ปรับให้ตรง JSON จริงของคุณ (MOCK ใช้ data.events / updateTime / statusText)
-  const SCHEMA = {
-    eventArrayPaths: [["data", "events"]],
-    timeKeys: ["updateTime"],
-    textKeys: ["statusText"],
-  };
-
-  // ==============================
-  // 1) Mapping จีน -> ไทย + กลุ่ม
+  // 1) Mapping จีน -> ไทย (ของคุณ)
   // ==============================
   const STATUS_MAP = [
-    { zh: "順利送達", th: "พัสดุถึงผู้รับเรียบร้อยแล้ว", group_tw: "ขนส่ง(ปลายทาง)" },
-    { zh: "配送中", th: "อยู่ระหว่างจัดส่ง", group_tw: "ขนส่ง(ปลายทาง)" },
-    { zh: "已集貨", th: "พัสดุอยู่ศูนย์คัดแยกพัสดุ", group_tw: "ขนส่ง(ปลายทาง)" },
+    // ขนส่ง(ปลายทาง)
+    { zh: "順利送達", th: "พัสดุถึงผู้รับเรียบร้อยแล้ว" },
+    { zh: "配送中", th: "อยู่ระหว่างจัดส่ง" },
+    { zh: "已集貨", th: "พัสดุอยู่ศูนย์คัดแยกพัสดุ" },
 
-    { zh: "出倉處理", th: "กำลังดำเนินการนำสินค้าออกจากคลัง", group_tw: "ศุลกากร(ปลายทาง)" },
-    { zh: "連線收單建檔", th: "ระบบศุลกากรรับและบันทึกข้อมูลเรียบร้อยแล้ว", group_tw: "ศุลกากร(ปลายทาง)" },
-    { zh: "由於海關系統查無此包裹申報人資料", th: "เนื่องจากระบบศุลกากรไม่พบข้อมูลผู้เดินพิธีการ โปรดตรวจสอบว่าผู้รับพัสดุได้ลงทะเบียนกับ EZ WAY แล้วหรือไม่ หากยังไม่ได้ลงทะเบียนโปรดลงทะเบียนให้เรียบร้อย ถ่ายภาพหน้าจอให้ติดชื่อ/หมายเลขโทรศัพท์และหมายเลขบัตรประชาชนของผู้เดินพิธีการ แล้วส่งให้เจ้าหน้าที่ลูกค้าสัมพันธ์ของ Weiming หลังจากได้รับข้อมูลแล้ว พัสดุจะได้รับการปล่อยภายในประมาณ 1-2 วันทำการ", group_tw: "ศุลกากร(ปลายทาง)" },
-    { zh: "不受理不可補正之錯單", th: "ข้อมูลที่ใช้เดินพิธีการไม่สอดคล้องกัน โปรดติดต่อเจ้าหน้าที่", group_tw: "ศุลกากร(ปลายทาง)" },
+    // ศุลกากรประเทศปลายทาง
+    { zh: "出倉處理", th: "กำลังดำเนินการนำสินค้าออกจากคลัง" },
+    { zh: "連線收單建檔", th: "ระบบศุลกากรรับและบันทึกข้อมูลเรียบร้อยแล้ว" },
+    { zh: "由於海關系統查無此包裹申報人資料", th: "เนื่องจากระบบศุลกากรไม่พบข้อมูลผู้เดินพิธีการ โปรดตรวจสอบว่าผู้รับพัสดุได้ลงทะเบียนกับ EZ WAY แล้วหรือไม่ หากยังไม่ได้ลงทะเบียนโปรดลงทะเบียนให้เรียบร้อย ถ่ายภาพหน้าจอให้ติดชื่อ/หมายเลขโทรศัพท์และหมายเลขบัตรประชาชนของผู้เดินพิธีการ แล้วส่งให้เจ้าหน้าที่ลูกค้าสัมพันธ์ของWeiming หลังจากได้รับข้อมูลแล้ว พัสดุจะได้รับการปล่อยภายในประมาณ 1-2 วันทำการ" },
+    { zh: "不受理不可補正之錯單", th: "ข้อมูลที่ใช้เดินพิธีการไม่สอดคล้องกัน โปรดติดต่อเจ้าหน้าที่" },
 
-    { zh: "您的快件已派送成功", th: "พัสดุถึงผู้รับเรียบร้อยแล้ว", group_hk: "ขนส่ง(ปลายทาง)" },
-    { zh: "快件派送不成功", th: "จัดส่งไม่สำเร็จ ติดต่อผู้รับไม่ได้ กำลังดำเนินการส่งใหม่", group_hk: "ขนส่ง(ปลายทาง)" },
-    { zh: "快件交给", th: "อยู่ระหว่างจัดส่ง", group_hk: "ขนส่ง(ปลายทาง)" },
-    { zh: "快件到达", th: "พัสดุถึงศูนย์คัดแยกพัสดุ", group_hk: "ขนส่ง(ปลายทาง)" },
-
-    { zh: "您的貨物已準備從集運倉出倉", th: "พัสดุของคุณออกคลัง เพื่อเตรียมส่งไปยังสนามบินแล้ว", group_tw: "คลังสินค้า(ต้นทาง)", group_hk: "คลังสินค้า(ต้นทาง)" },
-    { zh: "已經打印好地址面單", th: "พิมพ์ใบปะหน้าที่อยู่เรียบร้อยแล้ว", group_tw: "คลังสินค้า(ต้นทาง)", group_hk: "คลังสินค้า(ต้นทาง)" },
-    { zh: "已經打印好地址面單!", th: "พิมพ์ใบปะหน้าที่อยู่เรียบร้อยแล้ว", group_tw: "คลังสินค้า(ต้นทาง)", group_hk: "คลังสินค้า(ต้นทาง)" },
-
-    { zh: "您已下單成功!請等待倉库人員作業出貸", th: "สร้างออเดอร์การจัดส่งเรียบร้อย", group_hk: "คลังสินค้า(ต้นทาง)" },
-    { zh: "您已下單成功!請等待倉庫人員作業出貨", th: "สร้างออเดอร์การจัดส่งเรียบร้อย", group_hk: "คลังสินค้า(ต้นทาง)" },
-    { zh: "您已下單成功", th: "สร้างออเดอร์การจัดส่งเรียบร้อย", group_tw: "คลังสินค้า(ต้นทาง)" },
+    // คลังสินค้า(ต้นทาง)
+    { zh: "您的貨物已準備從集運倉出倉", th: "พัสดุของคุณออกคลัง เพื่อเตรียมส่งไปยังสนามบินแล้ว" },
+    { zh: "已經打印好地址面單", th: "พิมพ์ใบปะหน้าที่อยู่เรียบร้อยแล้ว" },
+    { zh: "您已下單成功", th: "สร้างออเดอร์การจัดส่งเรียบร้อย" },
   ];
 
-  const GROUPS_BY_LANE = {
-    TW: ["ขนส่ง(ปลายทาง)", "ศุลกากร(ปลายทาง)", "คลังสินค้า(ต้นทาง)"],
-    HK: ["ขนส่ง(ปลายทาง)", "คลังสินค้า(ต้นทาง)"],
-    DEFAULT: ["ขนส่ง(ปลายทาง)", "ศุลกากร(ปลายทาง)", "คลังสินค้า(ต้นทาง)"],
-  };
-
-  // ==============================
+  // ==========================================
   // 2) Utilities
-  // ==============================
+  // ==========================================
   function normalizeText(s) {
     return (s || "")
       .replace(/[“”]/g, '"')
@@ -399,8 +328,11 @@
       .trim();
   }
 
-  function hasChinese(s) { return /[\u4e00-\u9fff]/.test(s || ""); }
+  function hasChinese(s){
+    return /[\u4e00-\u9fff]/.test(s || "");
+  }
 
+  // ดึงจีนจากข้อความผสม รองรับ () และ （）
   function extractZh(mixed) {
     const s = normalizeText(mixed);
     const m = s.match(/[（(]([^）)]+)[）)]/);
@@ -408,300 +340,229 @@
     return s;
   }
 
-  function escapeHtml(s) {
-    return String(s || "")
-      .replace(/&/g, "&amp;")
-      .replace(/</g, "&lt;")
-      .replace(/>/g, "&gt;")
-      .replace(/"/g, "&quot;")
-      .replace(/'/g, "&#039;");
-  }
-
-  function getByPath(obj, pathArr) {
-    let cur = obj;
-    for (const k of pathArr) {
-      if (!cur || typeof cur !== "object") return undefined;
-      cur = cur[k];
-    }
-    return cur;
-  }
-
-  function firstExisting(obj, keys) {
+  function pickStatusText(obj) {
+    if (!obj || typeof obj !== "object") return "";
+    const keys = [
+      "status_zh","status_cn","status","status_text","statusText",
+      "latest_status_zh","latest_status_cn","latest_status","latestStatus",
+      "desc_zh","description_zh","description","remark","remark_zh",
+      "message","state","event"
+    ];
     for (const k of keys) {
-      const v = obj?.[k];
-      if (v !== undefined && v !== null && String(v).trim() !== "") return v;
+      const v = obj[k];
+      if (typeof v === "string" && v.trim()) return v;
     }
     return "";
   }
 
-  function parseTimeToMs(raw) {
-    const s = String(raw || "").trim();
-    if (!s) return NaN;
+  function pickTimeText(obj) {
+    if (!obj || typeof obj !== "object") return "-";
+    return obj.time || obj.datetime || obj.dateTime || obj.date_time || obj.timestamp || "-";
+  }
 
-    const p = Date.parse(s);
-    if (!Number.isNaN(p)) return p;
+  // ==========================================
+  // 3) Translate: match เท่านั้น
+  // ==========================================
+  function toThaiStatus(rawAny) {
+    const raw = extractZh(rawAny);
+    if (!raw) return null;
 
-    let m = s.match(/^(\d{4})[-/](\d{2})[-/](\d{2})[ T](\d{2}):(\d{2})(?::(\d{2}))?$/);
-    if (m) {
-      const [_, Y, Mo, D, h, mi, se] = m;
-      return new Date(+Y, +Mo - 1, +D, +h, +mi, +(se || 0)).getTime();
+    if (!hasChinese(raw)) return null;
+
+    const zh = normalizeText(raw);
+
+    const exact = STATUS_MAP.find(x => normalizeText(x.zh) === zh);
+    if (exact) return exact.th;
+
+    const loose = STATUS_MAP.find(x => zh.includes(normalizeText(x.zh)) || normalizeText(x.zh).includes(zh));
+    if (loose) return loose.th;
+
+    return null;
+  }
+
+  // ==========================================
+  // 4) Grouping
+  // ==========================================
+  const GROUP_ORDER = ["ขนส่งปลายทาง", "ศุลกากรประเทศปลายทาง", "คลังสินค้าต้นทาง"];
+
+  function groupOf(th){
+    if (!th) return "คลังสินค้าต้นทาง";
+
+    if (th.includes("พัสดุถึงผู้รับเรียบร้อยแล้ว") || th.includes("อยู่ระหว่างจัดส่ง") || th.includes("พัสดุอยู่ศูนย์คัดแยกพัสดุ")) {
+      return "ขนส่งปลายทาง";
     }
-    return NaN;
-  }
 
-  function normalizeEventsFromAnyResponse(data, schema) {
-    let arr;
-    for (const p of (schema.eventArrayPaths || [])) {
-      const v = getByPath(data, p);
-      if (Array.isArray(v)) { arr = v; break; }
-    }
-    if (!Array.isArray(arr)) {
-      const paths = (schema.eventArrayPaths || []).map(p => p.join(".")).join(" | ");
-      throw new Error("ไม่พบอาเรย์ไทม์ไลน์ตาม SCHEMA: " + (paths || "(no paths)"));
+    if (th.includes("กำลังดำเนินการนำสินค้า") || th.includes("ระบบศุลกากรรับ") || th.includes("เนื่องจากระบบศุลกากรไม่พบข้อมูล") || th.includes("ข้อมูลที่ใช้เดินพิธีการ")) {
+      return "ศุลกากรประเทศปลายทาง";
     }
 
-    const out = arr.map((x) => {
-      const time = firstExisting(x, schema.timeKeys || ["time"]);
-      const raw  = firstExisting(x, schema.textKeys || ["status"]);
-      return { time: String(time || ""), raw: String(raw || ""), _ms: parseTimeToMs(time) };
-    });
-
-    return out.filter(e => e.time.trim() !== "" || e.raw.trim() !== "");
-  }
-
-  function sortEventsDesc(events) {
-    const withIdx = events.map((e, i) => ({...e, _idx:i}));
-    withIdx.sort((a,b) => {
-      const aOk = !Number.isNaN(a._ms), bOk = !Number.isNaN(b._ms);
-      if (aOk && bOk) return b._ms - a._ms;
-      if (aOk && !bOk) return -1;
-      if (!aOk && bOk) return 1;
-      return a._idx - b._idx;
-    });
-    return withIdx.map(({_idx, ...rest}) => rest);
-  }
-
-  function findMapByZh(zh) {
-    const z = normalizeText(zh);
-    return STATUS_MAP.find(x => z === x.zh || z.startsWith(x.zh)) || null;
-  }
-
-  function inferLaneFromEvents(events) {
-    const joined = normalizeText((events || []).map(e => e.raw || "").join(" "));
-    if (/快件|派送|到达/.test(joined)) return "HK";
-    if (/連線收單建檔|出倉處理|配送中|順利送達/.test(joined)) return "TW";
-    return "DEFAULT";
-  }
-
-  function groupNameForLane(mapItem, lane) {
-    if (!mapItem) return "ขนส่ง(ปลายทาง)";
-    if (lane === "HK" && mapItem.group_hk) return mapItem.group_hk;
-    if (lane === "TW" && mapItem.group_tw) return mapItem.group_tw;
-    return mapItem.group_tw || mapItem.group_hk || "ขนส่ง(ปลายทาง)";
-  }
-
-  function statusToBadgeKind(thText) {
-    const t = normalizeText(thText);
-    if (!t) return "warn";
-    if (/(ถึงผู้รับเรียบร้อยแล้ว|ส่งสำเร็จ|สำเร็จ)/.test(t)) return "ok";
-    if (/(ไม่สำเร็จ|ไม่พบ|ไม่สอดคล้อง|โปรดติดต่อ|ผิด|ล้มเหลว|ยกเลิก)/.test(t)) return "bad";
-    return "warn";
-  }
-
-  function computeStepIndex(lane, groupsPresent) {
-    const steps = (lane === "HK")
-      ? ["คลังสินค้า(ต้นทาง)", "ขนส่ง(ปลายทาง)"]
-      : ["คลังสินค้า(ต้นทาง)", "ศุลกากร(ปลายทาง)", "ขนส่ง(ปลายทาง)"];
-
-    let lastIdx = -1;
-    for (let i = 0; i < steps.length; i++) {
-      if (groupsPresent.has(steps[i])) lastIdx = i;
+    if (th.includes("ออกคลัง") || th.includes("ใบปะหน้า") || th.includes("สร้างออเดอร์")) {
+      return "คลังสินค้าต้นทาง";
     }
-    return { steps, activeIdx: Math.max(lastIdx, 0) };
+
+    return "คลังสินค้าต้นทาง";
   }
 
-  // ==============================
-  // Render
-  // ==============================
-  function setLoading(isLoading) {
-    btn.disabled = isLoading;
-    btn.textContent = isLoading ? "กำลังค้นหา..." : "ค้นหา";
+  function badgeOf(th){
+    if (!th) return { cls:"warn", label:"กำลังดำเนินการ" };
+    if (th.includes("ถึงผู้รับ")) return { cls:"ok", label:"ถึงแล้ว" };
+    if (th.includes("โปรดตรวจสอบ") || th.includes("ไม่สอดคล้อง") || th.includes("ติดต่อ")) {
+      return { cls:"bad", label:"มีปัญหา" };
+    }
+    return { cls:"warn", label:"กำลังขนส่ง" };
   }
 
-  function showError(msg) {
+  // ==========================================
+  // 5) Render
+  // ==========================================
+  function renderSummary(data, latestTh){
+    // ถ้าไม่ match: ไม่แสดงอะไรเลย (ไม่มีกล่องแดง)
+    if (!latestTh) {
+      summary.style.display = "none";
+      summary.innerHTML = "";
+      return;
+    }
+
     summary.style.display = "block";
-    history.style.display = "none";
-    summary.innerHTML = `<div class="errorBox">${escapeHtml(msg || "เกิดข้อผิดพลาด")}</div>`;
-  }
-
-  function renderSummary(no, lane, currentTh, currentRaw, stepperModel) {
-    const badgeKind = statusToBadgeKind(currentTh);
-    const badgeLabel = currentTh || "ไม่พบสถานะ";
-
-    const stepHtml = `
-      <div class="stepper">
-        <div class="steps">
-          ${stepperModel.steps.map((title, idx) => {
-            const cls = (idx < stepperModel.activeIdx) ? "step done"
-                      : (idx === stepperModel.activeIdx) ? "step active"
-                      : "step";
-            return `
-              <div class="${cls}">
-                <div class="stepTop">
-                  <div class="stepDot" aria-hidden="true"></div>
-                  <div class="stepTitle">${escapeHtml(title)}</div>
-                </div>
-              </div>
-            `;
-          }).join("")}
-        </div>
-      </div>
-    `;
+    const badge = badgeOf(latestTh);
 
     summary.innerHTML = `
       <div class="summaryTop">
         <div class="kv">
-          <b>เลขพัสดุ</b>
-          <div class="value">${escapeHtml(no)}</div>
-          <div class="small">เส้นทาง: ${escapeHtml(lane)}</div>
+          <div><b>อัปเดตล่าสุด</b> <span class="value">${data.last_update || data.lastUpdate || "-"}</span></div>
         </div>
-        <div class="badge ${badgeKind}">
-          <span class="dot" aria-hidden="true"></span>
-          <span>${escapeHtml(badgeLabel)}</span>
-        </div>
+
+        <span class="badge ${badge.cls}">
+          <span class="dot"></span>
+          ${badge.label}
+        </span>
       </div>
-      <div class="small" style="margin-top:6px;">ข้อความต้นฉบับ: ${escapeHtml(currentRaw || "-")}</div>
-      ${stepHtml}
+
+      <div style="margin-top:6px;font-size:18px;font-weight:800">
+        ${latestTh}
+      </div>
     `;
-    summary.style.display = "block";
   }
 
-  function renderGroups(grouped, order) {
-    const html = order.map(groupName => {
-      const events = grouped.get(groupName) || [];
-      if (!events.length) return "";
-      return `
-        <div class="group">
-          <div class="groupTitle">
-            <span>${escapeHtml(groupName)}</span>
-            <span class="small">${events.length} รายการ</span>
-          </div>
-          <div class="timeline">
-            ${events.map(ev => `
-              <div class="event">
-                <div class="time">${escapeHtml(ev.time || "")}</div>
-                <div class="text">${escapeHtml(ev.th || ev.raw || "")}</div>
-              </div>
-            `).join("")}
-          </div>
-        </div>
-      `;
-    }).join("");
+  function renderGroupedTimeline(events){
+    const arr = Array.isArray(events) ? events : (events ? [events] : []);
 
-    groupsEl.innerHTML = html || `<div class="muted">ไม่พบไทม์ไลน์</div>`;
+    const translated = arr.map(e => {
+      const raw = pickStatusText(e);
+      const th = toThaiStatus(raw);
+      return { time: pickTimeText(e), th };
+    }).filter(x => !!x.th);
+
+    if (!translated.length) {
+      if (history) history.style.display = "none";
+      return;
+    }
+
+    const seen = new Set();
+    const deduped = [];
+    for (const x of translated) {
+      if (seen.has(x.th)) continue;
+      seen.add(x.th);
+      deduped.push({ ...x, group: groupOf(x.th) });
+    }
+
+    const buckets = new Map(GROUP_ORDER.map(g => [g, []]));
+    for (const x of deduped) {
+      if (!buckets.has(x.group)) buckets.set(x.group, []);
+      buckets.get(x.group).push(x);
+    }
+
+    const html = GROUP_ORDER
+      .filter(g => (buckets.get(g) || []).length > 0)
+      .map(g => {
+        const items = buckets.get(g) || [];
+        const itemsHtml = items.map(it => `
+          <div class="event">
+            <div class="time">${it.time || "-"}</div>
+            <div class="text">${it.th}</div>
+          </div>
+        `).join("");
+
+        // ไม่แสดง "x รายการ" ตามที่ขอ
+        return `
+          <div class="group">
+            <div class="groupTitle">
+              <div>${g}</div>
+            </div>
+            <div class="timeline">${itemsHtml}</div>
+          </div>
+        `;
+      })
+      .join("");
+
+    groupsEl.innerHTML = html;
     history.style.display = "block";
   }
 
-  // ==============================
-  // Data / Flow
-  // ==============================
-  async function fetchTracking(no) {
-    if (USE_MOCK) {
-      return {
-        data: {
-          events: [
-            { updateTime: "2026-01-20 10:15", statusText: "順利送達" },
-            { updateTime: "2026-01-20 08:40", statusText: "配送中" },
-            { updateTime: "2026-01-19 18:10", statusText: "連線收單建檔" },
-            { updateTime: "2026-01-19 09:05", statusText: "您的貨物已準備從集運倉出倉" },
-            { updateTime: "2026-01-18 21:30", statusText: "已經打印好地址面單" }
-          ]
-        }
-      };
-    }
-
-    if (!API_URL.trim()) throw new Error("ยังไม่ได้ตั้งค่า API_URL");
-    const url = API_URL + encodeURIComponent(no);
-    const res = await fetch(url, { method: "GET" });
-    if (!res.ok) throw new Error("เรียกข้อมูลไม่สำเร็จ (HTTP " + res.status + ")");
-    return await res.json();
-  }
-
-  function buildViewModel(no, data) {
-    const baseEvents = normalizeEventsFromAnyResponse(data, SCHEMA);
-    if (!baseEvents.length) return { ok: false, error: "ไม่พบข้อมูลไทม์ไลน์สำหรับเลขพัสดุนี้" };
-
-    const sortedBase = sortEventsDesc(baseEvents);
-
-    const events = sortedBase.map(e => {
-      const raw = normalizeText(e.raw);
-      const zh = hasChinese(raw) ? extractZh(raw) : raw;
-      const mapItem = hasChinese(zh) ? findMapByZh(zh) : null;
-      const th = mapItem ? mapItem.th : (raw || zh);
-      return { time: e.time, raw, zh, th, mapItem };
-    });
-
-    const lane = inferLaneFromEvents(events);
-
-    const grouped = new Map();
-    const groupsPresent = new Set();
-    for (const ev of events) {
-      const group = groupNameForLane(ev.mapItem, lane);
-      if (!grouped.has(group)) grouped.set(group, []);
-      grouped.get(group).push(ev);
-      groupsPresent.add(group);
-    }
-
-    const order = GROUPS_BY_LANE[lane] || GROUPS_BY_LANE.DEFAULT;
-
-    const current = events[0];
-    const stepperModel = computeStepIndex(lane, groupsPresent);
-
-    return {
-      ok: true,
-      no,
-      lane,
-      currentTh: current?.th || "",
-      currentRaw: current?.raw || "",
-      grouped,
-      order,
-      stepperModel,
-    };
-  }
-
-  async function onSearch() {
-    const no = normalizeText(noEl.value);
-    if (!no) { showError("กรุณากรอกเลขพัสดุ"); return; }
-
-    summary.style.display = "none";
+  function setLoading(){
+    summary.style.display = "block";
     history.style.display = "none";
-    groupsEl.innerHTML = "";
-    setLoading(true);
+    summary.innerHTML = `
+      <div class="loading">
+        <span class="spinner" aria-hidden="true"></span>
+        <div>
+          <div style="font-weight:800;color:#0f172a">กำลังค้นหา...</div>
+          <div class="small">โปรดรอสักครู่</div>
+        </div>
+      </div>
+    `;
+  }
 
-    try {
-      summary.style.display = "block";
-      summary.innerHTML = `<div class="loading"><div class="spinner" aria-hidden="true"></div><div>กำลังดึงข้อมูล...</div></div>`;
+  function setError(msg){
+    // อันนี้ยังคงไว้สำหรับ error จริง ๆ จาก API
+    summary.style.display = "block";
+    history.style.display = "none";
+    summary.innerHTML = `<div class="errorBox"><b>ไม่สำเร็จ:</b> ${msg || "เกิดข้อผิดพลาด"}</div>`;
+  }
 
-      const data = await fetchTracking(no);
-      console.log("API response:", data);
+  // ==========================================
+  // 6) Run
+  // ==========================================
+  async function run(){
+    const no = (noEl.value || "").trim();
+    if(!no){ alert("กรุณากรอกเลขพัสดุ"); return; }
 
-      const vm = buildViewModel(no, data);
-      if (!vm.ok) { showError(vm.error || "ไม่สามารถสร้างผลลัพธ์ได้"); return; }
+    btn.disabled = true;
+    setLoading();
 
-      renderSummary(vm.no, vm.lane, vm.currentTh, vm.currentRaw, vm.stepperModel);
-      renderGroups(vm.grouped, vm.order);
+    try{
+      const url = `/api/track?no=${encodeURIComponent(no)}`;
+      const r = await fetch(url, { cache: "no-store" });
+      const text = await r.text();
 
-    } catch (err) {
-      showError(err?.message || "เกิดข้อผิดพลาด");
-    } finally {
-      setLoading(false);
+      let data;
+      try { data = JSON.parse(text); }
+      catch {
+        setError(`API ไม่ได้ส่ง JSON (HTTP ${r.status})`);
+        return;
+      }
+
+      if(!r.ok){
+        setError(data.error || `HTTP ${r.status}`);
+        return;
+      }
+
+      const events = data.events || data.history || data.traces || data.track || [];
+      const rawLatest = pickStatusText(data) || pickStatusText(Array.isArray(events) ? events[0] : events);
+      const latestTh = toThaiStatus(rawLatest);
+
+      renderSummary(data, latestTh);
+      renderGroupedTimeline(events);
+
+    }catch(e){
+      setError(String(e));
+    }finally{
+      btn.disabled = false;
     }
   }
 
-  btn.addEventListener("click", onSearch);
-  noEl.addEventListener("keydown", (e) => {
-    if (e.key === "Enter") onSearch();
-  });
+  btn.addEventListener("click", run);
+  noEl.addEventListener("keydown", (e) => { if(e.key === "Enter") run(); });
 </script>
 </body>
 </html>

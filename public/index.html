@@ -227,6 +227,27 @@
       display: none !important;
     }
   </style>
+  /* Step summary (ในกรอบแดงฝั่งซ้าย) */
+.stepList{display:grid;gap:6px;margin-top:10px}
+.stepItem{
+  display:flex;align-items:center;gap:10px;
+  padding:10px 12px;border-radius:14px;
+  border:1px solid var(--border);
+  background: var(--surface-2);
+  font-size:13px;font-weight:800;
+}
+.stepNum{
+  width:22px;height:22px;border-radius:999px;
+  display:grid;place-items:center;
+  background: rgba(15,95,191,.12);
+  color: var(--brand);
+  font-size:12px;font-weight:900;
+  flex:0 0 auto;
+}
+.stepItem.active{
+  border-color: rgba(15,95,191,.35);
+  background: rgba(15,95,191,.06);
+}
 </head>
 
 <body>
@@ -487,6 +508,23 @@ function getProgressPct(th, whichCase){
   summary.style.display = "block";
   const badge = badgeOf(latestTh);
 
+  // กลุ่มปัจจุบันจากสถานะล่าสุด
+  const currentGroup = groupOf(latestTh);
+
+  // 3 ขั้นตอน (ถ้าคุณต้องการให้ข้อ 3 เป็นอย่างอื่น เปลี่ยน label ได้ตรงนี้)
+  const steps = [
+    "คลังสินค้าต้นทาง",
+    "ศุลกากรประเทศปลายทาง",
+    "ขนส่งปลายทาง",
+  ];
+
+  const stepsHtml = steps.map((g, idx) => `
+    <div class="stepItem ${g === currentGroup ? "active" : ""}">
+      <div class="stepNum">${idx + 1}</div>
+      <div>${g}</div>
+    </div>
+  `).join("");
+
   summary.innerHTML = `
     <div class="summaryTop">
       <div class="kv">
@@ -500,12 +538,18 @@ function getProgressPct(th, whichCase){
       </span>
     </div>
 
+    <!-- สถานะล่าสุด (ลบ % ต่อท้ายออกแล้ว) -->
     <div style="margin-top:6px;font-size:18px;font-weight:800">
       ${latestTh}
-      ${typeof latestPct === "number" ? `<span class="muted" style="font-weight:700"> (${latestPct}%)</span>` : ""}
+    </div>
+
+    <!-- หัวข้อ 3 ขั้นตอน -->
+    <div class="stepList">
+      ${stepsHtml}
     </div>
   `;
 }
+
 
 
   function renderGroupedTimeline(events){

@@ -227,15 +227,16 @@
       display: none !important;
     }
   </style>
-  /* Step summary (ในกรอบแดงฝั่งซ้าย) */
-.stepList{display:grid;gap:6px;margin-top:10px}
+ /* Step summary (ในกรอบแดงฝั่งซ้าย) */
+.stepList{display:grid;gap:8px;margin-top:10px}
 .stepItem{
-  display:flex;align-items:center;gap:10px;
+  display:flex;align-items:center;justify-content:space-between;gap:10px;
   padding:10px 12px;border-radius:14px;
   border:1px solid var(--border);
   background: var(--surface-2);
   font-size:13px;font-weight:800;
 }
+.stepLeft{display:flex;align-items:center;gap:10px;min-width:0}
 .stepNum{
   width:22px;height:22px;border-radius:999px;
   display:grid;place-items:center;
@@ -244,10 +245,49 @@
   font-size:12px;font-weight:900;
   flex:0 0 auto;
 }
+.stepLabel{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.stepPct{font-size:12px;font-weight:900;color:var(--muted);flex:0 0 auto}
+
 .stepItem.active{
   border-color: rgba(15,95,191,.35);
   background: rgba(15,95,191,.06);
 }
+.stepItem.done{
+  border-color: rgba(15,118,110,.30);
+  background: rgba(15,118,110,.06);
+}
+.stepItem.done .stepNum{background: rgba(15,118,110,.14); color: var(--ok)}
+
+/* Overall progress bar */
+.pbar{margin-top:10px}
+.pbarTop{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.pbarLabel{font-size:12px;color:var(--muted);font-weight:800}
+.pbarVal{font-size:12px;color:var(--text);font-weight:900}
+.pbarTrack{
+  margin-top:6px;
+  height:10px;border-radius:999px;
+  background: rgba(100,116,139,.15);
+  overflow:hidden;
+}
+.pbarFill{
+  height:100%;
+  width:0%;
+  background: linear-gradient(90deg, var(--brand), var(--brand-2));
+}
+
+/* Helper note (case2) */
+.helpNote{
+  margin-top:10px;
+  border:1px solid rgba(180,83,9,.25);
+  background: rgba(180,83,9,.08);
+  color: #7c2d12;
+  border-radius: 14px;
+  padding: 10px 12px;
+  font-size: 12px;
+  line-height:1.35;
+}
+.helpNote a{color: inherit; font-weight:900; text-decoration:underline}
+
 </head>
 
 <body>
@@ -409,7 +449,20 @@ function getProgressPct(th, whichCase){
       .replace(/\s+/g, " ")
       .trim();
   }
+const STEP_DEFS = [
+  { key: "คลังสินค้าต้นทาง", max: 30 },
+  { key: "ศุลกากรประเทศปลายทาง", max: 70 },
+  { key: "ขนส่งปลายทาง", max: 100 },
+];
 
+function stepState(latestPct, currentGroup){
+  // currentGroup ใช้ตัดสิน active, latestPct ใช้ตัดสิน done
+  return STEP_DEFS.map(s => ({
+    ...s,
+    active: s.key === currentGroup,
+    done: typeof latestPct === "number" ? latestPct >= s.max : false
+  }));
+}
   function hasChinese(s){
     return /[\u4e00-\u9fff]/.test(s || "");
   }
@@ -497,8 +550,7 @@ function getProgressPct(th, whichCase){
   // ==========================================
   // 5) Render
   // ==========================================
-  function renderSummary(data, latestTh, latestPct){
-  // ถ้าไม่ match: ไม่แสดงอะไรเลย
+ function renderSummary(data, latestTh, latestPct, whichCase){
   if (!latestTh) {
     summary.style.display = "none";
     summary.innerHTML = "";
@@ -508,28 +560,32 @@ function getProgressPct(th, whichCase){
   summary.style.display = "block";
   const badge = badgeOf(latestTh);
 
-  // กลุ่มปัจจุบันจากสถานะล่าสุด
   const currentGroup = groupOf(latestTh);
+  const steps = stepState(latestPct, currentGroup);
 
-  // 3 ขั้นตอน (ถ้าคุณต้องการให้ข้อ 3 เป็นอย่างอื่น เปลี่ยน label ได้ตรงนี้)
-  const steps = [
-    "คลังสินค้าต้นทาง",
-    "ศุลกากรประเทศปลายทาง",
-    "ขนส่งปลายทาง",
-  ];
-
-  const stepsHtml = steps.map((g, idx) => `
-    <div class="stepItem ${g === currentGroup ? "active" : ""}">
-      <div class="stepNum">${idx + 1}</div>
-      <div>${g}</div>
+  const stepsHtml = steps.map((s, idx) => `
+    <div class="stepItem ${s.active ? "active" : ""} ${s.done ? "done" : ""}">
+      <div class="stepLeft">
+        <div class="stepNum">${idx + 1}</div>
+        <div class="stepLabel">${s.key}</div>
+      </div>
+      <div class="stepPct">${s.max}%</div>
     </div>
   `).join("");
+
+  const pctSafe = (typeof latestPct === "number" && latestPct >= 0 && latestPct <= 100) ? latestPct : null;
+
+  const helpHtml = (whichCase === "case2")
+    ? `<div class="helpNote">
+         พบสถานะที่ต้องตรวจสอบข้อมูลศุลกากร/ผู้เดินพิธีการ (EZ WAY) แนะนำให้ตรวจสอบการลงทะเบียน และหากต้องการความช่วยเหลือให้ติดต่อเจ้าหน้าที่ผ่าน
+         <a href="https://line.me/R/ti/p/@wmex" target="_blank" rel="noopener noreferrer">LINE</a>
+       </div>`
+    : "";
 
   summary.innerHTML = `
     <div class="summaryTop">
       <div class="kv">
         <div><b>อัปเดตล่าสุด</b> <span class="value">${data.last_update || data.lastUpdate || "-"}</span></div>
-        ${typeof latestPct === "number" ? `<div class="small muted">ความคืบหน้า: <b>${latestPct}%</b></div>` : ""}
       </div>
 
       <span class="badge ${badge.cls}">
@@ -538,17 +594,28 @@ function getProgressPct(th, whichCase){
       </span>
     </div>
 
-    <!-- สถานะล่าสุด (ลบ % ต่อท้ายออกแล้ว) -->
     <div style="margin-top:6px;font-size:18px;font-weight:800">
       ${latestTh}
     </div>
 
-    <!-- หัวข้อ 3 ขั้นตอน -->
+    <div class="pbar">
+      <div class="pbarTop">
+        <div class="pbarLabel">ความคืบหน้าโดยรวม</div>
+        <div class="pbarVal">${pctSafe == null ? "-" : pctSafe + "%"}</div>
+      </div>
+      <div class="pbarTrack">
+        <div class="pbarFill" style="width:${pctSafe == null ? 0 : pctSafe}%;"></div>
+      </div>
+    </div>
+
     <div class="stepList">
       ${stepsHtml}
     </div>
+
+    ${helpHtml}
   `;
 }
+
 
 
 
@@ -689,7 +756,7 @@ const whichCase = detectCaseFromThaiStatuses(thList);
 
 const latestPct = getProgressPct(latestTh, whichCase);
 
-renderSummary(data, latestTh, latestPct);
+renderSummary(data, latestTh, latestPct, whichCase);
 renderGroupedTimeline(events);
 
     }catch(e){

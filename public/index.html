@@ -557,13 +557,12 @@ function getProgressPct(th, whichCase){
       const total = GROUP_TOTAL[g];
 
       const itemsHtml = items.map(it => `
-        <div class="event">
-          <div class="time">${it.time || "-"}</div>
-          <div class="text">
-            ${it.th} <span class="muted">(${it.pct}%)</span>
-          </div>
-        </div>
-      `).join("");
+  <div class="event">
+    <div class="time">${it.time || "-"}</div>
+    <div class="text">${it.th}</div>
+  </div>
+`).join("");
+
 
       return `
         <div class="group">

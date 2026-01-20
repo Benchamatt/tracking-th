@@ -226,67 +226,68 @@
     #groupHint {
       display: none !important;
     }
-
-     /* Step summary (ในกรอบแดงฝั่งซ้าย) */
-.stepList{display:grid;gap:8px;margin-top:10px}
-.stepItem{
-  display:flex;align-items:center;justify-content:space-between;gap:10px;
-  padding:10px 12px;border-radius:14px;
-  border:1px solid var(--border);
-  background: var(--surface-2);
-  font-size:13px;font-weight:800;
+/* ===== Stepper (องค์กร/ทางการ + เส้นเชื่อม) ===== */
+.stepper{margin-top:14px}
+.steps{display:flex;gap:12px;align-items:stretch}
+.step{
+  flex:1; position:relative; padding:12px 12px; border-radius:14px;
+  background: var(--surface-2); border:1px solid var(--border);
 }
-.stepLeft{display:flex;align-items:center;gap:10px;min-width:0}
-.stepNum{
-  width:22px;height:22px;border-radius:999px;
-  display:grid;place-items:center;
-  background: rgba(15,95,191,.12);
-  color: var(--brand);
-  font-size:12px;font-weight:900;
+.step:not(:last-child)::after{
+  content:""; position:absolute; top:19px; right:-12px; width:12px; height:2px;
+  background: rgba(100,116,139,.22);
+}
+.stepTop{display:flex;align-items:center;gap:10px}
+.stepDot{
+  width:12px;height:12px;border-radius:999px;
+  background: rgba(100,116,139,.22);
+  border:3px solid rgba(100,116,139,.16);
   flex:0 0 auto;
 }
-.stepLabel{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.stepPct{font-size:12px;font-weight:900;color:var(--muted);flex:0 0 auto}
-
-.stepItem.active{
-  border-color: rgba(15,95,191,.35);
-  background: rgba(15,95,191,.06);
+.stepTitle{
+  font-size:12px; font-weight:900; color:var(--muted);
+  letter-spacing:.2px; line-height:1.2;
 }
-.stepItem.done{
-  border-color: rgba(15,118,110,.30);
-  background: rgba(15,118,110,.06);
+.step.active{background: rgba(15,95,191,.06); border-color: rgba(15,95,191,.22)}
+.step.active .stepDot{
+  background: var(--brand); border-color: rgba(15,95,191,.22);
+  box-shadow: 0 0 0 3px rgba(15,95,191,.10);
 }
-.stepItem.done .stepNum{background: rgba(15,118,110,.14); color: var(--ok)}
+.step.active .stepTitle{color: var(--text)}
+.step.done{background: rgba(15,95,191,.04); border-color: rgba(15,95,191,.14)}
+.step.done .stepDot{background: var(--brand); border-color: rgba(15,95,191,.18)}
+.step.done .stepTitle{color: rgba(15,23,42,.90)}
+.step.done:not(:last-child)::after{background: rgba(15,95,191,.40)}
+@media(max-width:520px){
+  .steps{flex-direction:column;gap:10px}
+  .step:not(:last-child)::after{
+    top:auto; bottom:-10px; left:18px; right:auto; width:2px; height:10px;
+  }
+}
 
-/* Overall progress bar */
-.pbar{margin-top:10px}
-.pbarTop{display:flex;align-items:center;justify-content:space-between;gap:10px}
-.pbarLabel{font-size:12px;color:var(--muted);font-weight:800}
-.pbarVal{font-size:12px;color:var(--text);font-weight:900}
-.pbarTrack{
-  margin-top:6px;
-  height:10px;border-radius:999px;
-  background: rgba(100,116,139,.15);
+/* ===== Progress bar ===== */
+.progressWrap{
+  margin-top: 12px; padding: 10px 12px; border-radius: 14px;
+  border: 1px solid var(--border);
+  background: linear-gradient(180deg, rgba(15,95,191,.05), rgba(15,95,191,.02));
+}
+.progressHead{
+  display:flex; align-items:center; justify-content:space-between; gap:10px;
+  margin-bottom: 8px;
+}
+.progressHead b{font-size:13px}
+.progressBar{
+  width:100%; height:10px; border-radius:999px;
+  background: rgba(100,116,139,.18);
   overflow:hidden;
+  border:1px solid rgba(100,116,139,.18);
 }
-.pbarFill{
-  height:100%;
-  width:0%;
-  background: linear-gradient(90deg, var(--brand), var(--brand-2));
+.progressFill{
+  height:100%; width:0%;
+  background: linear-gradient(135deg, var(--brand), var(--brand-2));
+  border-radius:999px;
 }
 
-/* Helper note (case2) */
-.helpNote{
-  margin-top:10px;
-  border:1px solid rgba(180,83,9,.25);
-  background: rgba(180,83,9,.08);
-  color: #7c2d12;
-  border-radius: 14px;
-  padding: 10px 12px;
-  font-size: 12px;
-  line-height:1.35;
-}
-.helpNote a{color: inherit; font-weight:900; text-decoration:underline}
   </style>
 </head>
 
@@ -550,7 +551,7 @@ function stepState(latestPct, currentGroup){
   // ==========================================
   // 5) Render
   // ==========================================
-renderSummary(data, latestTh, latestPct, whichCase);
+
 function renderSummary(data, latestTh, latestPct, whichCase){
   if (!latestTh) {
     summary.style.display = "none";

@@ -1,173 +1,300 @@
 <!doctype html>
 <html lang="th">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
 <title>Weiming Tracking</title>
 
-<!-- ===================== STYLE ===================== -->
 <style>
-/* === Theme === */
 :root{
-  --bg:#f6f8fb;--surface:#fff;--surface-2:#f1f4f9;
-  --text:#0f172a;--muted:#64748b;--border:#e5e7eb;
-  --brand:#0f5fbf;--brand-2:#0a3f7a;
-  --ok:#0f766e;--warn:#b45309;--bad:#b91c1c;
-  --shadow:0 10px 24px rgba(2,6,23,.08);
+  --brand:#2563eb;
+  --brand-soft:#e0edff;
+  --bg:#f5f8fc;
+  --card:#ffffff;
+  --text:#0f172a;
+  --muted:#64748b;
+  --border:#e5e7eb;
+  --ok:#0f766e;
+  --warn:#b45309;
+  --bad:#b91c1c;
+  --shadow:0 20px 40px rgba(15,95,191,.12);
 }
+
 *{box-sizing:border-box}
 body{
-  margin:0;font-family:system-ui,-apple-system,"Segoe UI",Tahoma,sans-serif;
-  background:var(--bg);color:var(--text)
+  margin:0;
+  font-family:system-ui,-apple-system,"Segoe UI",Tahoma,sans-serif;
+  background:radial-gradient(900px 400px at 20% -10%,#e8f1ff,transparent 60%),var(--bg);
+  color:var(--text);
 }
-.wrap{max-width:980px;margin:auto;padding:20px}
 
-/* === Cards === */
-.card{
-  background:var(--surface);
-  border:1px solid var(--border);
-  border-radius:16px;
+.wrap{max-width:1100px;margin:auto;padding:20px}
+
+/* ===== Header ===== */
+.topbar{
+  background:linear-gradient(135deg,#eaf2ff,#f6f9ff);
+  border-radius:18px;
+  padding:16px 20px;
+  display:flex;
+  align-items:center;
+  gap:12px;
   box-shadow:var(--shadow);
-  padding:16px;
 }
-.grid{display:grid;grid-template-columns:1.1fr .9fr;gap:14px;margin-top:14px}
-@media(max-width:860px){.grid{grid-template-columns:1fr}}
+.logo{
+  width:42px;height:42px;border-radius:12px;
+  background:linear-gradient(135deg,#2563eb,#1e40af);
+  display:grid;place-items:center;color:#fff;font-weight:900;
+}
+.brand h1{margin:0;font-size:16px}
+.brand small{color:var(--muted)}
 
+/* ===== Layout ===== */
+.layout{
+  display:grid;
+  grid-template-columns:1.1fr .9fr;
+  gap:22px;
+  margin-top:18px;
+}
+@media(max-width:900px){
+  .layout{grid-template-columns:1fr}
+}
+
+/* ===== Cards ===== */
+.card{
+  background:var(--card);
+  border-radius:18px;
+  padding:18px;
+  box-shadow:var(--shadow);
+}
+.card h2{margin:0 0 6px;font-size:15px}
+
+/* ===== Search ===== */
+.searchRow{
+  display:grid;
+  grid-template-columns:1fr 130px;
+  gap:10px;
+  margin-top:12px;
+}
+@media(max-width:500px){
+  .searchRow{grid-template-columns:1fr}
+}
 input{
-  width:100%;padding:12px 14px;border-radius:14px;
-  border:1px solid var(--border);background:var(--surface-2)
+  padding:12px 14px;
+  border-radius:14px;
+  border:1px solid var(--border);
+  font-size:15px;
 }
-.btn{
-  border:none;border-radius:14px;padding:12px 14px;
-  background:linear-gradient(135deg,var(--brand),var(--brand-2));
-  color:#fff;cursor:pointer
+button{
+  border:none;
+  border-radius:14px;
+  background:linear-gradient(135deg,#2563eb,#1e40af);
+  color:#fff;
+  font-size:15px;
+  cursor:pointer;
 }
-.btn:disabled{opacity:.6}
 
-/* === Summary === */
+/* ===== Summary ===== */
+.summaryTop{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
 .badge{
-  display:inline-flex;align-items:center;gap:6px;
-  padding:6px 10px;border-radius:999px;font-size:12px;font-weight:700
+  padding:6px 12px;
+  border-radius:999px;
+  font-size:12px;
+  font-weight:800;
 }
-.badge.ok{background:rgba(15,118,110,.12);color:var(--ok)}
-.badge.warn{background:rgba(180,83,9,.12);color:var(--warn)}
-.badge.bad{background:rgba(185,28,28,.12);color:var(--bad)}
+.badge.warn{background:#fff4e5;color:var(--warn)}
+.badge.ok{background:#e6fffa;color:var(--ok)}
+.badge.bad{background:#fee2e2;color:var(--bad)}
 
-/* === Stepper === */
-.steps{display:flex;gap:10px;margin-top:12px}
-.step{flex:1;padding:10px;border-radius:14px;background:var(--surface-2)}
-.step.active{background:rgba(15,95,191,.08)}
-.step.done{opacity:.8}
+.summaryMain{
+  margin-top:10px;
+  font-size:20px;
+  font-weight:900;
+}
 
-/* === Timeline === */
-.group{margin-top:12px}
-.groupTitle{font-weight:800;font-size:13px;margin-bottom:6px}
-.timeline{padding-left:18px;position:relative}
+/* ===== Progress ===== */
+.progress{
+  margin-top:14px;
+}
+.progressBar{
+  height:8px;
+  background:#e5e7eb;
+  border-radius:999px;
+  overflow:hidden;
+}
+.progressFill{
+  height:100%;
+  background:var(--brand);
+  width:0%;
+  transition:.4s;
+}
+
+/* ===== Steps ===== */
+.steps{
+  display:flex;
+  gap:10px;
+  margin-top:14px;
+}
+.step{
+  flex:1;
+  padding:8px 12px;
+  border-radius:999px;
+  background:#f1f5f9;
+  font-size:12px;
+  font-weight:700;
+  display:flex;
+  justify-content:space-between;
+}
+.step.active{
+  background:var(--brand-soft);
+  color:#1d4ed8;
+}
+
+/* ===== Timeline ===== */
+.group{margin-bottom:16px}
+.groupTitle{
+  font-weight:900;
+  font-size:13px;
+  margin-bottom:6px;
+}
+.timeline{
+  position:relative;
+  padding-left:20px;
+}
 .timeline:before{
-  content:"";position:absolute;left:7px;top:0;bottom:0;
-  width:2px;background:#cbd5e1
+  content:"";
+  position:absolute;
+  left:8px;
+  top:0;bottom:0;
+  width:2px;
+  background:#cbd5e1;
 }
 .event{
-  background:var(--surface-2);
-  border:1px solid var(--border);
-  border-radius:14px;padding:10px 12px;margin-bottom:10px
+  background:#f8fafc;
+  border-radius:14px;
+  padding:10px 12px;
+  margin-bottom:10px;
 }
 .event .time{font-size:12px;color:var(--muted)}
 .event .text{font-weight:700}
 
-/* === Loading / Error === */
-.error{color:var(--bad);font-size:13px}
+/* ===== Footer ===== */
+.footer{
+  margin-top:18px;
+  text-align:center;
+  font-size:12px;
+  color:var(--muted);
+}
 </style>
 </head>
 
 <body>
 <div class="wrap">
 
-  <div class="card">
-    <h3>ค้นหาเลขพัสดุ</h3>
-    <input id="no" placeholder="เลขพัสดุ" />
-    <br/><br/>
-    <button class="btn" id="btn">ค้นหา</button>
+  <!-- Header -->
+  <div class="topbar">
+    <div class="logo">W</div>
+    <div class="brand">
+      <h1>Weiming Tracking</h1>
+      <small>ระบบตรวจสอบสถานะพัสดุ</small>
+    </div>
   </div>
 
-  <div class="grid">
+  <div class="layout">
+
+    <!-- LEFT -->
     <div>
-      <div class="card" id="summary" style="display:none"></div>
+      <div class="card">
+        <h2>ค้นหาเลขพัสดุ</h2>
+        <small style="color:#64748b">กรอกเลขพัสดุ แล้วกด “ค้นหา”</small>
+
+        <div class="searchRow">
+          <input id="no" placeholder="เลขพัสดุ"/>
+          <button id="btn">ค้นหา</button>
+        </div>
+      </div>
+
+      <!-- Summary -->
+      <div class="card" id="summary" style="display:none;margin-top:14px"></div>
     </div>
+
+    <!-- RIGHT -->
     <div>
       <div class="card" id="history" style="display:none">
-        <h3>ไทม์ไลน์สถานะ</h3>
+        <h2>ไทม์ไลน์สถานะ</h2>
         <div id="groups"></div>
       </div>
     </div>
+
   </div>
 
+  <div class="footer">
+    © 2026 Weiming Tracking | ติดต่อผ่าน LINE
+  </div>
 </div>
 
-<!-- ===================== SCRIPT ===================== -->
 <script>
 const $=id=>document.getElementById(id);
-const btn=$("btn"),noEl=$("no"),summary=$("summary"),history=$("history"),groupsEl=$("groups");
+const btn=$("btn"),noEl=$("no"),summary=$("summary"),groupsEl=$("groups"),history=$("history");
 
-/* ===== Status Map ===== */
+/* ===== Mapping ===== */
 const STATUS_MAP=[
-  {zh:"順利送達",th:"พัสดุถึงผู้รับเรียบร้อยแล้ว",g:"last"},
-  {zh:"配送中",th:"อยู่ระหว่างจัดส่ง",g:"last"},
-  {zh:"已集貨",th:"พัสดุอยู่ศูนย์คัดแยกพัสดุ",g:"last"},
-  {zh:"出倉處理",th:"กำลังนำสินค้าออกจากคลัง",g:"custom"},
-  {zh:"連線收單建檔",th:"ศุลกากรรับข้อมูลแล้ว",g:"custom"},
-  {zh:"已經打印好地址面單",th:"พิมพ์ใบปะหน้าที่อยู่แล้ว",g:"origin"},
-  {zh:"您已下單成功",th:"สร้างออเดอร์เรียบร้อย",g:"origin"},
+ {zh:"順利送達",th:"พัสดุถึงผู้รับเรียบร้อยแล้ว",step:3},
+ {zh:"配送中",th:"อยู่ระหว่างจัดส่ง",step:3},
+ {zh:"出倉處理",th:"กำลังดำเนินการนำสินค้าออกจากคลัง",step:2},
+ {zh:"連線收單建檔",th:"ระบบศุลกากรรับและบันทึกข้อมูลแล้ว",step:2},
+ {zh:"已經打印好地址面單",th:"พิมพ์ใบปะหน้าที่อยู่เรียบร้อย",step:1},
+ {zh:"您已下單成功",th:"สร้างออเดอร์เรียบร้อย",step:1},
 ];
 
-/* ===== Utils ===== */
-const norm=s=>String(s||"").replace(/[!！]/g,"").trim();
-const pick=(o)=>o?.status_zh||o?.status||o?.message||"";
-const pickTime=o=>o?.time||o?.datetime||"-";
+const match=raw=>STATUS_MAP.find(x=>raw?.includes(x.zh))||null;
 
-function match(raw){
-  raw=norm(raw);
-  return STATUS_MAP.find(x=>raw.includes(x.zh))||null;
-}
-
-/* ===== Render ===== */
-function renderSummary(th){
-  if(!th){summary.style.display="none";return}
-  const badge=th.includes("ถึงผู้รับ")?"ok":th.includes("ศุล")?"warn":"warn";
+/* ===== Render Summary ===== */
+function renderSummary(data,latest){
   summary.style.display="block";
+  const percent=[0,30,70,100][latest.step];
   summary.innerHTML=`
-    <div class="badge ${badge}">${badge==="ok"?"ถึงแล้ว":"กำลังดำเนินการ"}</div>
-    <div style="margin-top:6px;font-size:18px;font-weight:800">${th}</div>
+    <div class="summaryTop">
+      <div style="font-size:13px;color:#64748b">
+        อัปเดตล่าสุด ${data.last_update||"-"}
+      </div>
+      <span class="badge warn">กำลังขนส่ง</span>
+    </div>
+
+    <div class="summaryMain">${latest.th}</div>
+
+    <div class="progress">
+      <div class="progressBar">
+        <div class="progressFill" style="width:${percent}%"></div>
+      </div>
+    </div>
+
+    <div class="steps">
+      <div class="step ${latest.step>=1?"active":""}">คลังสินค้า(ต้นทาง)<b>30%</b></div>
+      <div class="step ${latest.step>=2?"active":""}">ศุลกากร(ปลายทาง)<b>70%</b></div>
+      <div class="step ${latest.step>=3?"active":""}">ขนส่ง(ปลายทาง)<b>100%</b></div>
+    </div>
   `;
 }
 
+/* ===== Render Timeline ===== */
 function renderTimeline(events){
-  const items=events.map(e=>{
-    const m=match(pick(e));
-    return m?{time:pickTime(e),th:m.th,g:m.g}:null;
-  }).filter(Boolean);
-
-  if(!items.length){history.style.display="none";return}
-
-  const groups={origin:[],custom:[],last:[]};
-  items.forEach(i=>groups[i.g].push(i));
-
-  groupsEl.innerHTML=Object.entries(groups)
-    .filter(([_,v])=>v.length)
-    .map(([k,v])=>`
-      <div class="group">
-        <div class="groupTitle">${k==="origin"?"คลังต้นทาง":k==="custom"?"ศุลกากร":"ปลายทาง"}</div>
-        <div class="timeline">
-          ${v.map(i=>`
-            <div class="event">
-              <div class="time">${i.time}</div>
-              <div class="text">${i.th}</div>
-            </div>
-          `).join("")}
-        </div>
+  groupsEl.innerHTML=`
+    <div class="group">
+      <div class="groupTitle">สถานะพัสดุ</div>
+      <div class="timeline">
+        ${events.map(e=>`
+          <div class="event">
+            <div class="time">${e.time||"-"}</div>
+            <div class="text">${match(e.status)?.th||e.status}</div>
+          </div>
+        `).join("")}
       </div>
-    `).join("");
-
+    </div>
+  `;
   history.style.display="block";
 }
 
@@ -175,22 +302,18 @@ function renderTimeline(events){
 async function run(){
   const no=noEl.value.trim();
   if(!no){alert("กรุณากรอกเลขพัสดุ");return}
-  btn.disabled=true;
+
   summary.style.display="block";
   summary.innerHTML="กำลังค้นหา...";
+  history.style.display="none";
 
-  try{
-    const r=await fetch(`/api/track?no=${encodeURIComponent(no)}`);
-    const data=await r.json();
-    const events=data.events||[];
-    const latest=match(pick(events[0]||data));
-    renderSummary(latest?.th);
-    renderTimeline(events);
-  }catch(e){
-    summary.innerHTML=`<div class="error">เกิดข้อผิดพลาด</div>`;
-  }finally{
-    btn.disabled=false;
-  }
+  const r=await fetch(`/api/track?no=${encodeURIComponent(no)}`);
+  const data=await r.json();
+  const events=data.events||[];
+  const latest=match(events[0]?.status||"");
+
+  renderSummary(data,latest);
+  renderTimeline(events);
 }
 
 btn.onclick=run;

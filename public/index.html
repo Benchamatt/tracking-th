@@ -443,14 +443,13 @@ function getProgressPct(th, whichCase){
 function buildSummaryFromTimeline(events){
   const arr = Array.isArray(events) ? events : (events ? [events] : []);
 
-  // 1) แปลสถานะตามกติกาเดียวกับไทม์ไลน์ (เฉพาะที่ match)
+  // แปลสถานะจากไทม์ไลน์ (เฉพาะที่ match)
   const thAll = arr.map(e => toThaiStatus(pickStatusText(e))).filter(Boolean);
 
-  // 2) ตรวจ case จากสถานะที่ “ไทม์ไลน์แสดงได้จริง”
- const whichCase = whichCaseArg || detectCaseFromThaiStatuses(translated.map(x => x.th));
+  // case ต้องอิงจากรายการที่ไทม์ไลน์แสดงได้จริง
+  const whichCase = detectCaseFromThaiStatuses(thAll);
 
-
-  // 3) ทำรายการที่มี pct + group (ตาม mapping เดียวกัน)
+  // map -> {th,pct,group,time} โดยใช้ mapping เดียวกับไทม์ไลน์
   const mapped = arr.map(e => {
     const th = toThaiStatus(pickStatusText(e));
     if (!th) return null;
@@ -458,15 +457,10 @@ function buildSummaryFromTimeline(events){
     const pct = getProgressPct(th, whichCase);
     if (pct == null) return null;
 
-    return {
-      th,
-      pct,
-      group: groupOf(th),
-      time: pickTimeText(e),
-    };
+    return { th, pct, group: groupOf(th), time: pickTimeText(e) };
   }).filter(Boolean);
 
-  // 4) Dedupe แบบเดียวกับ timeline (กันซ้ำสถานะเดิม)
+  // dedupe ตาม th
   const seen = new Set();
   const deduped = [];
   for (const x of mapped){
@@ -475,21 +469,22 @@ function buildSummaryFromTimeline(events){
     deduped.push(x);
   }
 
-  // 5) currentGroup = “กลุ่มแรกที่มีข้อมูล” ตามลำดับที่ไทม์ไลน์จัดกลุ่ม (บนลงล่าง)
+  // currentGroup = กลุ่ม “บนสุดที่มีข้อมูล” ตาม GROUP_ORDER (เหมือนไทม์ไลน์)
   const currentGroup =
     GROUP_ORDER.find(g => deduped.some(x => x.group === g)) ||
     (deduped[0]?.group || "คลังสินค้าต้นทาง");
 
-  // 6) progress = เอาค่า % ที่มากที่สุดจากสิ่งที่ไทม์ไลน์แสดง (สะท้อนความคืบหน้าจริง)
+  // progress = % สูงสุดที่ปรากฏในไทม์ไลน์ที่แสดง (สะท้อนความคืบหน้า)
   const maxPct = deduped.reduce((m, x) => Math.max(m, x.pct), -Infinity);
   const latestPct = Number.isFinite(maxPct) ? maxPct : null;
 
-  // 7) สถานะสรุป = เลือกสถานะที่ % มากที่สุด (ตรงกับความคืบหน้าที่โชว์)
+  // latestTh = สถานะที่มี % สูงสุด (ให้ตรงกับ progress)
   const best = deduped.slice().sort((a,b) => b.pct - a.pct)[0] || null;
   const latestTh = best ? best.th : null;
 
   return { whichCase, currentGroup, latestPct, latestTh };
 }
+
 
   // ==========================================
   // 2) Utilities
@@ -686,11 +681,11 @@ const curGroup = currentGroup || groupOf(latestTh);
 
 
   function renderGroupedTimeline(events, sm.whichCase);
+ function renderGroupedTimeline(events, whichCaseArg){
   const arr = Array.isArray(events) ? events : (events ? [events] : []);
 
   const translated = arr.map(e => {
-    const raw = pickStatusText(e);
-    const th = toThaiStatus(raw);
+    const th = toThaiStatus(pickStatusText(e));
     return { time: pickTimeText(e), th };
   }).filter(x => !!x.th);
 
@@ -699,10 +694,10 @@ const curGroup = currentGroup || groupOf(latestTh);
     return;
   }
 
-  // ตรวจจับกรณี (1/2) จากสถานะไทยที่มีจริง
-  const whichCase = detectCaseFromThaiStatuses(translated.map(x => x.th));
+  // ใช้ whichCase จาก summary ถ้ามี เพื่อให้ตรงกัน 100%
+  const whichCase = whichCaseArg || detectCaseFromThaiStatuses(translated.map(x => x.th));
 
-  // dedupe เหมือนเดิม
+  // dedupe + filter เฉพาะที่มี pct (อยู่ใน mapping)
   const seen = new Set();
   const deduped = [];
   for (const x of translated) {
@@ -710,14 +705,13 @@ const curGroup = currentGroup || groupOf(latestTh);
     seen.add(x.th);
 
     const pct = getProgressPct(x.th, whichCase);
-    // ถ้า status ไทยมี แต่ไม่เจอ % (ไม่อยู่ใน mapping) -> ไม่แสดง ตามกติกาคุณ
     if (pct == null) continue;
 
     deduped.push({ ...x, pct, group: groupOf(x.th) });
   }
 
   if (!deduped.length) {
-    if (history) history.style.display = "none";
+    history.style.display = "none";
     return;
   }
 
@@ -731,21 +725,16 @@ const curGroup = currentGroup || groupOf(latestTh);
     .filter(g => (buckets.get(g) || []).length > 0)
     .map(g => {
       const items = buckets.get(g) || [];
-      const total = GROUP_TOTAL[g];
-
       const itemsHtml = items.map(it => `
-  <div class="event">
-    <div class="time">${it.time || "-"}</div>
-    <div class="text">${it.th}</div>
-  </div>
-`).join("");
-
+        <div class="event">
+          <div class="time">${it.time || "-"}</div>
+          <div class="text">${it.th}</div>
+        </div>
+      `).join("");
 
       return `
         <div class="group">
-          <div class="groupTitle">
-            <div>${g}</div>
-          </div>
+          <div class="groupTitle"><div>${g}</div></div>
           <div class="timeline">${itemsHtml}</div>
         </div>
       `;
@@ -755,6 +744,7 @@ const curGroup = currentGroup || groupOf(latestTh);
   groupsEl.innerHTML = html;
   history.style.display = "block";
 }
+
 
   function setLoading(){
     summary.style.display = "block";
@@ -811,24 +801,6 @@ const sm = buildSummaryFromTimeline(events);
 
 renderSummary(data, sm.latestTh, sm.latestPct, sm.whichCase, sm.currentGroup);
 renderGroupedTimeline(events); // ไทม์ไลน์ยัง render เหมือนเดิม
-
-
-const rawLatest =
-  pickStatusText(data) ||
-  pickStatusText(lastEv) ||
-  pickStatusText(arrEv[0]) ||
-  "";
-     const latestTh = toThaiStatus(rawLatest);
-
-// หาเคสจาก events (แปลไทยที่ match)
-const arr = Array.isArray(events) ? events : (events ? [events] : []);
-const thList = arr.map(e => toThaiStatus(pickStatusText(e))).filter(Boolean);
-const whichCase = detectCaseFromThaiStatuses(thList);
-
-const latestPct = getProgressPct(latestTh, whichCase);
-
-renderSummary(data, latestTh, latestPct, whichCase);
-renderGroupedTimeline(events);
 
     }catch(e){
       setError(String(e));

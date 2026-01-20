@@ -1,323 +1,741 @@
 <!doctype html>
 <html lang="th">
 <head>
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>Weiming Tracking</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Weiming Tracking</title>
 
-<style>
-:root{
-  --brand:#2563eb;
-  --brand-soft:#e0edff;
-  --bg:#f5f8fc;
-  --card:#ffffff;
-  --text:#0f172a;
-  --muted:#64748b;
-  --border:#e5e7eb;
-  --ok:#0f766e;
-  --warn:#b45309;
-  --bad:#b91c1c;
-  --shadow:0 20px 40px rgba(15,95,191,.12);
-}
+  <style>
+    :root{
+      --bg:#f6f8fb;
+      --surface:#ffffff;
+      --surface-2:#f1f4f9;
+      --text:#0f172a;
+      --muted:#64748b;
+      --border:#e5e7eb;
+      --shadow: 0 10px 24px rgba(2, 6, 23, 0.08);
 
-*{box-sizing:border-box}
-body{
-  margin:0;
-  font-family:system-ui,-apple-system,"Segoe UI",Tahoma,sans-serif;
-  background:radial-gradient(900px 400px at 20% -10%,#e8f1ff,transparent 60%),var(--bg);
-  color:var(--text);
-}
+      --brand:#0f5fbf;
+      --brand-2:#0a3f7a;
 
-.wrap{max-width:1100px;margin:auto;padding:20px}
+      --ok:#0f766e;
+      --warn:#b45309;
+      --bad:#b91c1c;
 
-/* ===== Header ===== */
-.topbar{
-  background:linear-gradient(135deg,#eaf2ff,#f6f9ff);
-  border-radius:18px;
-  padding:16px 20px;
-  display:flex;
-  align-items:center;
-  gap:12px;
-  box-shadow:var(--shadow);
-}
-.logo{
-  width:42px;height:42px;border-radius:12px;
-  background:linear-gradient(135deg,#2563eb,#1e40af);
-  display:grid;place-items:center;color:#fff;font-weight:900;
-}
-.brand h1{margin:0;font-size:16px}
-.brand small{color:var(--muted)}
+      --badge-bg: rgba(15, 95, 191, 0.10);
+      --badge-text: #0f5fbf;
 
-/* ===== Layout ===== */
-.layout{
-  display:grid;
-  grid-template-columns:1.1fr .9fr;
-  gap:22px;
-  margin-top:18px;
-}
-@media(max-width:900px){
-  .layout{grid-template-columns:1fr}
-}
+      --ring: rgba(15,95,191,.25);
+    }
 
-/* ===== Cards ===== */
-.card{
-  background:var(--card);
-  border-radius:18px;
-  padding:18px;
-  box-shadow:var(--shadow);
-}
-.card h2{margin:0 0 6px;font-size:15px}
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      font-family: system-ui, -apple-system, "Segoe UI", Tahoma, sans-serif;
+      background: radial-gradient(1200px 600px at 20% -10%, rgba(15,95,191,.10), transparent 60%),
+                  radial-gradient(1000px 500px at 90% 0%, rgba(15,95,191,.08), transparent 55%),
+                  var(--bg);
+      color:var(--text);
+    }
 
-/* ===== Search ===== */
-.searchRow{
-  display:grid;
-  grid-template-columns:1fr 130px;
-  gap:10px;
-  margin-top:12px;
-}
-@media(max-width:500px){
-  .searchRow{grid-template-columns:1fr}
-}
-input{
-  padding:12px 14px;
-  border-radius:14px;
-  border:1px solid var(--border);
-  font-size:15px;
-}
-button{
-  border:none;
-  border-radius:14px;
-  background:linear-gradient(135deg,#2563eb,#1e40af);
-  color:#fff;
-  font-size:15px;
-  cursor:pointer;
-}
+    .wrap{max-width:980px;margin:0 auto;padding:20px 14px 28px}
 
-/* ===== Summary ===== */
-.summaryTop{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-}
-.badge{
-  padding:6px 12px;
-  border-radius:999px;
-  font-size:12px;
-  font-weight:800;
-}
-.badge.warn{background:#fff4e5;color:var(--warn)}
-.badge.ok{background:#e6fffa;color:var(--ok)}
-.badge.bad{background:#fee2e2;color:var(--bad)}
+    .topbar{
+      display:flex;align-items:center;justify-content:space-between;gap:12px;
+      padding: 14px 16px;
+      border:1px solid var(--border);
+      border-radius: 16px;
+      background: linear-gradient(135deg, rgba(15,95,191,.12), rgba(15,95,191,.04));
+      box-shadow: var(--shadow);
+    }
+    .brand{display:flex;align-items:center;gap:10px;min-width:0}
+    .logo{
+      width:40px;height:40px;border-radius:12px;
+      background: linear-gradient(135deg, var(--brand), var(--brand-2));
+      display:grid;place-items:center;
+      box-shadow: 0 10px 18px rgba(15,95,191,.25);
+      flex:0 0 auto;
+    }
+    .logo svg{width:22px;height:22px;fill:#fff}
+    .brand h1{margin:0;font-size:16px;letter-spacing:.2px;line-height:1.1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .brand .sub{font-size:12px;color:var(--muted);margin-top:2px}
 
-.summaryMain{
-  margin-top:10px;
-  font-size:20px;
-  font-weight:900;
-}
+    .grid{
+      display:grid;
+      grid-template-columns: 1.1fr .9fr;
+      gap: 14px;
+      margin-top: 14px;
+    }
+    @media(max-width: 860px){.grid{grid-template-columns:1fr}}
 
-/* ===== Progress ===== */
-.progress{
-  margin-top:14px;
-}
-.progressBar{
-  height:8px;
-  background:#e5e7eb;
-  border-radius:999px;
-  overflow:hidden;
-}
-.progressFill{
-  height:100%;
-  background:var(--brand);
-  width:0%;
-  transition:.4s;
-}
+    .card{
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      box-shadow: var(--shadow);
+      padding: 16px;
+      overflow:hidden;
+    }
+    .card h2{margin:0 0 8px 0;font-size:14px;letter-spacing:.2px}
+    .muted{color:var(--muted); font-size:13px}
+    .small{font-size:12px; color:var(--muted)}
 
-/* ===== Steps ===== */
-.steps{
-  display:flex;
-  gap:10px;
-  margin-top:14px;
-}
-.step{
-  flex:1;
-  padding:8px 12px;
-  border-radius:999px;
-  background:#f1f5f9;
-  font-size:12px;
-  font-weight:700;
-  display:flex;
-  justify-content:space-between;
-}
-.step.active{
-  background:var(--brand-soft);
-  color:#1d4ed8;
-}
+    .searchRow{
+      display:grid;
+      grid-template-columns: 1fr 132px;
+      gap: 10px;
+      margin-top: 10px;
+    }
+    @media(max-width:520px){.searchRow{grid-template-columns:1fr}}
 
-/* ===== Timeline ===== */
-.group{margin-bottom:16px}
-.groupTitle{
-  font-weight:900;
-  font-size:13px;
-  margin-bottom:6px;
-}
-.timeline{
-  position:relative;
-  padding-left:20px;
-}
-.timeline:before{
-  content:"";
-  position:absolute;
-  left:8px;
-  top:0;bottom:0;
-  width:2px;
-  background:#cbd5e1;
-}
-.event{
-  background:#f8fafc;
-  border-radius:14px;
-  padding:10px 12px;
-  margin-bottom:10px;
-}
-.event .time{font-size:12px;color:var(--muted)}
-.event .text{font-weight:700}
+    input{
+      width:100%;
+      padding: 12px 14px;
+      border-radius: 14px;
+      border: 1px solid var(--border);
+      background: var(--surface-2);
+      color: var(--text);
+      font-size: 15px;
+    }
+    input:focus{outline:3px solid var(--ring); border-color: transparent}
 
-/* ===== Footer ===== */
-.footer{
-  margin-top:18px;
-  text-align:center;
-  font-size:12px;
-  color:var(--muted);
-}
-</style>
+    .btn{
+      border:none;
+      border-radius: 14px;
+      padding: 12px 14px;
+      background: linear-gradient(135deg, var(--brand), var(--brand-2));
+      color:#fff;
+      font-size:15px;
+      cursor:pointer;
+      box-shadow: 0 12px 18px rgba(15,95,191,.22);
+      transition: transform .06s ease, filter .12s ease;
+    }
+    .btn:hover{filter:brightness(1.02)}
+    .btn:active{transform: translateY(1px)}
+    .btn:disabled{opacity:.6;cursor:not-allowed;box-shadow:none}
+
+    .summaryTop{
+      display:flex;
+      justify-content:space-between;
+      align-items:flex-start;
+      gap:10px;
+      margin-bottom: 10px;
+    }
+    .kv{display:grid;gap:6px}
+    .kv b{font-size:13px}
+    .kv .value{font-size:14px}
+
+    .badge{
+      display:inline-flex;align-items:center;gap:8px;
+      padding: 8px 10px;border-radius: 999px;
+      background: var(--badge-bg);
+      color: var(--badge-text);
+      border: 1px solid rgba(15,95,191,.18);
+      font-size: 12px;
+      font-weight: 700;
+      white-space:nowrap;
+    }
+    .dot{width:8px;height:8px;border-radius:999px;background: currentColor;opacity:.95}
+
+    .badge.ok{background: rgba(15,118,110,.12); color: var(--ok); border-color: rgba(15,118,110,.25)}
+    .badge.warn{background: rgba(180,83,9,.12); color: var(--warn); border-color: rgba(180,83,9,.25)}
+    .badge.bad{background: rgba(185,28,28,.12); color: var(--bad); border-color: rgba(185,28,28,.25)}
+
+    /* กลุ่มสถานะ */
+    .group{margin-top:12px}
+    .groupTitle{
+      display:flex;align-items:center;justify-content:space-between;gap:10px;
+      padding: 10px 12px;
+      border-radius: 14px;
+      border: 1px solid var(--border);
+      background: linear-gradient(180deg, rgba(15,95,191,.06), rgba(15,95,191,.02));
+      font-weight:800;
+      font-size:13px;
+    }
+
+    .timeline{
+      margin-top: 10px;
+      position:relative;
+      padding-left: 18px;
+    }
+    .timeline:before{
+      content:"";
+      position:absolute;
+      left:7px; top:2px; bottom:2px;
+      width:2px;
+      background: linear-gradient(to bottom, rgba(15,95,191,.35), rgba(15,95,191,.08));
+    }
+
+    .event{
+      position:relative;
+      padding: 10px 10px 10px 12px;
+      border-radius: 14px;
+      border: 1px solid var(--border);
+      background: var(--surface-2);
+      margin-bottom: 10px;
+    }
+    .event:before{
+      content:"";
+      position:absolute;
+      left:-18px;
+      top: 16px;
+      width: 12px;
+      height: 12px;
+      border-radius: 999px;
+      background: var(--surface);
+      border: 3px solid rgba(15,95,191,.55);
+      box-shadow: 0 0 0 3px rgba(15,95,191,.10);
+    }
+    .event .time{font-size:12px;color:var(--muted)}
+    .event .text{font-size:14px;font-weight:700;margin-top:4px;line-height:1.35}
+
+    .errorBox{
+      border: 1px solid rgba(185,28,28,.25);
+      background: rgba(185,28,28,.08);
+      color: var(--bad);
+      border-radius: 14px;
+      padding: 10px 12px;
+      font-size: 13px;
+    }
+
+    .loading{
+      display:flex;align-items:center;gap:10px;
+      font-size:13px;color:var(--muted);
+    }
+    .spinner{
+      width:16px;height:16px;border-radius:999px;
+      border:2px solid rgba(15,95,191,.25);
+      border-top-color: rgba(15,95,191,.85);
+      animation: spin 0.9s linear infinite;
+    }
+    @keyframes spin{to{transform:rotate(360deg)}}
+
+    .footer{
+      margin-top: 14px;
+      padding: 12px 6px 2px;
+      text-align:center;
+      color: var(--muted);
+      font-size: 12px;
+    }
+    .footer a{color: var(--muted); text-decoration:none}
+    .footer a:hover{text-decoration:underline}
+
+    /* ซ่อนกติกา และข้อความจัดกลุ่ม (ถาวร) */
+    #rule,
+    #groupHint { display: none !important; }
+
+    /* ===== Stepper (องค์กร/ทางการ + เส้นเชื่อม) ===== */
+    .stepper{margin-top:14px}
+    .steps{display:flex;gap:12px;align-items:stretch}
+    .step{
+      flex:1; position:relative;
+      padding:12px 12px;
+      border-radius:14px;
+      background: var(--surface-2);
+      border:1px solid var(--border);
+    }
+    .step:not(:last-child)::after{
+      content:"";
+      position:absolute;
+      top:19px;
+      right:-12px;
+      width:12px;
+      height:2px;
+      background: rgba(100,116,139,.22);
+    }
+    .stepTop{display:flex;align-items:center;gap:10px}
+    .stepDot{
+      width:12px;height:12px;border-radius:999px;
+      background: rgba(100,116,139,.22);
+      border:3px solid rgba(100,116,139,.16);
+      flex:0 0 auto;
+    }
+    .stepTitle{
+      font-size:12px;
+      font-weight:900;
+      color:var(--muted);
+      letter-spacing:.2px;
+      line-height:1.2;
+    }
+    .step.active{background: rgba(15,95,191,.06); border-color: rgba(15,95,191,.22)}
+    .step.active .stepDot{
+      background: var(--brand);
+      border-color: rgba(15,95,191,.22);
+      box-shadow: 0 0 0 3px rgba(15,95,191,.10);
+    }
+    .step.active .stepTitle{color: var(--text)}
+    .step.done{background: rgba(15,95,191,.04); border-color: rgba(15,95,191,.14)}
+    .step.done .stepDot{background: var(--brand); border-color: rgba(15,95,191,.18)}
+    .step.done .stepTitle{color: rgba(15,23,42,.90)}
+    .step.done:not(:last-child)::after{background: rgba(15,95,191,.40)}
+    @media(max-width:520px){
+      .steps{flex-direction:column;gap:10px}
+      .step:not(:last-child)::after{
+        top:auto; bottom:-10px; left:18px; right:auto;
+        width:2px; height:10px;
+      }
+    }
+  </style>
 </head>
 
 <body>
-<div class="wrap">
-
-  <!-- Header -->
-  <div class="topbar">
-    <div class="logo">W</div>
-    <div class="brand">
-      <h1>Weiming Tracking</h1>
-      <small>ระบบตรวจสอบสถานะพัสดุ</small>
-    </div>
-  </div>
-
-  <div class="layout">
-
-    <!-- LEFT -->
-    <div>
-      <div class="card">
-        <h2>ค้นหาเลขพัสดุ</h2>
-        <small style="color:#64748b">กรอกเลขพัสดุ แล้วกด “ค้นหา”</small>
-
-        <div class="searchRow">
-          <input id="no" placeholder="เลขพัสดุ"/>
-          <button id="btn">ค้นหา</button>
+  <div class="wrap" id="app">
+    <div class="topbar">
+      <div class="brand">
+        <div class="logo" aria-hidden="true" title="Weiming">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M20 8h-3V4H3v13h2.1a2.9 2.9 0 0 0 5.8 0h4.2a2.9 2.9 0 0 0 5.8 0H23v-5l-3-4zM6.5 19a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zm10 0a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zM17 12V9h2l2 3h-4z"/>
+          </svg>
+        </div>
+        <div style="min-width:0">
+          <h1>Weiming Tracking</h1>
+          <div class="sub">ระบบตรวจสอบสถานะพัสดุ</div>
         </div>
       </div>
-
-      <!-- Summary -->
-      <div class="card" id="summary" style="display:none;margin-top:14px"></div>
     </div>
 
-    <!-- RIGHT -->
-    <div>
-      <div class="card" id="history" style="display:none">
-        <h2>ไทม์ไลน์สถานะ</h2>
-        <div id="groups"></div>
-      </div>
-    </div>
+    <div class="grid">
+      <!-- ซ้าย: ค้นหา + สรุป -->
+      <div>
+        <div class="card">
+          <h2>ค้นหาเลขพัสดุ</h2>
+          <div class="muted">กรอกเลขพัสดุ แล้วกด “ค้นหา”</div>
 
-  </div>
-
-  <div class="footer">
-    © 2026 Weiming Tracking | ติดต่อผ่าน LINE
-  </div>
-</div>
-
-<script>
-const $=id=>document.getElementById(id);
-const btn=$("btn"),noEl=$("no"),summary=$("summary"),groupsEl=$("groups"),history=$("history");
-
-/* ===== Mapping ===== */
-const STATUS_MAP=[
- {zh:"順利送達",th:"พัสดุถึงผู้รับเรียบร้อยแล้ว",step:3},
- {zh:"配送中",th:"อยู่ระหว่างจัดส่ง",step:3},
- {zh:"出倉處理",th:"กำลังดำเนินการนำสินค้าออกจากคลัง",step:2},
- {zh:"連線收單建檔",th:"ระบบศุลกากรรับและบันทึกข้อมูลแล้ว",step:2},
- {zh:"已經打印好地址面單",th:"พิมพ์ใบปะหน้าที่อยู่เรียบร้อย",step:1},
- {zh:"您已下單成功",th:"สร้างออเดอร์เรียบร้อย",step:1},
-];
-
-const match=raw=>STATUS_MAP.find(x=>raw?.includes(x.zh))||null;
-
-/* ===== Render Summary ===== */
-function renderSummary(data,latest){
-  summary.style.display="block";
-  const percent=[0,30,70,100][latest.step];
-  summary.innerHTML=`
-    <div class="summaryTop">
-      <div style="font-size:13px;color:#64748b">
-        อัปเดตล่าสุด ${data.last_update||"-"}
-      </div>
-      <span class="badge warn">กำลังขนส่ง</span>
-    </div>
-
-    <div class="summaryMain">${latest.th}</div>
-
-    <div class="progress">
-      <div class="progressBar">
-        <div class="progressFill" style="width:${percent}%"></div>
-      </div>
-    </div>
-
-    <div class="steps">
-      <div class="step ${latest.step>=1?"active":""}">คลังสินค้า(ต้นทาง)<b>30%</b></div>
-      <div class="step ${latest.step>=2?"active":""}">ศุลกากร(ปลายทาง)<b>70%</b></div>
-      <div class="step ${latest.step>=3?"active":""}">ขนส่ง(ปลายทาง)<b>100%</b></div>
-    </div>
-  `;
-}
-
-/* ===== Render Timeline ===== */
-function renderTimeline(events){
-  groupsEl.innerHTML=`
-    <div class="group">
-      <div class="groupTitle">สถานะพัสดุ</div>
-      <div class="timeline">
-        ${events.map(e=>`
-          <div class="event">
-            <div class="time">${e.time||"-"}</div>
-            <div class="text">${match(e.status)?.th||e.status}</div>
+          <div class="searchRow">
+            <input id="no" placeholder="เลขพัสดุ" inputmode="numeric" autocomplete="off" />
+            <button class="btn" id="btn">ค้นหา</button>
           </div>
-        `).join("")}
+
+          <div id="hint" class="small" style="margin-top:10px;">
+            หมายเหตุ: หากต้องเชื่อม API จริง ให้แก้ค่า <b>API_URL</b> ในสคริปต์ด้านล่าง
+          </div>
+        </div>
+
+        <div class="card" id="summary" style="display:none; margin-top:14px;"></div>
+      </div>
+
+      <!-- ขวา: ไทม์ไลน์ -->
+      <div>
+        <div class="card" id="history" style="display:none;">
+          <h2>ไทม์ไลน์สถานะ</h2>
+          <div id="groups"></div>
+        </div>
       </div>
     </div>
-  `;
-  history.style.display="block";
-}
 
-/* ===== Run ===== */
-async function run(){
-  const no=noEl.value.trim();
-  if(!no){alert("กรุณากรอกเลขพัสดุ");return}
+    <div class="footer">
+      © <span id="year"></span> Weiming Tracking. All rights reserved.
+      <span class="muted"> | </span>
+      <a href="https://line.me/R/ti/p/@wmex" target="_blank" rel="noopener noreferrer">ติดต่อผ่าน LINE</a>
+    </div>
+  </div>
 
-  summary.style.display="block";
-  summary.innerHTML="กำลังค้นหา...";
-  history.style.display="none";
+  <script>
+    "use strict";
 
-  const r=await fetch(`/api/track?no=${encodeURIComponent(no)}`);
-  const data=await r.json();
-  const events=data.events||[];
-  const latest=match(events[0]?.status||"");
+    // ------------------------------------------------------------
+    // DOM refs
+    // ------------------------------------------------------------
+    const $ = (id) => document.getElementById(id);
+    const summary = $("summary");
+    const history = $("history");
+    const groupsEl = $("groups");
+    const btn = $("btn");
+    const noEl = $("no");
 
-  renderSummary(data,latest);
-  renderTimeline(events);
-}
+    const yearEl = $("year");
+    if (yearEl) yearEl.textContent = String(new Date().getFullYear());
 
-btn.onclick=run;
-noEl.onkeydown=e=>e.key==="Enter"&&run();
-</script>
+    // ------------------------------------------------------------
+    // 0) Config
+    // ------------------------------------------------------------
+    // ใส่ endpoint ของคุณตรงนี้ เช่น:
+    // const API_URL = "https://example.com/api/track?no=";
+    const API_URL = "";
+
+    // ถ้ายังไม่มี API ให้ทดสอบหน้าบ้านก่อน ใช้ mock ได้
+    const USE_MOCK = (API_URL.trim() === "");
+
+    // ------------------------------------------------------------
+    // 1) Mapping จีน -> ไทย + กลุ่มตามประเทศ (TW/HK)
+    // ------------------------------------------------------------
+    const STATUS_MAP = [
+      // ===== TW: ขนส่ง(ปลายทาง) =====
+      { zh: "順利送達", th: "พัสดุถึงผู้รับเรียบร้อยแล้ว", group_tw: "ขนส่ง(ปลายทาง)" },
+      { zh: "配送中", th: "อยู่ระหว่างจัดส่ง", group_tw: "ขนส่ง(ปลายทาง)" },
+      { zh: "已集貨", th: "พัสดุอยู่ศูนย์คัดแยกพัสดุ", group_tw: "ขนส่ง(ปลายทาง)" },
+
+      // ===== TW: ศุลกากร(ปลายทาง) =====
+      { zh: "出倉處理", th: "กำลังดำเนินการนำสินค้าออกจากคลัง", group_tw: "ศุลกากร(ปลายทาง)" },
+      { zh: "連線收單建檔", th: "ระบบศุลกากรรับและบันทึกข้อมูลเรียบร้อยแล้ว", group_tw: "ศุลกากร(ปลายทาง)" },
+      { zh: "由於海關系統查無此包裹申報人資料", th: "เนื่องจากระบบศุลกากรไม่พบข้อมูลผู้เดินพิธีการ โปรดตรวจสอบว่าผู้รับพัสดุได้ลงทะเบียนกับ EZ WAY แล้วหรือไม่ หากยังไม่ได้ลงทะเบียนโปรดลงทะเบียนให้เรียบร้อย ถ่ายภาพหน้าจอให้ติดชื่อ/หมายเลขโทรศัพท์และหมายเลขบัตรประชาชนของผู้เดินพิธีการ แล้วส่งให้เจ้าหน้าที่ลูกค้าสัมพันธ์ของ Weiming หลังจากได้รับข้อมูลแล้ว พัสดุจะได้รับการปล่อยภายในประมาณ 1-2 วันทำการ", group_tw: "ศุลกากร(ปลายทาง)" },
+      { zh: "不受理不可補正之錯單", th: "ข้อมูลที่ใช้เดินพิธีการไม่สอดคล้องกัน โปรดติดต่อเจ้าหน้าที่", group_tw: "ศุลกากร(ปลายทาง)" },
+
+      // ===== HK: ขนส่ง(ปลายทาง) =====
+      { zh: "您的快件已派送成功", th: "พัสดุถึงผู้รับเรียบร้อยแล้ว", group_hk: "ขนส่ง(ปลายทาง)" },
+      { zh: "快件派送不成功", th: "จัดส่งไม่สำเร็จ ติดต่อผู้รับไม่ได้ กำลังดำเนินการส่งใหม่", group_hk: "ขนส่ง(ปลายทาง)" },
+      { zh: "快件交给", th: "อยู่ระหว่างจัดส่ง", group_hk: "ขนส่ง(ปลายทาง)" },
+      { zh: "快件到达", th: "พัสดุถึงศูนย์คัดแยกพัสดุ", group_hk: "ขนส่ง(ปลายทาง)" },
+
+      // ===== TW/HK: คลังสินค้า(ต้นทาง) =====
+      { zh: "您的貨物已準備從集運倉出倉", th: "พัสดุของคุณออกคลัง เพื่อเตรียมส่งไปยังสนามบินแล้ว", group_tw: "คลังสินค้า(ต้นทาง)", group_hk: "คลังสินค้า(ต้นทาง)" },
+      { zh: "已經打印好地址面單", th: "พิมพ์ใบปะหน้าที่อยู่เรียบร้อยแล้ว", group_tw: "คลังสินค้า(ต้นทาง)", group_hk: "คลังสินค้า(ต้นทาง)" },
+      { zh: "已經打印好地址面單!", th: "พิมพ์ใบปะหน้าที่อยู่เรียบร้อยแล้ว", group_tw: "คลังสินค้า(ต้นทาง)", group_hk: "คลังสินค้า(ต้นทาง)" },
+
+      // สร้างออเดอร์ (HK ตามตาราง + กันหลุดหลายเวอร์ชัน)
+      { zh: "您已下單成功!請等待倉库人員作業出貸", th: "สร้างออเดอร์การจัดส่งเรียบร้อย", group_hk: "คลังสินค้า(ต้นทาง)" },
+      { zh: "您已下單成功!請等待倉庫人員作業出貨", th: "สร้างออเดอร์การจัดส่งเรียบร้อย", group_hk: "คลังสินค้า(ต้นทาง)" },
+
+      // เผื่อ TW/ระบบเดิมส่งสั้น
+      { zh: "您已下單成功", th: "สร้างออเดอร์การจัดส่งเรียบร้อย", group_tw: "คลังสินค้า(ต้นทาง)" },
+    ];
+
+    const GROUPS_BY_LANE = {
+      TW: ["ขนส่ง(ปลายทาง)", "ศุลกากร(ปลายทาง)", "คลังสินค้า(ต้นทาง)"],
+      HK: ["ขนส่ง(ปลายทาง)", "คลังสินค้า(ต้นทาง)"],
+      DEFAULT: ["ขนส่ง(ปลายทาง)", "ศุลกากร(ปลายทาง)", "คลังสินค้า(ต้นทาง)"],
+    };
+
+    // ------------------------------------------------------------
+    // 2) Utilities
+    // ------------------------------------------------------------
+    function normalizeText(s) {
+      return (s || "")
+        .replace(/[“”]/g, '"')
+        .replace(/\s+/g, " ")
+        .trim();
+    }
+
+    function hasChinese(s) {
+      return /[\u4e00-\u9fff]/.test(s || "");
+    }
+
+    // ดึงจีนจากข้อความผสม รองรับ () และ （）
+    function extractZh(mixed) {
+      const s = normalizeText(mixed);
+      const m = s.match(/[（(]([^）)]+)[）)]/);
+      if (m && m[1]) return normalizeText(m[1]);
+      return s;
+    }
+
+    function escapeHtml(s) {
+      return String(s || "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+
+    function fmtTime(s) {
+      // แสดงตามเดิมก่อน (เพราะรูปแบบเวลาจาก API แต่ละเจ้าไม่เหมือนกัน)
+      return normalizeText(s);
+    }
+
+    function byTimeDesc(a, b) {
+      // ถ้าเวลามาเป็น ISO จะเรียงได้ด้วย Date
+      const ta = Date.parse(a.time || a.datetime || a.date || "");
+      const tb = Date.parse(b.time || b.datetime || b.date || "");
+      if (!Number.isNaN(ta) && !Number.isNaN(tb)) return tb - ta;
+      // fallback: ไม่เรียง
+      return 0;
+    }
+
+    // ------------------------------------------------------------
+    // 3) Mapping / Grouping helpers
+    // ------------------------------------------------------------
+    function findMapByZh(zh) {
+      const z = normalizeText(zh);
+      // ให้รองรับ prefix match (เช่น "快件交给xxx")
+      return STATUS_MAP.find(x => z === x.zh || z.startsWith(x.zh)) || null;
+    }
+
+    function inferLaneFromEvents(events) {
+      // กติกาเบื้องต้น: ถ้าพบคำ/แพทเทิร์น HK เด่น ๆ ให้ HK
+      const joined = normalizeText((events || []).map(e => e.raw || e.text || e.status || "").join(" "));
+      if (/快件|派送|到达/.test(joined)) return "HK";
+      // ถ้าเจอคำ TW เด่น ๆ
+      if (/連線收單建檔|出倉處理|配送中|順利送達/.test(joined)) return "TW";
+      return "DEFAULT";
+    }
+
+    function groupNameForLane(mapItem, lane) {
+      if (!mapItem) return "ขนส่ง(ปลายทาง)";
+      if (lane === "HK" && mapItem.group_hk) return mapItem.group_hk;
+      if (lane === "TW" && mapItem.group_tw) return mapItem.group_tw;
+      return mapItem.group_tw || mapItem.group_hk || "ขนส่ง(ปลายทาง)";
+    }
+
+    function statusToBadgeKind(thText) {
+      const t = normalizeText(thText);
+
+      if (!t) return "warn";
+      if (/(ถึงผู้รับเรียบร้อยแล้ว|ส่งสำเร็จ|สำเร็จ)/.test(t)) return "ok";
+      if (/(ไม่สำเร็จ|ไม่พบ|ไม่สอดคล้อง|โปรดติดต่อ|ผิด|ล้มเหลว|ยกเลิก)/.test(t)) return "bad";
+      return "warn";
+    }
+
+    function computeStepIndex(lane, groupsPresent) {
+      // สร้าง stepper ตาม lane: ปกติ 3 ขั้น (คลัง -> ศุลกากร -> ขนส่ง) หรือ HK 2 ขั้น (คลัง -> ขนส่ง)
+      const steps = (lane === "HK")
+        ? ["คลังสินค้า(ต้นทาง)", "ขนส่ง(ปลายทาง)"]
+        : ["คลังสินค้า(ต้นทาง)", "ศุลกากร(ปลายทาง)", "ขนส่ง(ปลายทาง)"];
+
+      // ถ้ากลุ่มใดมี event ถือว่า step นั้น "done" / ล่าสุดที่มี event เป็น "active"
+      let lastIdx = -1;
+      for (let i = 0; i < steps.length; i++) {
+        if (groupsPresent.has(steps[i])) lastIdx = i;
+      }
+      return { steps, activeIdx: Math.max(lastIdx, 0) };
+    }
+
+    // ------------------------------------------------------------
+    // 4) Render
+    // ------------------------------------------------------------
+    function setLoading(isLoading) {
+      btn.disabled = isLoading;
+      if (isLoading) btn.textContent = "กำลังค้นหา...";
+      else btn.textContent = "ค้นหา";
+    }
+
+    function showError(msg) {
+      summary.style.display = "block";
+      history.style.display = "none";
+      summary.innerHTML = `
+        <div class="errorBox">${escapeHtml(msg || "เกิดข้อผิดพลาด")}</div>
+      `;
+    }
+
+    function renderSummary(no, lane, currentTh, currentRaw, stepperModel) {
+      const badgeKind = statusToBadgeKind(currentTh);
+      const badgeLabel = currentTh || "ไม่พบสถานะ";
+
+      const stepHtml = `
+        <div class="stepper">
+          <div class="steps">
+            ${stepperModel.steps.map((title, idx) => {
+              const cls = (idx < stepperModel.activeIdx) ? "step done"
+                        : (idx === stepperModel.activeIdx) ? "step active"
+                        : "step";
+              return `
+                <div class="${cls}">
+                  <div class="stepTop">
+                    <div class="stepDot" aria-hidden="true"></div>
+                    <div class="stepTitle">${escapeHtml(title)}</div>
+                  </div>
+                </div>
+              `;
+            }).join("")}
+          </div>
+        </div>
+      `;
+
+      summary.innerHTML = `
+        <div class="summaryTop">
+          <div class="kv">
+            <b>เลขพัสดุ</b>
+            <div class="value">${escapeHtml(no)}</div>
+            <div class="small">เส้นทาง: ${escapeHtml(lane)}</div>
+          </div>
+          <div class="badge ${badgeKind}">
+            <span class="dot" aria-hidden="true"></span>
+            <span>${escapeHtml(badgeLabel)}</span>
+          </div>
+        </div>
+
+        <div class="small" style="margin-top:6px;">
+          ข้อความต้นฉบับ: ${escapeHtml(currentRaw || "-")}
+        </div>
+
+        ${stepHtml}
+      `;
+
+      summary.style.display = "block";
+    }
+
+    function renderGroups(lane, grouped, order) {
+      const html = order.map(groupName => {
+        const events = grouped.get(groupName) || [];
+        if (!events.length) return ""; // ไม่โชว์กลุ่มว่าง
+        return `
+          <div class="group">
+            <div class="groupTitle">
+              <span>${escapeHtml(groupName)}</span>
+              <span class="small">${events.length} รายการ</span>
+            </div>
+            <div class="timeline">
+              ${events.map(ev => `
+                <div class="event">
+                  <div class="time">${escapeHtml(fmtTime(ev.time || ""))}</div>
+                  <div class="text">${escapeHtml(ev.th || ev.raw || "")}</div>
+                </div>
+              `).join("")}
+            </div>
+          </div>
+        `;
+      }).join("");
+
+      groupsEl.innerHTML = html || `<div class="muted">ไม่พบไทม์ไลน์</div>`;
+      history.style.display = "block";
+    }
+
+    // ------------------------------------------------------------
+    // 5) Data normalization (รองรับหลายรูปแบบ response)
+    // ------------------------------------------------------------
+    function normalizeEventsFromAnyResponse(data) {
+      // พยายามรองรับ API หลายแบบ:
+      // - { events: [{ time, status }] }
+      // - { data: { events: [...] } }
+      // - { result: [...] } เป็นต้น
+      const candidates = [
+        data?.events,
+        data?.data?.events,
+        data?.data?.timeline,
+        data?.timeline,
+        data?.result,
+        data?.data?.result,
+        data?.data,
+      ];
+
+      let arr = null;
+      for (const c of candidates) {
+        if (Array.isArray(c)) { arr = c; break; }
+      }
+      if (!arr) return [];
+
+      // แปลงให้เป็นโครงเดียว: { time, raw }
+      return arr.map(x => {
+        const time = x.time || x.datetime || x.date || x.updateTime || x.updated_at || "";
+        const raw  = x.raw || x.text || x.status || x.statusText || x.message || x.desc || "";
+        return { time, raw };
+      });
+    }
+
+    // ------------------------------------------------------------
+    // 6) Main flow
+    // ------------------------------------------------------------
+    async function fetchTracking(no) {
+      if (USE_MOCK) {
+        // mock เพื่อให้หน้ารันได้ทันที
+        return {
+          events: [
+            { time: "2026-01-20 10:15", raw: "順利送達" },
+            { time: "2026-01-20 08:40", raw: "配送中" },
+            { time: "2026-01-19 18:10", raw: "連線收單建檔" },
+            { time: "2026-01-19 09:05", raw: "您的貨物已準備從集運倉出倉" },
+            { time: "2026-01-18 21:30", raw: "已經打印好地址面單" },
+          ]
+        };
+      }
+
+      const url = API_URL + encodeURIComponent(no);
+      const res = await fetch(url, { method: "GET" });
+      if (!res.ok) throw new Error("เรียกข้อมูลไม่สำเร็จ (HTTP " + res.status + ")");
+      return await res.json();
+    }
+
+    function buildViewModel(no, data) {
+      const baseEvents = normalizeEventsFromAnyResponse(data);
+      if (!baseEvents.length) return { ok: false, error: "ไม่พบข้อมูลไทม์ไลน์สำหรับเลขพัสดุนี้" };
+
+      // แปลง event -> map ไทย + group
+      const events = baseEvents.map(e => {
+        const raw = normalizeText(e.raw);
+        const zh = hasChinese(raw) ? extractZh(raw) : raw;
+        const mapItem = hasChinese(zh) ? findMapByZh(zh) : null;
+
+        // ถ้า map ไม่เจอ แต่ข้อความเป็นจีน ให้แสดง zh เดิม
+        const th = mapItem ? mapItem.th : (raw || zh);
+
+        return {
+          time: e.time,
+          raw,
+          zh,
+          th,
+          mapItem,
+        };
+      });
+
+      // เรียงล่าสุดขึ้นก่อน (ถ้าเวลา parse ได้)
+      const sorted = [...events].sort(byTimeDesc);
+
+      const lane = inferLaneFromEvents(sorted);
+
+      // group
+      const grouped = new Map();
+      const groupsPresent = new Set();
+
+      for (const ev of sorted) {
+        const group = groupNameForLane(ev.mapItem, lane);
+        if (!grouped.has(group)) grouped.set(group, []);
+        grouped.get(group).push(ev);
+        groupsPresent.add(group);
+      }
+
+      // order
+      const order = GROUPS_BY_LANE[lane] || GROUPS_BY_LANE.DEFAULT;
+
+      // current status (ใช้รายการแรกหลังเรียง desc)
+      const current = sorted[0];
+      const currentTh = current?.th || "";
+      const currentRaw = current?.raw || "";
+
+      const stepperModel = computeStepIndex(lane, groupsPresent);
+
+      return {
+        ok: true,
+        no,
+        lane,
+        currentTh,
+        currentRaw,
+        grouped,
+        order,
+        stepperModel,
+      };
+    }
+
+    async function onSearch() {
+      const no = normalizeText(noEl.value);
+      if (!no) {
+        showError("กรุณากรอกเลขพัสดุ");
+        return;
+      }
+
+      summary.style.display = "none";
+      history.style.display = "none";
+      groupsEl.innerHTML = "";
+      setLoading(true);
+
+      try {
+        // loading hint
+        summary.style.display = "block";
+        summary.innerHTML = `<div class="loading"><div class="spinner" aria-hidden="true"></div><div>กำลังดึงข้อมูล...</div></div>`;
+
+        const data = await fetchTracking(no);
+        const vm = buildViewModel(no, data);
+
+        if (!vm.ok) {
+          showError(vm.error || "ไม่สามารถสร้างผลลัพธ์ได้");
+          return;
+        }
+
+        renderSummary(vm.no, vm.lane, vm.currentTh, vm.currentRaw, vm.stepperModel);
+        renderGroups(vm.lane, vm.grouped, vm.order);
+      } catch (err) {
+        showError(err?.message || "เกิดข้อผิดพลาด");
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    // ------------------------------------------------------------
+    // Events
+    // ------------------------------------------------------------
+    btn.addEventListener("click", onSearch);
+    noEl.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") onSearch();
+    });
+  </script>
 </body>
 </html>

@@ -550,7 +550,8 @@ function stepState(latestPct, currentGroup){
   // ==========================================
   // 5) Render
   // ==========================================
- function renderSummary(data, latestTh, latestPct, whichCase){
+renderSummary(data, latestTh, latestPct, whichCase);
+function renderSummary(data, latestTh, latestPct, whichCase){
   if (!latestTh) {
     summary.style.display = "none";
     summary.innerHTML = "";
@@ -561,23 +562,34 @@ function stepState(latestPct, currentGroup){
   const badge = badgeOf(latestTh);
 
   const currentGroup = groupOf(latestTh);
-  const steps = stepState(latestPct, currentGroup);
+  const steps = [
+    { key: "คลังสินค้าต้นทาง", max: 30 },
+    { key: "ศุลกากรประเทศปลายทาง", max: 70 },
+    { key: "ขนส่งปลายทาง", max: 100 },
+  ];
 
-  const stepsHtml = steps.map((s, idx) => `
-    <div class="stepItem ${s.active ? "active" : ""} ${s.done ? "done" : ""}">
-      <div class="stepLeft">
-        <div class="stepNum">${idx + 1}</div>
-        <div class="stepLabel">${s.key}</div>
+  const pctSafe =
+    (typeof latestPct === "number" && latestPct >= 0 && latestPct <= 100)
+      ? latestPct
+      : null;
+
+  const stepsHtml = steps.map((s) => {
+    const isDone = typeof pctSafe === "number" ? pctSafe >= s.max : false;
+    const isActive = s.key === currentGroup;
+
+    return `
+      <div class="step ${isDone ? "done" : ""} ${isActive ? "active" : ""}">
+        <div class="stepTop">
+          <span class="stepDot" aria-hidden="true"></span>
+          <div class="stepTitle">${s.key} (${s.max}%)</div>
+        </div>
       </div>
-      <div class="stepPct">${s.max}%</div>
-    </div>
-  `).join("");
-
-  const pctSafe = (typeof latestPct === "number" && latestPct >= 0 && latestPct <= 100) ? latestPct : null;
+    `;
+  }).join("");
 
   const helpHtml = (whichCase === "case2")
-    ? `<div class="helpNote">
-         พบสถานะที่ต้องตรวจสอบข้อมูลศุลกากร/ผู้เดินพิธีการ (EZ WAY) แนะนำให้ตรวจสอบการลงทะเบียน และหากต้องการความช่วยเหลือให้ติดต่อเจ้าหน้าที่ผ่าน
+    ? `<div class="helpNote" style="margin-top:12px">
+         พบสถานะที่ต้องตรวจสอบข้อมูลศุลกากร/ผู้เดินพิธีการ (EZ WAY) แนะนำให้ตรวจสอบการลงทะเบียน และติดต่อเจ้าหน้าที่ผ่าน
          <a href="https://line.me/R/ti/p/@wmex" target="_blank" rel="noopener noreferrer">LINE</a>
        </div>`
     : "";
@@ -598,23 +610,26 @@ function stepState(latestPct, currentGroup){
       ${latestTh}
     </div>
 
-    <div class="pbar">
-      <div class="pbarTop">
-        <div class="pbarLabel">ความคืบหน้าโดยรวม</div>
-        <div class="pbarVal">${pctSafe == null ? "-" : pctSafe + "%"}</div>
+    <div class="progressWrap">
+      <div class="progressHead">
+        <b>ความคืบหน้าโดยรวม</b>
+        <div>${pctSafe == null ? "-" : pctSafe + "%"}</div>
       </div>
-      <div class="pbarTrack">
-        <div class="pbarFill" style="width:${pctSafe == null ? 0 : pctSafe}%;"></div>
+      <div class="progressBar">
+        <div class="progressFill" style="width:${pctSafe == null ? 0 : pctSafe}%;"></div>
       </div>
     </div>
 
-    <div class="stepList">
-      ${stepsHtml}
+    <div class="stepper">
+      <div class="steps">
+        ${stepsHtml}
+      </div>
     </div>
 
     ${helpHtml}
   `;
 }
+
 
 
 

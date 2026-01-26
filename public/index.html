@@ -562,20 +562,7 @@ function stepState(latestPct, currentGroup){
   const GROUP_ORDER_HK = ["ขนส่งปลายทาง", "คลังสินค้าต้นทาง"];
 
 
-  function groupOf(th, provider = "tw"){
-  if (!th) return "คลังสินค้าต้นทาง";
-
-  // กลุ่มขนส่งปลายทาง
-  if (
-    th.includes("พัสดุถึงผู้รับเรียบร้อยแล้ว") ||
-    th.includes("อยู่ระหว่างจัดส่ง") ||
-    th.includes("พัสดุอยู่ศูนย์คัดแยกพัสดุ")
-  ) {
-    return "ขนส่งปลายทาง";
-  }
-
-  // กลุ่มศุลกากร (ใช้เฉพาะ tw)
-  function groupOf(th, provider = "tw"){
+function groupOf(th, provider = "tw"){
   if (!th) return "คลังสินค้าต้นทาง";
 
   // ขนส่งปลายทาง
@@ -611,6 +598,9 @@ function stepState(latestPct, currentGroup){
   return "คลังสินค้าต้นทาง";
 }
 
+  return "คลังสินค้าต้นทาง";
+}
+
 
   function badgeOf(th){
     if (!th) return { cls:"warn", label:"กำลังดำเนินการ" };
@@ -635,7 +625,8 @@ function renderSummary(data, latestTh, latestPct, whichCase, currentGroup){
   summary.style.display = "block";
   const badge = badgeOf(latestTh);
 
-const curGroup = currentGroup || groupOf(latestTh);
+const curGroup = currentGroup || groupOf(latestTh, "tw"); // หรือส่ง provider เข้า renderSummary ก็ได้
+
   const steps = [
     { key: "คลังสินค้าต้นทาง", max: 30 },
     { key: "ศุลกากรประเทศปลายทาง", max: 70 },

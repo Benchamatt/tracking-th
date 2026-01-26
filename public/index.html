@@ -635,13 +635,19 @@ function renderSummary(data, latestTh, latestPct, whichCase, currentGroup, provi
   summary.style.display = "block";
   const badge = badgeOf(latestTh);
 
-const curGroup = currentGroup || groupOf(latestTh, "tw");
+const curGroup = currentGroup || groupOf(latestTh, provider);
 
-  const steps = [
-    { key: "คลังสินค้าต้นทาง", max: 30 },
-    { key: "ศุลกากรประเทศปลายทาง", max: 70 },
-    { key: "ขนส่งปลายทาง", max: 100 },
-  ];
+   const steps = provider === "hk"
+  ? [
+      { key: "คลังสินค้าต้นทาง", max: 50 },
+      { key: "ขนส่งปลายทาง", max: 100 },
+    ]
+  : [
+      { key: "คลังสินค้าต้นทาง", max: 30 },
+      { key: "ศุลกากรประเทศปลายทาง", max: 70 },
+      { key: "ขนส่งปลายทาง", max: 100 },
+    ];
+
 
   const pctSafe =
     (typeof latestPct === "number" && latestPct >= 0 && latestPct <= 100)

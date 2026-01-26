@@ -379,184 +379,92 @@
     { zh: "已經打印好地址面單", th: "พิมพ์ใบปะหน้าที่อยู่เรียบร้อยแล้ว" },
     { zh: "您已下單成功", th: "สร้างออเดอร์การจัดส่งเรียบร้อย" },
   ];
-// ==========================================
-// 1.1) Progress % (Case 1 / Case 2)
-// ==========================================
-const GROUP_TOTAL = {
-  "คลังสินค้าต้นทาง": 30,
-  "ศุลกากรประเทศปลายทาง": 70,
-  "ขนส่งปลายทาง": 100
-};
+// ==============================
+// 1) Mapping จีน -> ไทย (TW + HK)
+// ==============================
+const STATUS_MAP = [
+  // ===== TW (เดิม) =====
+  { zh: "順利送達", th: "พัสดุถึงผู้รับเรียบร้อยแล้ว" },
+  { zh: "配送中", th: "อยู่ระหว่างจัดส่ง" },
+  { zh: "已集貨", th: "พัสดุอยู่ศูนย์คัดแยกพัสดุ" },
 
-// ใช้ "contains" เพื่อกันปัญหาข้อความยาว/มีรายละเอียดต่อท้าย
+  { zh: "出倉處理", th: "กำลังดำเนินการนำสินค้าออกจากคลัง" },
+  { zh: "連線收單建檔", th: "ระบบศุลกากรรับและบันทึกข้อมูลเรียบร้อยแล้ว" },
+  { zh: "由於海關系統查無此包裹申報人資料", th: "เนื่องจากระบบศุลกากรไม่พบข้อมูลผู้เดินพิธีการ โปรดตรวจสอบ EZ WAY" },
+  { zh: "不受理不可補正之錯單", th: "ข้อมูลที่ใช้เดินพิธีการไม่สอดคล้องกัน โปรดติดต่อเจ้าหน้าที่" },
+
+  { zh: "您的貨物已準備從集運倉出倉", th: "พัสดุของคุณออกคลัง เพื่อเตรียมส่งไปยังสนามบินแล้ว" },
+  { zh: "已經打印好地址面單", th: "พิมพ์ใบปะหน้าที่อยู่เรียบร้อยแล้ว" },
+  { zh: "您已下單成功", th: "สร้างออเดอร์การจัดส่งเรียบร้อย" },
+
+  // ===== HK / SF Express =====
+  { zh: "派送中", th: "อยู่ระหว่างจัดส่ง" },
+  { zh: "派件", th: "อยู่ระหว่างจัดส่ง" },
+  { zh: "派送不成功", th: "จัดส่งไม่สำเร็จ ติดต่อผู้รับไม่ได้ กำลังดำเนินการส่งใหม่" },
+
+  { zh: "順利送達", th: "พัสดุถึงผู้รับเรียบร้อยแล้ว" },
+  { zh: "已成功签收", th: "พัสดุถึงผู้รับเรียบร้อยแล้ว" },
+
+  { zh: "件件到达", th: "พัสดุถึงสถานี SF" },
+  { zh: "件件离开", th: "พัสดุออกจากศูนย์คัดแยกที่ฮ่องกง" },
+
+  { zh: "已收件", th: "รับพัสดุแล้ว (SF Express)" },
+
+  { zh: "您的货物已准备从集运仓出仓", th: "พัสดุของคุณออกคลัง เพื่อเตรียมส่งไปยังสนามบินแล้ว" },
+  { zh: "已打印好地址面单", th: "พิมพ์ใบปะหน้าที่อยู่เรียบร้อยแล้ว" },
+  { zh: "您已下单成功", th: "สร้างออเดอร์การจัดส่งเรียบร้อย" },
+];
+
+
+// ==========================================
+// 1.1) Progress Rules (TW + HK)
+// ==========================================
 const PROGRESS_RULES = {
+  // ===== TW =====
   case1: [
     { contains: "สร้างออเดอร์การจัดส่งเรียบร้อย", pct: 10 },
     { contains: "พิมพ์ใบปะหน้าที่อยู่เรียบร้อยแล้ว", pct: 20 },
-    { contains: "พัสดุของคุณออกคลัง เพื่อเตรียมส่งไปยังสนามบินแล้ว", pct: 30 },
+    { contains: "พัสดุของคุณออกคลัง", pct: 30 },
 
     { contains: "กำลังดำเนินการนำสินค้าออกจากคลัง", pct: 50 },
-    { contains: "ระบบศุลกากรรับและบันทึกข้อมูลเรียบร้อยแล้ว", pct: 70 },
+    { contains: "ระบบศุลกากรรับ", pct: 70 },
 
     { contains: "พัสดุอยู่ศูนย์คัดแยกพัสดุ", pct: 80 },
     { contains: "อยู่ระหว่างจัดส่ง", pct: 90 },
     { contains: "พัสดุถึงผู้รับเรียบร้อยแล้ว", pct: 100 },
   ],
+
   case2: [
     { contains: "สร้างออเดอร์การจัดส่งเรียบร้อย", pct: 10 },
     { contains: "พิมพ์ใบปะหน้าที่อยู่เรียบร้อยแล้ว", pct: 20 },
-    { contains: "พัสดุของคุณออกคลัง เพื่อเตรียมส่งไปยังสนามบินแล้ว", pct: 30 },
+    { contains: "พัสดุของคุณออกคลัง", pct: 30 },
 
-    { contains: "ไม่พบข้อมูลผู้เดินพิธีการ", pct: 40 }, // EZ WAY
+    { contains: "ไม่พบข้อมูลผู้เดินพิธีการ", pct: 40 },
     { contains: "ข้อมูลที่ใช้เดินพิธีการไม่สอดคล้องกัน", pct: 50 },
 
     { contains: "กำลังดำเนินการนำสินค้าออกจากคลัง", pct: 60 },
-    { contains: "ระบบศุลกากรรับและบันทึกข้อมูลเรียบร้อยแล้ว", pct: 70 },
+    { contains: "ระบบศุลกากรรับ", pct: 70 },
 
     { contains: "พัสดุอยู่ศูนย์คัดแยกพัสดุ", pct: 80 },
+    { contains: "อยู่ระหว่างจัดส่ง", pct: 90 },
+    { contains: "พัสดุถึงผู้รับเรียบร้อยแล้ว", pct: 100 },
+  ],
+
+  // ===== HK (2 Steps) =====
+  hk: [
+    { contains: "สร้างออเดอร์การจัดส่งเรียบร้อย", pct: 10 },
+    { contains: "พิมพ์ใบปะหน้าที่อยู่เรียบร้อยแล้ว", pct: 30 },
+    { contains: "พัสดุของคุณออกคลัง", pct: 50 },
+
+    { contains: "พัสดุถึงสถานี SF", pct: 70 },
     { contains: "อยู่ระหว่างจัดส่ง", pct: 90 },
     { contains: "พัสดุถึงผู้รับเรียบร้อยแล้ว", pct: 100 },
   ]
 };
 
-function detectCaseFromThaiStatuses(thList){
-  // ถ้ามีสถานะปัญหา EZ WAY / ข้อมูลไม่สอดคล้อง => case2
-  const joined = (thList || []).join(" ");
-  if (
-    joined.includes("ไม่พบข้อมูลผู้เดินพิธีการ") ||
-    joined.includes("ลงทะเบียนกับ EZ WAY") ||
-    joined.includes("ข้อมูลที่ใช้เดินพิธีการไม่สอดคล้องกัน")
-  ) return "case2";
-  return "case1";
-}
 
-function getProgressPct(th, whichCase){
-  if (!th) return null;
-  const rules = PROGRESS_RULES[whichCase] || PROGRESS_RULES.case1;
-
-  const t = normalizeText(th);
-  for (const r of rules){
-    if (t.includes(normalizeText(r.contains))) return r.pct;
-  }
-  return null; // ถ้าไม่ match ตามกติกาเดิม = ไม่แสดง
-}
-function buildSummaryFromTimeline(events, provider = "tw"){
-  const arr = Array.isArray(events) ? events : (events ? [events] : []);
-
-  const thAll = arr.map(e => toThaiStatus(pickStatusText(e))).filter(Boolean);
-  const whichCase = detectCaseFromThaiStatuses(thAll);
-
-  const mapped = arr.map(e => {
-    const th = toThaiStatus(pickStatusText(e));
-    if (!th) return null;
-
-    const pct = getProgressPct(th, whichCase);
-    if (pct == null) return null;
-
-    return { th, pct, group: groupOf(th, provider), time: pickTimeText(e) };
-  }).filter(Boolean);
-
-  const seen = new Set();
-  const deduped = [];
-  for (const x of mapped){
-    if (seen.has(x.th)) continue;
-    seen.add(x.th);
-    deduped.push(x);
-  }
-
-  const order = provider === "hk" ? GROUP_ORDER_HK : GROUP_ORDER_TW;
-
-  const currentGroup =
-    order.find(g => deduped.some(x => x.group === g)) ||
-    (deduped[0]?.group || "คลังสินค้าต้นทาง");
-
-  const maxPct = deduped.reduce((m, x) => Math.max(m, x.pct), -Infinity);
-  const latestPct = Number.isFinite(maxPct) ? maxPct : null;
-
-  const best = deduped.slice().sort((a,b) => b.pct - a.pct)[0] || null;
-  const latestTh = best ? best.th : null;
-
-  return { whichCase, currentGroup, latestPct, latestTh };
-}
-
-
-  // ==========================================
-  // 2) Utilities
-  // ==========================================
-  function normalizeText(s) {
-    return (s || "")
-      .replace(/[“”]/g, '"')
-      .replace(/\s+/g, " ")
-      .trim();
-  }
-const STEP_DEFS = [
-  { key: "คลังสินค้าต้นทาง", max: 30 },
-  { key: "ศุลกากรประเทศปลายทาง", max: 70 },
-  { key: "ขนส่งปลายทาง", max: 100 },
-];
-
-function stepState(latestPct, currentGroup){
-  // currentGroup ใช้ตัดสิน active, latestPct ใช้ตัดสิน done
-  return STEP_DEFS.map(s => ({
-    ...s,
-    active: s.key === currentGroup,
-    done: typeof latestPct === "number" ? latestPct >= s.max : false
-  }));
-}
-  function hasChinese(s){
-    return /[\u4e00-\u9fff]/.test(s || "");
-  }
-
-  // ดึงจีนจากข้อความผสม รองรับ () และ （）
-  function extractZh(mixed) {
-    const s = normalizeText(mixed);
-    const m = s.match(/[（(]([^）)]+)[）)]/);
-    if (m && m[1]) return normalizeText(m[1]);
-    return s;
-  }
-
-  function pickStatusText(obj) {
-    if (!obj || typeof obj !== "object") return "";
-    const keys = [
-      "status_zh","status_cn","status","status_text","statusText",
-      "latest_status_zh","latest_status_cn","latest_status","latestStatus",
-      "desc_zh","description_zh","description","remark","remark_zh",
-      "message","state","event"
-    ];
-    for (const k of keys) {
-      const v = obj[k];
-      if (typeof v === "string" && v.trim()) return v;
-    }
-    return "";
-  }
-
-  function pickTimeText(obj) {
-    if (!obj || typeof obj !== "object") return "-";
-    return obj.time || obj.datetime || obj.dateTime || obj.date_time || obj.timestamp || "-";
-  }
-
-  // ==========================================
-  // 3) Translate: match เท่านั้น
-  // ==========================================
-  function toThaiStatus(rawAny) {
-    const raw = extractZh(rawAny);
-    if (!raw) return null;
-
-    if (!hasChinese(raw)) return null;
-
-    const zh = normalizeText(raw);
-
-    const exact = STATUS_MAP.find(x => normalizeText(x.zh) === zh);
-    if (exact) return exact.th;
-
-    const loose = STATUS_MAP.find(x => zh.includes(normalizeText(x.zh)) || normalizeText(x.zh).includes(zh));
-    if (loose) return loose.th;
-
-    return null;
-  }
-
-  // ==========================================
- // 4) Grouping
+// ==========================================
+// 4) Grouping (TW = 3 กลุ่ม, HK = 2 กลุ่ม)
 // ==========================================
 const GROUP_ORDER_TW = ["ขนส่งปลายทาง", "ศุลกากรประเทศปลายทาง", "คลังสินค้าต้นทาง"];
 const GROUP_ORDER_HK = ["ขนส่งปลายทาง", "คลังสินค้าต้นทาง"];
@@ -568,35 +476,26 @@ function groupOf(th, provider = "tw"){
   if (
     th.includes("พัสดุถึงผู้รับเรียบร้อยแล้ว") ||
     th.includes("อยู่ระหว่างจัดส่ง") ||
-    th.includes("พัสดุอยู่ศูนย์คัดแยกพัสดุ")
+    th.includes("พัสดุอยู่ศูนย์คัดแยกพัสดุ") ||
+    th.includes("พัสดุถึงสถานี SF") ||
+    th.includes("ศูนย์คัดแยกที่ฮ่องกง")
   ) {
     return "ขนส่งปลายทาง";
   }
 
-  // ศุลกากร (เฉพาะ tw)
+  // ศุลกากร (เฉพาะ TW)
   if (provider !== "hk") {
     if (
       th.includes("กำลังดำเนินการนำสินค้า") ||
       th.includes("ระบบศุลกากรรับ") ||
-      th.includes("เนื่องจากระบบศุลกากรไม่พบข้อมูล") ||
+      th.includes("ไม่พบข้อมูลผู้เดินพิธีการ") ||
       th.includes("ข้อมูลที่ใช้เดินพิธีการ")
     ) {
       return "ศุลกากรประเทศปลายทาง";
     }
   }
 
-  // คลังสินค้า
-  if (
-    th.includes("ออกคลัง") ||
-    th.includes("ใบปะหน้า") ||
-    th.includes("สร้างออเดอร์")
-  ) {
-    return "คลังสินค้าต้นทาง";
-  }
-
-  return "คลังสินค้าต้นทาง";
-}
-  // คลังสินค้า
+  // คลังต้นทาง
   if (
     th.includes("ออกคลัง") ||
     th.includes("ใบปะหน้า") ||
@@ -608,8 +507,6 @@ function groupOf(th, provider = "tw"){
   return "คลังสินค้าต้นทาง";
 }
 
-  return "คลังสินค้าต้นทาง";
-}
 
 
   function badgeOf(th){

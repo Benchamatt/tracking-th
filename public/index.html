@@ -440,16 +440,12 @@ function getProgressPct(th, whichCase){
   }
   return null; // ถ้าไม่ match ตามกติกาเดิม = ไม่แสดง
 }
-function buildSummaryFromTimeline(events){
+function buildSummaryFromTimeline(events, provider = "tw"){
   const arr = Array.isArray(events) ? events : (events ? [events] : []);
 
-  // แปลสถานะจากไทม์ไลน์ (เฉพาะที่ match)
   const thAll = arr.map(e => toThaiStatus(pickStatusText(e))).filter(Boolean);
-
-  // case ต้องอิงจากรายการที่ไทม์ไลน์แสดงได้จริง
   const whichCase = detectCaseFromThaiStatuses(thAll);
 
-  // map -> {th,pct,group,time} โดยใช้ mapping เดียวกับไทม์ไลน์
   const mapped = arr.map(e => {
     const th = toThaiStatus(pickStatusText(e));
     if (!th) return null;
@@ -457,10 +453,9 @@ function buildSummaryFromTimeline(events){
     const pct = getProgressPct(th, whichCase);
     if (pct == null) return null;
 
-    return { th, pct, group: groupOf(th), time: pickTimeText(e) };
+    return { th, pct, group: groupOf(th, provider), time: pickTimeText(e) };
   }).filter(Boolean);
 
-  // dedupe ตาม th
   const seen = new Set();
   const deduped = [];
   for (const x of mapped){
@@ -469,16 +464,15 @@ function buildSummaryFromTimeline(events){
     deduped.push(x);
   }
 
-  // currentGroup = กลุ่ม “บนสุดที่มีข้อมูล” ตาม GROUP_ORDER (เหมือนไทม์ไลน์)
+  const order = provider === "hk" ? GROUP_ORDER_HK : GROUP_ORDER_TW;
+
   const currentGroup =
-    GROUP_ORDER.find(g => deduped.some(x => x.group === g)) ||
+    order.find(g => deduped.some(x => x.group === g)) ||
     (deduped[0]?.group || "คลังสินค้าต้นทาง");
 
-  // progress = % สูงสุดที่ปรากฏในไทม์ไลน์ที่แสดง (สะท้อนความคืบหน้า)
   const maxPct = deduped.reduce((m, x) => Math.max(m, x.pct), -Infinity);
   const latestPct = Number.isFinite(maxPct) ? maxPct : null;
 
-  // latestTh = สถานะที่มี % สูงสุด (ให้ตรงกับ progress)
   const best = deduped.slice().sort((a,b) => b.pct - a.pct)[0] || null;
   const latestTh = best ? best.th : null;
 
@@ -564,25 +558,59 @@ function stepState(latestPct, currentGroup){
   // ==========================================
   // 4) Grouping
   // ==========================================
-  const GROUP_ORDER = ["ขนส่งปลายทาง", "ศุลกากรประเทศปลายทาง", "คลังสินค้าต้นทาง"];
+  const GROUP_ORDER_TW = ["ขนส่งปลายทาง", "ศุลกากรประเทศปลายทาง", "คลังสินค้าต้นทาง"];
+  const GROUP_ORDER_HK = ["ขนส่งปลายทาง", "คลังสินค้าต้นทาง"];
 
-  function groupOf(th){
-    if (!th) return "คลังสินค้าต้นทาง";
 
-    if (th.includes("พัสดุถึงผู้รับเรียบร้อยแล้ว") || th.includes("อยู่ระหว่างจัดส่ง") || th.includes("พัสดุอยู่ศูนย์คัดแยกพัสดุ")) {
-      return "ขนส่งปลายทาง";
-    }
+  function groupOf(th, provider = "tw"){
+  if (!th) return "คลังสินค้าต้นทาง";
 
-    if (th.includes("กำลังดำเนินการนำสินค้า") || th.includes("ระบบศุลกากรรับ") || th.includes("เนื่องจากระบบศุลกากรไม่พบข้อมูล") || th.includes("ข้อมูลที่ใช้เดินพิธีการ")) {
+  // กลุ่มขนส่งปลายทาง
+  if (
+    th.includes("พัสดุถึงผู้รับเรียบร้อยแล้ว") ||
+    th.includes("อยู่ระหว่างจัดส่ง") ||
+    th.includes("พัสดุอยู่ศูนย์คัดแยกพัสดุ")
+  ) {
+    return "ขนส่งปลายทาง";
+  }
+
+  // กลุ่มศุลกากร (ใช้เฉพาะ tw)
+  function groupOf(th, provider = "tw"){
+  if (!th) return "คลังสินค้าต้นทาง";
+
+  // ขนส่งปลายทาง
+  if (
+    th.includes("พัสดุถึงผู้รับเรียบร้อยแล้ว") ||
+    th.includes("อยู่ระหว่างจัดส่ง") ||
+    th.includes("พัสดุอยู่ศูนย์คัดแยกพัสดุ")
+  ) {
+    return "ขนส่งปลายทาง";
+  }
+
+  // ศุลกากร (เฉพาะ tw)
+  if (provider !== "hk") {
+    if (
+      th.includes("กำลังดำเนินการนำสินค้า") ||
+      th.includes("ระบบศุลกากรรับ") ||
+      th.includes("เนื่องจากระบบศุลกากรไม่พบข้อมูล") ||
+      th.includes("ข้อมูลที่ใช้เดินพิธีการ")
+    ) {
       return "ศุลกากรประเทศปลายทาง";
     }
+  }
 
-    if (th.includes("ออกคลัง") || th.includes("ใบปะหน้า") || th.includes("สร้างออเดอร์")) {
-      return "คลังสินค้าต้นทาง";
-    }
-
+  // คลังสินค้า
+  if (
+    th.includes("ออกคลัง") ||
+    th.includes("ใบปะหน้า") ||
+    th.includes("สร้างออเดอร์")
+  ) {
     return "คลังสินค้าต้นทาง";
   }
+
+  return "คลังสินค้าต้นทาง";
+}
+
 
   function badgeOf(th){
     if (!th) return { cls:"warn", label:"กำลังดำเนินการ" };
@@ -676,7 +704,7 @@ const curGroup = currentGroup || groupOf(latestTh);
   `;
 }
 
- function renderGroupedTimeline(events, whichCaseArg){
+ function renderGroupedTimeline(events, provider, whichCaseArg){
   const arr = Array.isArray(events) ? events : (events ? [events] : []);
 
   const translated = arr.map(e => {
@@ -688,6 +716,7 @@ const curGroup = currentGroup || groupOf(latestTh);
     if (history) history.style.display = "none";
     return;
   }
+const order = provider === "hk" ? GROUP_ORDER_HK : GROUP_ORDER_TW;
 
   // ใช้ whichCase จาก summary ถ้ามี เพื่อให้ตรงกัน 100%
   const whichCase = whichCaseArg || detectCaseFromThaiStatuses(translated.map(x => x.th));
@@ -702,7 +731,7 @@ const curGroup = currentGroup || groupOf(latestTh);
     const pct = getProgressPct(x.th, whichCase);
     if (pct == null) continue;
 
-    deduped.push({ ...x, pct, group: groupOf(x.th) });
+   deduped.push({ ...x, pct, group: groupOf(x.th, provider) });
   }
 
   if (!deduped.length) {
@@ -710,13 +739,13 @@ const curGroup = currentGroup || groupOf(latestTh);
     return;
   }
 
-  const buckets = new Map(GROUP_ORDER.map(g => [g, []]));
+  const buckets = new Map(order.map(g => [g, []]));
   for (const x of deduped) {
     if (!buckets.has(x.group)) buckets.set(x.group, []);
     buckets.get(x.group).push(x);
   }
 
-  const html = GROUP_ORDER
+  const html = order
     .filter(g => (buckets.get(g) || []).length > 0)
     .map(g => {
       const items = buckets.get(g) || [];
@@ -765,12 +794,15 @@ const curGroup = currentGroup || groupOf(latestTh);
   // ==========================================
   // 6) Run
   // ==========================================
-  async function run(){
-    const no = (noEl.value || "").trim();
-    if(!no){ alert("กรุณากรอกเลขพัสดุ"); return; }
+ async function run(){
+  const no = (noEl.value || "").trim();
+  if(!no){ alert("กรุณากรอกเลขพัสดุ"); return; }
 
-    btn.disabled = true;
-    setLoading();
+  const provider = /^SF/i.test(no) ? "hk" : "tw";
+
+  btn.disabled = true;
+  setLoading();
+
 
     try{
       const url = `/api/track?no=${encodeURIComponent(no)}`;
@@ -789,14 +821,12 @@ const curGroup = currentGroup || groupOf(latestTh);
         return;
       }
 
-    const events = data.events || data.history || data.traces || data.track || [];
+  const events = data.events || data.history || data.traces || data.track || [];
 
 // สรุป “จากไทม์ไลน์” โดยตรง
-const sm = buildSummaryFromTimeline(events);
-
+const sm = buildSummaryFromTimeline(events, provider);
 renderSummary(data, sm.latestTh, sm.latestPct, sm.whichCase, sm.currentGroup);
-renderGroupedTimeline(events); // ไทม์ไลน์ยัง render เหมือนเดิม
-
+renderGroupedTimeline(events, provider);
     }catch(e){
       setError(String(e));
     }finally{

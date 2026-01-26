@@ -556,11 +556,10 @@ function stepState(latestPct, currentGroup){
   }
 
   // ==========================================
-  // 4) Grouping
-  // ==========================================
-  const GROUP_ORDER_TW = ["ขนส่งปลายทาง", "ศุลกากรประเทศปลายทาง", "คลังสินค้าต้นทาง"];
-  const GROUP_ORDER_HK = ["ขนส่งปลายทาง", "คลังสินค้าต้นทาง"];
-
+ // 4) Grouping
+// ==========================================
+const GROUP_ORDER_TW = ["ขนส่งปลายทาง", "ศุลกากรประเทศปลายทาง", "คลังสินค้าต้นทาง"];
+const GROUP_ORDER_HK = ["ขนส่งปลายทาง", "คลังสินค้าต้นทาง"];
 
 function groupOf(th, provider = "tw"){
   if (!th) return "คลังสินค้าต้นทาง";
@@ -597,6 +596,17 @@ function groupOf(th, provider = "tw"){
 
   return "คลังสินค้าต้นทาง";
 }
+  // คลังสินค้า
+  if (
+    th.includes("ออกคลัง") ||
+    th.includes("ใบปะหน้า") ||
+    th.includes("สร้างออเดอร์")
+  ) {
+    return "คลังสินค้าต้นทาง";
+  }
+
+  return "คลังสินค้าต้นทาง";
+}
 
   return "คลังสินค้าต้นทาง";
 }
@@ -615,7 +625,7 @@ function groupOf(th, provider = "tw"){
   // 5) Render
   // ==========================================
 
-function renderSummary(data, latestTh, latestPct, whichCase, currentGroup){
+function renderSummary(data, latestTh, latestPct, whichCase, currentGroup, provider = "tw"){
   if (!latestTh) {
     summary.style.display = "none";
     summary.innerHTML = "";
@@ -625,7 +635,7 @@ function renderSummary(data, latestTh, latestPct, whichCase, currentGroup){
   summary.style.display = "block";
   const badge = badgeOf(latestTh);
 
-const curGroup = currentGroup || groupOf(latestTh, "tw"); // หรือส่ง provider เข้า renderSummary ก็ได้
+const curGroup = currentGroup || groupOf(latestTh, "tw");
 
   const steps = [
     { key: "คลังสินค้าต้นทาง", max: 30 },
@@ -816,7 +826,7 @@ const order = provider === "hk" ? GROUP_ORDER_HK : GROUP_ORDER_TW;
 
 // สรุป “จากไทม์ไลน์” โดยตรง
 const sm = buildSummaryFromTimeline(events, provider);
-renderSummary(data, sm.latestTh, sm.latestPct, sm.whichCase, sm.currentGroup);
+renderSummary(data, sm.latestTh, sm.latestPct, sm.whichCase, sm.currentGroup, provider);
 renderGroupedTimeline(events, provider);
     }catch(e){
       setError(String(e));

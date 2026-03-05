@@ -226,68 +226,68 @@
     #groupHint {
       display: none !important;
     }
-/* ===== Stepper (องค์กร/ทางการ + เส้นเชื่อม) ===== */
-.stepper{margin-top:14px}
-.steps{display:flex;gap:12px;align-items:stretch}
-.step{
-  flex:1; position:relative; padding:12px 12px; border-radius:14px;
-  background: var(--surface-2); border:1px solid var(--border);
-}
-.step:not(:last-child)::after{
-  content:""; position:absolute; top:19px; right:-12px; width:12px; height:2px;
-  background: rgba(100,116,139,.22);
-}
-.stepTop{display:flex;align-items:center;gap:10px}
-.stepDot{
-  width:12px;height:12px;border-radius:999px;
-  background: rgba(100,116,139,.22);
-  border:3px solid rgba(100,116,139,.16);
-  flex:0 0 auto;
-}
-.stepTitle{
-  font-size:12px; font-weight:900; color:var(--muted);
-  letter-spacing:.2px; line-height:1.2;
-}
-.step.active{background: rgba(15,95,191,.06); border-color: rgba(15,95,191,.22)}
-.step.active .stepDot{
-  background: var(--brand); border-color: rgba(15,95,191,.22);
-  box-shadow: 0 0 0 3px rgba(15,95,191,.10);
-}
-.step.active .stepTitle{color: var(--text)}
-.step.done{background: rgba(15,95,191,.04); border-color: rgba(15,95,191,.14)}
-.step.done .stepDot{background: var(--brand); border-color: rgba(15,95,191,.18)}
-.step.done .stepTitle{color: rgba(15,23,42,.90)}
-.step.done:not(:last-child)::after{background: rgba(15,95,191,.40)}
-@media(max-width:520px){
-  .steps{flex-direction:column;gap:10px}
-  .step:not(:last-child)::after{
-    top:auto; bottom:-10px; left:18px; right:auto; width:2px; height:10px;
-  }
-}
 
-/* ===== Progress bar ===== */
-.progressWrap{
-  margin-top: 12px; padding: 10px 12px; border-radius: 14px;
-  border: 1px solid var(--border);
-  background: linear-gradient(180deg, rgba(15,95,191,.05), rgba(15,95,191,.02));
-}
-.progressHead{
-  display:flex; align-items:center; justify-content:space-between; gap:10px;
-  margin-bottom: 8px;
-}
-.progressHead b{font-size:13px}
-.progressBar{
-  width:100%; height:10px; border-radius:999px;
-  background: rgba(100,116,139,.18);
-  overflow:hidden;
-  border:1px solid rgba(100,116,139,.18);
-}
-.progressFill{
-  height:100%; width:0%;
-  background: linear-gradient(135deg, var(--brand), var(--brand-2));
-  border-radius:999px;
-}
+    /* ===== Stepper (องค์กร/ทางการ + เส้นเชื่อม) ===== */
+    .stepper{margin-top:14px}
+    .steps{display:flex;gap:12px;align-items:stretch}
+    .step{
+      flex:1; position:relative; padding:12px 12px; border-radius:14px;
+      background: var(--surface-2); border:1px solid var(--border);
+    }
+    .step:not(:last-child)::after{
+      content:""; position:absolute; top:19px; right:-12px; width:12px; height:2px;
+      background: rgba(100,116,139,.22);
+    }
+    .stepTop{display:flex;align-items:center;gap:10px}
+    .stepDot{
+      width:12px;height:12px;border-radius:999px;
+      background: rgba(100,116,139,.22);
+      border:3px solid rgba(100,116,139,.16);
+      flex:0 0 auto;
+    }
+    .stepTitle{
+      font-size:12px; font-weight:900; color:var(--muted);
+      letter-spacing:.2px; line-height:1.2;
+    }
+    .step.active{background: rgba(15,95,191,.06); border-color: rgba(15,95,191,.22)}
+    .step.active .stepDot{
+      background: var(--brand); border-color: rgba(15,95,191,.22);
+      box-shadow: 0 0 0 3px rgba(15,95,191,.10);
+    }
+    .step.active .stepTitle{color: var(--text)}
+    .step.done{background: rgba(15,95,191,.04); border-color: rgba(15,95,191,.14)}
+    .step.done .stepDot{background: var(--brand); border-color: rgba(15,95,191,.18)}
+    .step.done .stepTitle{color: rgba(15,23,42,.90)}
+    .step.done:not(:last-child)::after{background: rgba(15,95,191,.40)}
+    @media(max-width:520px){
+      .steps{flex-direction:column;gap:10px}
+      .step:not(:last-child)::after{
+        top:auto; bottom:-10px; left:18px; right:auto; width:2px; height:10px;
+      }
+    }
 
+    /* ===== Progress bar ===== */
+    .progressWrap{
+      margin-top: 12px; padding: 10px 12px; border-radius: 14px;
+      border: 1px solid var(--border);
+      background: linear-gradient(180deg, rgba(15,95,191,.05), rgba(15,95,191,.02));
+    }
+    .progressHead{
+      display:flex; align-items:center; justify-content:space-between; gap:10px;
+      margin-bottom: 8px;
+    }
+    .progressHead b{font-size:13px}
+    .progressBar{
+      width:100%; height:10px; border-radius:999px;
+      background: rgba(100,116,139,.18);
+      overflow:hidden;
+      border:1px solid rgba(100,116,139,.18);
+    }
+    .progressFill{
+      height:100%; width:0%;
+      background: linear-gradient(135deg, var(--brand), var(--brand-2));
+      border-radius:999px;
+    }
   </style>
 </head>
 
@@ -318,7 +318,6 @@
             <button class="btn" id="btn">ค้นหา</button>
           </div>
 
-          <!-- ใส่ id="rule" (ซ่อนด้วย CSS) -->
           <div id="rule" style="margin-top:10px" class="small">
             กติกา: แสดงเฉพาะสถานะ “ภาษาจีน” ที่ตรงกับ mapping ของคุณเท่านั้น (ไม่ match = ไม่แสดง)
           </div>
@@ -330,12 +329,9 @@
       <div>
         <div class="card" id="history" style="display:none">
           <h2>ไทม์ไลน์สถานะ</h2>
-
-          <!-- ใส่ id="groupHint" (ซ่อนด้วย CSS) -->
           <div id="groupHint" class="muted">
             จัดกลุ่ม: ขนส่งปลายทาง / ศุลกากรประเทศปลายทาง / คลังสินค้าต้นทาง
           </div>
-
           <div id="groups"></div>
         </div>
       </div>
@@ -371,8 +367,12 @@
     // ศุลกากรประเทศปลายทาง
     { zh: "出倉處理", th: "กำลังดำเนินการนำสินค้าออกจากคลัง" },
     { zh: "連線收單建檔", th: "ระบบศุลกากรรับและบันทึกข้อมูลเรียบร้อยแล้ว" },
-    { zh: "您的貨物遇到海關預先委任隨機抽查", th: "พัสดุของคุณถูกศุลกากรสุ่มตรวจ (ตรวจสอบเพิ่มเติม)" },
+
+    // ✅ NEW: แปลเหมือน EZ WAY (ตามที่ต้องการ)
+    { zh: "您的貨物遇到海關預先委任隨機抽查", th: "เนื่องจากระบบศุลกากรไม่พบข้อมูลผู้เดินพิธีการ โปรดตรวจสอบว่าผู้รับพัสดุได้ลงทะเบียนกับ EZ WAY แล้วหรือไม่ หากยังไม่ได้ลงทะเบียนโปรดลงทะเบียนให้เรียบร้อย ถ่ายภาพหน้าจอให้ติดชื่อ/หมายเลขโทรศัพท์และหมายเลขบัตรประชาชนของผู้เดินพิธีการ แล้วส่งให้เจ้าหน้าที่ลูกค้าสัมพันธ์ของWeiming หลังจากได้รับข้อมูลแล้ว พัสดุจะได้รับการปล่อยภายในประมาณ 1-2 วันทำการ" },
+
     { zh: "由於海關系統查無此包裹申報人資料", th: "เนื่องจากระบบศุลกากรไม่พบข้อมูลผู้เดินพิธีการ โปรดตรวจสอบว่าผู้รับพัสดุได้ลงทะเบียนกับ EZ WAY แล้วหรือไม่ หากยังไม่ได้ลงทะเบียนโปรดลงทะเบียนให้เรียบร้อย ถ่ายภาพหน้าจอให้ติดชื่อ/หมายเลขโทรศัพท์และหมายเลขบัตรประชาชนของผู้เดินพิธีการ แล้วส่งให้เจ้าหน้าที่ลูกค้าสัมพันธ์ของWeiming หลังจากได้รับข้อมูลแล้ว พัสดุจะได้รับการปล่อยภายในประมาณ 1-2 วันทำการ" },
+
     { zh: "不受理不可補正之錯單", th: "ข้อมูลที่ใช้เดินพิธีการไม่สอดคล้องกัน โปรดติดต่อเจ้าหน้าที่" },
 
     // คลังสินค้า(ต้นทาง)
@@ -380,136 +380,79 @@
     { zh: "已經打印好地址面單", th: "พิมพ์ใบปะหน้าที่อยู่เรียบร้อยแล้ว" },
     { zh: "您已下單成功", th: "สร้างออเดอร์การจัดส่งเรียบร้อย" },
   ];
-// ==========================================
-// 1.1) Progress % (Case 1 / Case 2)
-// ==========================================
-const GROUP_TOTAL = {
-  "คลังสินค้าต้นทาง": 30,
-  "ศุลกากรประเทศปลายทาง": 70,
-  "ขนส่งปลายทาง": 100
-};
-
-// ใช้ "contains" เพื่อกันปัญหาข้อความยาว/มีรายละเอียดต่อท้าย
-const PROGRESS_RULES = {
-  case1: [
-    { contains: "สร้างออเดอร์การจัดส่งเรียบร้อย", pct: 10 },
-    { contains: "พิมพ์ใบปะหน้าที่อยู่เรียบร้อยแล้ว", pct: 20 },
-    { contains: "พัสดุของคุณออกคลัง เพื่อเตรียมส่งไปยังสนามบินแล้ว", pct: 30 },
-
-    { contains: "กำลังดำเนินการนำสินค้าออกจากคลัง", pct: 50 },
-    { contains: "ระบบศุลกากรรับและบันทึกข้อมูลเรียบร้อยแล้ว", pct: 70 },
-
-    { contains: "พัสดุอยู่ศูนย์คัดแยกพัสดุ", pct: 80 },
-    { contains: "อยู่ระหว่างจัดส่ง", pct: 90 },
-    { contains: "พัสดุถึงผู้รับเรียบร้อยแล้ว", pct: 100 },
-  ],
-  case2: [
-    { contains: "สร้างออเดอร์การจัดส่งเรียบร้อย", pct: 10 },
-    { contains: "พิมพ์ใบปะหน้าที่อยู่เรียบร้อยแล้ว", pct: 20 },
-    { contains: "พัสดุของคุณออกคลัง เพื่อเตรียมส่งไปยังสนามบินแล้ว", pct: 30 },
-
-    { contains: "ไม่พบข้อมูลผู้เดินพิธีการ", pct: 40 }, // EZ WAY
-    { contains: "ข้อมูลที่ใช้เดินพิธีการไม่สอดคล้องกัน", pct: 50 },
-
-    { contains: "กำลังดำเนินการนำสินค้าออกจากคลัง", pct: 60 },
-    { contains: "ระบบศุลกากรรับและบันทึกข้อมูลเรียบร้อยแล้ว", pct: 70 },
-
-    { contains: "พัสดุอยู่ศูนย์คัดแยกพัสดุ", pct: 80 },
-    { contains: "อยู่ระหว่างจัดส่ง", pct: 90 },
-    { contains: "พัสดุถึงผู้รับเรียบร้อยแล้ว", pct: 100 },
-  ]
-};
-
-function detectCaseFromThaiStatuses(thList){
-  // ถ้ามีสถานะปัญหา EZ WAY / ข้อมูลไม่สอดคล้อง => case2
-  const joined = (thList || []).join(" ");
-  if (
-    joined.includes("ไม่พบข้อมูลผู้เดินพิธีการ") ||
-    joined.includes("ลงทะเบียนกับ EZ WAY") ||
-    joined.includes("ข้อมูลที่ใช้เดินพิธีการไม่สอดคล้องกัน")
-  ) return "case2";
-  return "case1";
-}
-
-function getProgressPct(th, whichCase){
-  if (!th) return null;
-  const rules = PROGRESS_RULES[whichCase] || PROGRESS_RULES.case1;
-
-  const t = normalizeText(th);
-  for (const r of rules){
-    if (t.includes(normalizeText(r.contains))) return r.pct;
-  }
-  return null; // ถ้าไม่ match ตามกติกาเดิม = ไม่แสดง
-}
-function buildSummaryFromTimeline(events){
-  const arr = Array.isArray(events) ? events : (events ? [events] : []);
-
-  // แปลสถานะจากไทม์ไลน์ (เฉพาะที่ match)
-  const thAll = arr.map(e => toThaiStatus(pickStatusText(e))).filter(Boolean);
-
-  // case ต้องอิงจากรายการที่ไทม์ไลน์แสดงได้จริง
-  const whichCase = detectCaseFromThaiStatuses(thAll);
-
-  // map -> {th,pct,group,time} โดยใช้ mapping เดียวกับไทม์ไลน์
-  const mapped = arr.map(e => {
-    const th = toThaiStatus(pickStatusText(e));
-    if (!th) return null;
-
-    const pct = getProgressPct(th, whichCase);
-    if (pct == null) return null;
-
-    return { th, pct, group: groupOf(th), time: pickTimeText(e) };
-  }).filter(Boolean);
-
-  // dedupe ตาม th
-  const seen = new Set();
-  const deduped = [];
-  for (const x of mapped){
-    if (seen.has(x.th)) continue;
-    seen.add(x.th);
-    deduped.push(x);
-  }
-
-  // currentGroup = กลุ่ม “บนสุดที่มีข้อมูล” ตาม GROUP_ORDER (เหมือนไทม์ไลน์)
-  const currentGroup =
-    GROUP_ORDER.find(g => deduped.some(x => x.group === g)) ||
-    (deduped[0]?.group || "คลังสินค้าต้นทาง");
-
-  // progress = % สูงสุดที่ปรากฏในไทม์ไลน์ที่แสดง (สะท้อนความคืบหน้า)
-  const maxPct = deduped.reduce((m, x) => Math.max(m, x.pct), -Infinity);
-  const latestPct = Number.isFinite(maxPct) ? maxPct : null;
-
-  // latestTh = สถานะที่มี % สูงสุด (ให้ตรงกับ progress)
-  const best = deduped.slice().sort((a,b) => b.pct - a.pct)[0] || null;
-  const latestTh = best ? best.th : null;
-
-  return { whichCase, currentGroup, latestPct, latestTh };
-}
-
 
   // ==========================================
-  // 2) Utilities
+  // 1.1) Progress % (Case 1 / Case 2)
   // ==========================================
+  const GROUP_TOTAL = {
+    "คลังสินค้าต้นทาง": 30,
+    "ศุลกากรประเทศปลายทาง": 70,
+    "ขนส่งปลายทาง": 100
+  };
+
+  // ใช้ "contains" เพื่อกันปัญหาข้อความยาว/มีรายละเอียดต่อท้าย
+  const PROGRESS_RULES = {
+    case1: [
+      { contains: "สร้างออเดอร์การจัดส่งเรียบร้อย", pct: 10 },
+      { contains: "พิมพ์ใบปะหน้าที่อยู่เรียบร้อยแล้ว", pct: 20 },
+      { contains: "พัสดุของคุณออกคลัง เพื่อเตรียมส่งไปยังสนามบินแล้ว", pct: 30 },
+
+      { contains: "กำลังดำเนินการนำสินค้าออกจากคลัง", pct: 50 },
+
+      // ✅ เพิ่มเพื่อให้สถานะ (ไทย) ของ EZ WAY/สุ่มตรวจ “โชว์ในไทม์ไลน์/โปรเกรส”
+      { contains: "ไม่พบข้อมูลผู้เดินพิธีการ", pct: 60 },
+
+      { contains: "ระบบศุลกากรรับและบันทึกข้อมูลเรียบร้อยแล้ว", pct: 70 },
+
+      { contains: "พัสดุอยู่ศูนย์คัดแยกพัสดุ", pct: 80 },
+      { contains: "อยู่ระหว่างจัดส่ง", pct: 90 },
+      { contains: "พัสดุถึงผู้รับเรียบร้อยแล้ว", pct: 100 },
+    ],
+    case2: [
+      { contains: "สร้างออเดอร์การจัดส่งเรียบร้อย", pct: 10 },
+      { contains: "พิมพ์ใบปะหน้าที่อยู่เรียบร้อยแล้ว", pct: 20 },
+      { contains: "พัสดุของคุณออกคลัง เพื่อเตรียมส่งไปยังสนามบินแล้ว", pct: 30 },
+
+      { contains: "ไม่พบข้อมูลผู้เดินพิธีการ", pct: 40 }, // EZ WAY
+      { contains: "ข้อมูลที่ใช้เดินพิธีการไม่สอดคล้องกัน", pct: 50 },
+
+      { contains: "กำลังดำเนินการนำสินค้าออกจากคลัง", pct: 60 },
+      { contains: "ระบบศุลกากรรับและบันทึกข้อมูลเรียบร้อยแล้ว", pct: 70 },
+
+      { contains: "พัสดุอยู่ศูนย์คัดแยกพัสดุ", pct: 80 },
+      { contains: "อยู่ระหว่างจัดส่ง", pct: 90 },
+      { contains: "พัสดุถึงผู้รับเรียบร้อยแล้ว", pct: 100 },
+    ]
+  };
+
+  function detectCaseFromThaiStatuses(thList){
+    const joined = (thList || []).join(" ");
+    if (
+      joined.includes("ไม่พบข้อมูลผู้เดินพิธีการ") ||
+      joined.includes("ลงทะเบียนกับ EZ WAY") ||
+      joined.includes("ข้อมูลที่ใช้เดินพิธีการไม่สอดคล้องกัน")
+    ) return "case2";
+    return "case1";
+  }
+
   function normalizeText(s) {
     return (s || "")
       .replace(/[“”]/g, '"')
       .replace(/\s+/g, " ")
       .trim();
   }
-const STEP_DEFS = [
-  { key: "คลังสินค้าต้นทาง", max: 30 },
-  { key: "ศุลกากรประเทศปลายทาง", max: 70 },
-  { key: "ขนส่งปลายทาง", max: 100 },
-];
 
-function stepState(latestPct, currentGroup){
-  // currentGroup ใช้ตัดสิน active, latestPct ใช้ตัดสิน done
-  return STEP_DEFS.map(s => ({
-    ...s,
-    active: s.key === currentGroup,
-    done: typeof latestPct === "number" ? latestPct >= s.max : false
-  }));
-}
+  function getProgressPct(th, whichCase){
+    if (!th) return null;
+    const rules = PROGRESS_RULES[whichCase] || PROGRESS_RULES.case1;
+
+    const t = normalizeText(th);
+    for (const r of rules){
+      if (t.includes(normalizeText(r.contains))) return r.pct;
+    }
+    return null;
+  }
+
   function hasChinese(s){
     return /[\u4e00-\u9fff]/.test(s || "");
   }
@@ -542,13 +485,9 @@ function stepState(latestPct, currentGroup){
     return obj.time || obj.datetime || obj.dateTime || obj.date_time || obj.timestamp || "-";
   }
 
-  // ==========================================
-  // 3) Translate: match เท่านั้น
-  // ==========================================
   function toThaiStatus(rawAny) {
     const raw = extractZh(rawAny);
     if (!raw) return null;
-
     if (!hasChinese(raw)) return null;
 
     const zh = normalizeText(raw);
@@ -562,9 +501,6 @@ function stepState(latestPct, currentGroup){
     return null;
   }
 
-  // ==========================================
-  // 4) Grouping
-  // ==========================================
   const GROUP_ORDER = ["ขนส่งปลายทาง", "ศุลกากรประเทศปลายทาง", "คลังสินค้าต้นทาง"];
 
   function groupOf(th){
@@ -574,7 +510,7 @@ function stepState(latestPct, currentGroup){
       return "ขนส่งปลายทาง";
     }
 
-    if (th.includes("กำลังดำเนินการนำสินค้า") || th.includes("ระบบศุลกากรรับ") || th.includes("เนื่องจากระบบศุลกากรไม่พบข้อมูล") || th.includes("ข้อมูลที่ใช้เดินพิธีการ")) {
+    if (th.includes("กำลังดำเนินการนำสินค้า") || th.includes("ระบบศุลกากรรับ") || th.includes("เนื่องจากระบบศุลกากรไม่พบข้อมูล") || th.includes("ข้อมูลที่ใช้เดินพิธีการ") || th.includes("ไม่พบข้อมูลผู้เดินพิธีการ")) {
       return "ศุลกากรประเทศปลายทาง";
     }
 
@@ -594,153 +530,182 @@ function stepState(latestPct, currentGroup){
     return { cls:"warn", label:"กำลังขนส่ง" };
   }
 
-  // ==========================================
-  // 5) Render
-  // ==========================================
+  function buildSummaryFromTimeline(events){
+    const arr = Array.isArray(events) ? events : (events ? [events] : []);
+    const thAll = arr.map(e => toThaiStatus(pickStatusText(e))).filter(Boolean);
+    const whichCase = detectCaseFromThaiStatuses(thAll);
 
-function renderSummary(data, latestTh, latestPct, whichCase, currentGroup){
-  if (!latestTh) {
-    summary.style.display = "none";
-    summary.innerHTML = "";
-    return;
+    const mapped = arr.map(e => {
+      const th = toThaiStatus(pickStatusText(e));
+      if (!th) return null;
+
+      const pct = getProgressPct(th, whichCase);
+      if (pct == null) return null;
+
+      return { th, pct, group: groupOf(th), time: pickTimeText(e) };
+    }).filter(Boolean);
+
+    const seen = new Set();
+    const deduped = [];
+    for (const x of mapped){
+      if (seen.has(x.th)) continue;
+      seen.add(x.th);
+      deduped.push(x);
+    }
+
+    const currentGroup =
+      GROUP_ORDER.find(g => deduped.some(x => x.group === g)) ||
+      (deduped[0]?.group || "คลังสินค้าต้นทาง");
+
+    const maxPct = deduped.reduce((m, x) => Math.max(m, x.pct), -Infinity);
+    const latestPct = Number.isFinite(maxPct) ? maxPct : null;
+
+    const best = deduped.slice().sort((a,b) => b.pct - a.pct)[0] || null;
+    const latestTh = best ? best.th : null;
+
+    return { whichCase, currentGroup, latestPct, latestTh };
   }
 
-  summary.style.display = "block";
-  const badge = badgeOf(latestTh);
+  function renderSummary(data, latestTh, latestPct, whichCase, currentGroup){
+    if (!latestTh) {
+      summary.style.display = "none";
+      summary.innerHTML = "";
+      return;
+    }
 
-const curGroup = currentGroup || groupOf(latestTh);
-  const steps = [
-    { key: "คลังสินค้าต้นทาง", max: 30 },
-    { key: "ศุลกากรประเทศปลายทาง", max: 70 },
-    { key: "ขนส่งปลายทาง", max: 100 },
-  ];
+    summary.style.display = "block";
+    const badge = badgeOf(latestTh);
 
-  const pctSafe =
-    (typeof latestPct === "number" && latestPct >= 0 && latestPct <= 100)
-      ? latestPct
-      : null;
+    const curGroup = currentGroup || groupOf(latestTh);
+    const steps = [
+      { key: "คลังสินค้าต้นทาง", max: 30 },
+      { key: "ศุลกากรประเทศปลายทาง", max: 70 },
+      { key: "ขนส่งปลายทาง", max: 100 },
+    ];
 
-  const stepsHtml = steps.map((s) => {
-    const isDone = typeof pctSafe === "number" ? pctSafe >= s.max : false;
-  const isActive = s.key === curGroup;
+    const pctSafe =
+      (typeof latestPct === "number" && latestPct >= 0 && latestPct <= 100)
+        ? latestPct
+        : null;
 
-    return `
-      <div class="step ${isDone ? "done" : ""} ${isActive ? "active" : ""}">
-        <div class="stepTop">
-          <span class="stepDot" aria-hidden="true"></span>
-          <div class="stepTitle">${s.key} (${s.max}%)</div>
-        </div>
-      </div>
-    `;
-  }).join("");
-
-  const helpHtml = (whichCase === "case2")
-    ? `<div class="helpNote" style="margin-top:12px">
-         พบสถานะที่ต้องตรวจสอบข้อมูลศุลกากร/ผู้เดินพิธีการ (EZ WAY) แนะนำให้ตรวจสอบการลงทะเบียน และติดต่อเจ้าหน้าที่ผ่าน
-         <a href="https://line.me/R/ti/p/@wmex" target="_blank" rel="noopener noreferrer">LINE</a>
-       </div>`
-    : "";
-
-  summary.innerHTML = `
-    <div class="summaryTop">
-      <div class="kv">
-        <div><b>อัปเดตล่าสุด</b> <span class="value">${data.last_update || data.lastUpdate || "-"}</span></div>
-      </div>
-
-      <span class="badge ${badge.cls}">
-        <span class="dot"></span>
-        ${badge.label}
-      </span>
-    </div>
-
-    <div style="margin-top:6px;font-size:18px;font-weight:800">
-      ${latestTh}
-    </div>
-
-    <div class="progressWrap">
-      <div class="progressHead">
-        <b>ความคืบหน้าโดยรวม</b>
-        <div>${pctSafe == null ? "-" : pctSafe + "%"}</div>
-      </div>
-      <div class="progressBar">
-        <div class="progressFill" style="width:${pctSafe == null ? 0 : pctSafe}%;"></div>
-      </div>
-    </div>
-
-    <div class="stepper">
-      <div class="steps">
-        ${stepsHtml}
-      </div>
-    </div>
-
-    ${helpHtml}
-  `;
-}
-
- function renderGroupedTimeline(events, whichCaseArg){
-  const arr = Array.isArray(events) ? events : (events ? [events] : []);
-
-  const translated = arr.map(e => {
-    const th = toThaiStatus(pickStatusText(e));
-    return { time: pickTimeText(e), th };
-  }).filter(x => !!x.th);
-
-  if (!translated.length) {
-    if (history) history.style.display = "none";
-    return;
-  }
-
-  // ใช้ whichCase จาก summary ถ้ามี เพื่อให้ตรงกัน 100%
-  const whichCase = whichCaseArg || detectCaseFromThaiStatuses(translated.map(x => x.th));
-
-  // dedupe + filter เฉพาะที่มี pct (อยู่ใน mapping)
-  const seen = new Set();
-  const deduped = [];
-  for (const x of translated) {
-    if (seen.has(x.th)) continue;
-    seen.add(x.th);
-
-    const pct = getProgressPct(x.th, whichCase);
-    if (pct == null) continue;
-
-    deduped.push({ ...x, pct, group: groupOf(x.th) });
-  }
-
-  if (!deduped.length) {
-    history.style.display = "none";
-    return;
-  }
-
-  const buckets = new Map(GROUP_ORDER.map(g => [g, []]));
-  for (const x of deduped) {
-    if (!buckets.has(x.group)) buckets.set(x.group, []);
-    buckets.get(x.group).push(x);
-  }
-
-  const html = GROUP_ORDER
-    .filter(g => (buckets.get(g) || []).length > 0)
-    .map(g => {
-      const items = buckets.get(g) || [];
-      const itemsHtml = items.map(it => `
-        <div class="event">
-          <div class="time">${it.time || "-"}</div>
-          <div class="text">${it.th}</div>
-        </div>
-      `).join("");
+    const stepsHtml = steps.map((s) => {
+      const isDone = typeof pctSafe === "number" ? pctSafe >= s.max : false;
+      const isActive = s.key === curGroup;
 
       return `
-        <div class="group">
-          <div class="groupTitle"><div>${g}</div></div>
-          <div class="timeline">${itemsHtml}</div>
+        <div class="step ${isDone ? "done" : ""} ${isActive ? "active" : ""}">
+          <div class="stepTop">
+            <span class="stepDot" aria-hidden="true"></span>
+            <div class="stepTitle">${s.key} (${s.max}%)</div>
+          </div>
         </div>
       `;
-    })
-    .join("");
+    }).join("");
 
-  groupsEl.innerHTML = html;
-  history.style.display = "block";
-}
+    const helpHtml = (whichCase === "case2")
+      ? `<div class="helpNote" style="margin-top:12px">
+           พบสถานะที่ต้องตรวจสอบข้อมูลศุลกากร/ผู้เดินพิธีการ (EZ WAY) แนะนำให้ตรวจสอบการลงทะเบียน และติดต่อเจ้าหน้าที่ผ่าน
+           <a href="https://line.me/R/ti/p/@wmex" target="_blank" rel="noopener noreferrer">LINE</a>
+         </div>`
+      : "";
 
+    summary.innerHTML = `
+      <div class="summaryTop">
+        <div class="kv">
+          <div><b>อัปเดตล่าสุด</b> <span class="value">${data.last_update || data.lastUpdate || "-"}</span></div>
+        </div>
+
+        <span class="badge ${badge.cls}">
+          <span class="dot"></span>
+          ${badge.label}
+        </span>
+      </div>
+
+      <div style="margin-top:6px;font-size:18px;font-weight:800">
+        ${latestTh}
+      </div>
+
+      <div class="progressWrap">
+        <div class="progressHead">
+          <b>ความคืบหน้าโดยรวม</b>
+          <div>${pctSafe == null ? "-" : pctSafe + "%"}</div>
+        </div>
+        <div class="progressBar">
+          <div class="progressFill" style="width:${pctSafe == null ? 0 : pctSafe}%;"></div>
+        </div>
+      </div>
+
+      <div class="stepper">
+        <div class="steps">
+          ${stepsHtml}
+        </div>
+      </div>
+
+      ${helpHtml}
+    `;
+  }
+
+  function renderGroupedTimeline(events, whichCaseArg){
+    const arr = Array.isArray(events) ? events : (events ? [events] : []);
+
+    const translated = arr.map(e => {
+      const th = toThaiStatus(pickStatusText(e));
+      return { time: pickTimeText(e), th };
+    }).filter(x => !!x.th);
+
+    if (!translated.length) {
+      if (history) history.style.display = "none";
+      return;
+    }
+
+    const whichCase = whichCaseArg || detectCaseFromThaiStatuses(translated.map(x => x.th));
+
+    const seen = new Set();
+    const deduped = [];
+    for (const x of translated) {
+      if (seen.has(x.th)) continue;
+      seen.add(x.th);
+
+      const pct = getProgressPct(x.th, whichCase);
+      if (pct == null) continue;
+
+      deduped.push({ ...x, pct, group: groupOf(x.th) });
+    }
+
+    if (!deduped.length) {
+      history.style.display = "none";
+      return;
+    }
+
+    const buckets = new Map(GROUP_ORDER.map(g => [g, []]));
+    for (const x of deduped) {
+      if (!buckets.has(x.group)) buckets.set(x.group, []);
+      buckets.get(x.group).push(x);
+    }
+
+    const html = GROUP_ORDER
+      .filter(g => (buckets.get(g) || []).length > 0)
+      .map(g => {
+        const items = buckets.get(g) || [];
+        const itemsHtml = items.map(it => `
+          <div class="event">
+            <div class="time">${it.time || "-"}</div>
+            <div class="text">${it.th}</div>
+          </div>
+        `).join("");
+
+        return `
+          <div class="group">
+            <div class="groupTitle"><div>${g}</div></div>
+            <div class="timeline">${itemsHtml}</div>
+          </div>
+        `;
+      })
+      .join("");
+
+    groupsEl.innerHTML = html;
+    history.style.display = "block";
+  }
 
   function setLoading(){
     summary.style.display = "block";
@@ -757,15 +722,11 @@ const curGroup = currentGroup || groupOf(latestTh);
   }
 
   function setError(msg){
-    // อันนี้ยังคงไว้สำหรับ error จริง ๆ จาก API
     summary.style.display = "block";
     history.style.display = "none";
     summary.innerHTML = `<div class="errorBox"><b>ไม่สำเร็จ:</b> ${msg || "เกิดข้อผิดพลาด"}</div>`;
   }
 
-  // ==========================================
-  // 6) Run
-  // ==========================================
   async function run(){
     const no = (noEl.value || "").trim();
     if(!no){ alert("กรุณากรอกเลขพัสดุ"); return; }
@@ -790,13 +751,14 @@ const curGroup = currentGroup || groupOf(latestTh);
         return;
       }
 
-    const events = data.events || data.history || data.traces || data.track || [];
+      const events = data.events || data.history || data.traces || data.track || [];
 
-// สรุป “จากไทม์ไลน์” โดยตรง
-const sm = buildSummaryFromTimeline(events);
+      const sm = buildSummaryFromTimeline(events);
 
-renderSummary(data, sm.latestTh, sm.latestPct, sm.whichCase, sm.currentGroup);
-renderGroupedTimeline(events); // ไทม์ไลน์ยัง render เหมือนเดิม
+      renderSummary(data, sm.latestTh, sm.latestPct, sm.whichCase, sm.currentGroup);
+
+      // ✅ สำคัญ: ส่ง whichCase เข้า timeline เพื่อให้ตรงกับ summary 100%
+      renderGroupedTimeline(events, sm.whichCase);
 
     }catch(e){
       setError(String(e));

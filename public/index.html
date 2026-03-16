@@ -361,6 +361,7 @@
   const STATUS_MAP = [
     // ขนส่ง(ปลายทาง)
     { zh: "順利送達", th: "พัสดุถึงผู้รับเรียบร้อยแล้ว" },
+    { zh: "簽收人：已簽收", th: "พัสดุถึงผู้รับเรียบร้อยแล้ว" },
     { zh: "配送中", th: "อยู่ระหว่างจัดส่ง" },
     { zh: "已集貨", th: "พัสดุอยู่ศูนย์คัดแยกพัสดุ" },
 
@@ -545,27 +546,23 @@
       return { th, pct, group: groupOf(th), time: pickTimeText(e) };
     }).filter(Boolean);
 
-    const seen = new Set();
-    const deduped = [];
-    for (const x of mapped){
-      if (seen.has(x.th)) continue;
-      seen.add(x.th);
-      deduped.push(x);
-    }
+    if (!mapped.length) {
+  return {
+    whichCase,
+    currentGroup: "คลังสินค้าต้นทาง",
+    latestPct: null,
+    latestTh: null
+  };
+}
 
-    const currentGroup =
-      GROUP_ORDER.find(g => deduped.some(x => x.group === g)) ||
-      (deduped[0]?.group || "คลังสินค้าต้นทาง");
+const latest = mapped[mapped.length - 1];
 
-    const maxPct = deduped.reduce((m, x) => Math.max(m, x.pct), -Infinity);
-    const latestPct = Number.isFinite(maxPct) ? maxPct : null;
-
-    const best = deduped.slice().sort((a,b) => b.pct - a.pct)[0] || null;
-    const latestTh = best ? best.th : null;
-
-    return { whichCase, currentGroup, latestPct, latestTh };
-  }
-
+return {
+  whichCase,
+  currentGroup: latest.group,
+  latestPct: latest.pct,
+  latestTh: latest.th
+};
  function renderSummary(data, latestTh, latestPct, whichCase, currentGroup){
   if (!latestTh) {
     summary.style.display = "none";

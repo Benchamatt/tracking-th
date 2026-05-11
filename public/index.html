@@ -396,207 +396,304 @@
     ]
   };
 
-  const GROUP_ORDER = [
-  "คลังสินค้าต้นทาง",
-  "ศุลกากรประเทศปลายทาง",
-  "ขนส่งปลายทาง"
-];
+  const GROUP_ORDER = ["ขนส่งปลายทาง", "ศุลกากรประเทศปลายทาง", "คลังสินค้าต้นทาง"];
 
-function detectCaseFromThaiStatuses(thList){
-  const joined = (thList || []).join(" ");
-
-  if (
-    joined.includes("ไม่พบข้อมูลผู้เดินพิธีการ") ||
-    joined.includes("ลงทะเบียนกับ EZ WAY") ||
-    joined.includes("ข้อมูลที่ใช้เดินพิธีการไม่สอดคล้องกัน")
-  ) return "case2";
-
-  return "case1";
-}
-
-function normalizeText(s) {
-  return (s || "")
-    .replace(/[“”]/g, '"')
-    .replace(/\s+/g, " ")
-    .trim();
-}
-
-function getProgressPct(th, whichCase){
-  if (!th) return null;
-
-  const rules = PROGRESS_RULES[whichCase] || PROGRESS_RULES.case1;
-  const t = normalizeText(th);
-
-  for (const r of rules){
-    if (t.includes(normalizeText(r.contains))) {
-      return r.pct;
-    }
+  function detectCaseFromThaiStatuses(thList){
+    const joined = (thList || []).join(" ");
+    if (
+      joined.includes("ไม่พบข้อมูลผู้เดินพิธีการ") ||
+      joined.includes("ลงทะเบียนกับ EZ WAY") ||
+      joined.includes("ข้อมูลที่ใช้เดินพิธีการไม่สอดคล้องกัน")
+    ) return "case2";
+    return "case1";
   }
 
-  return null;
-}
-
-function hasChinese(s){
-  return /[\u4e00-\u9fff]/.test(s || "");
-}
-
-function extractZh(mixed) {
-  const s = normalizeText(mixed);
-  const m = s.match(/[（(]([^）)]+)[）)]/);
-
-  if (m && m[1]) return normalizeText(m[1]);
-
-  return s;
-}
-
-function pickStatusText(obj) {
-  if (!obj || typeof obj !== "object") return "";
-
-  const keys = [
-    "status_zh","status_cn","status","status_text","statusText",
-    "latest_status_zh","latest_status_cn","latest_status","latestStatus",
-    "desc_zh","description_zh","description","remark","remark_zh",
-    "message","state","event"
-  ];
-
-  for (const k of keys) {
-    const v = obj[k];
-
-    if (typeof v === "string" && v.trim()) {
-      return v;
-    }
+  function normalizeText(s) {
+    return (s || "")
+      .replace(/[“”]/g, '"')
+      .replace(/\s+/g, " ")
+      .trim();
   }
 
-  return "";
-}
+  function getProgressPct(th, whichCase){
+    if (!th) return null;
+    const rules = PROGRESS_RULES[whichCase] || PROGRESS_RULES.case1;
+    const t = normalizeText(th);
 
-function pickTimeText(obj) {
-  if (!obj || typeof obj !== "object") return "-";
+    for (const r of rules){
+      if (t.includes(normalizeText(r.contains))) return r.pct;
+    }
+    return null;
+  }
 
-  return obj.time || obj.datetime || obj.dateTime || obj.date_time || obj.timestamp || "-";
-}
+  function hasChinese(s){
+    return /[\u4e00-\u9fff]/.test(s || "");
+  }
 
-function toThaiStatus(rawAny) {
-  const raw = extractZh(rawAny);
+  function extractZh(mixed) {
+    const s = normalizeText(mixed);
+    const m = s.match(/[（(]([^）)]+)[）)]/);
+    if (m && m[1]) return normalizeText(m[1]);
+    return s;
+  }
 
-  if (!raw) return null;
-  if (!hasChinese(raw)) return null;
+  function pickStatusText(obj) {
+    if (!obj || typeof obj !== "object") return "";
+    const keys = [
+      "status_zh","status_cn","status","status_text","statusText",
+      "latest_status_zh","latest_status_cn","latest_status","latestStatus",
+      "desc_zh","description_zh","description","remark","remark_zh",
+      "message","state","event"
+    ];
+    for (const k of keys) {
+      const v = obj[k];
+      if (typeof v === "string" && v.trim()) return v;
+    }
+    return "";
+  }
 
-  const zh = normalizeText(raw);
+  function pickTimeText(obj) {
+    if (!obj || typeof obj !== "object") return "-";
+    return obj.time || obj.datetime || obj.dateTime || obj.date_time || obj.timestamp || "-";
+  }
 
-  const exact = STATUS_MAP.find(
-    x => normalizeText(x.zh) === zh
-  );
+  function toThaiStatus(rawAny) {
+    const raw = extractZh(rawAny);
+    if (!raw) return null;
+    if (!hasChinese(raw)) return null;
 
-  if (exact) return exact.th;
+    const zh = normalizeText(raw);
 
-  const loose = STATUS_MAP.find(
-    x =>
-      zh.includes(normalizeText(x.zh)) ||
-      normalizeText(x.zh).includes(zh)
-  );
+    const exact = STATUS_MAP.find(x => normalizeText(x.zh) === zh);
+    if (exact) return exact.th;
 
-  if (loose) return loose.th;
+    const loose = STATUS_MAP.find(x => zh.includes(normalizeText(x.zh)) || normalizeText(x.zh).includes(zh));
+    if (loose) return loose.th;
 
-  return null;
-}
+    return null;
+  }
 
-function groupOf(th){
+  function groupOf(th){
+    if (!th) return "คลังสินค้าต้นทาง";
 
-  if (!th) {
+    if (
+      th.includes("พัสดุถึงผู้รับเรียบร้อยแล้ว") ||
+      th.includes("อยู่ระหว่างจัดส่ง") ||
+      th.includes("พัสดุอยู่ศูนย์คัดแยกพัสดุ")
+    ) {
+      return "ขนส่งปลายทาง";
+    }
+
+    if (
+      th.includes("กำลังดำเนินการนำสินค้า") ||
+      th.includes("ระบบศุลกากรรับ") ||
+      th.includes("เนื่องจากระบบศุลกากรไม่พบข้อมูล") ||
+      th.includes("ข้อมูลที่ใช้เดินพิธีการ") ||
+      th.includes("ไม่พบข้อมูลผู้เดินพิธีการ")
+    ) {
+      return "ศุลกากรประเทศปลายทาง";
+    }
+
+    if (
+      th.includes("ออกคลัง") ||
+      th.includes("ใบปะหน้า") ||
+      th.includes("สร้างออเดอร์")
+    ) {
+      return "คลังสินค้าต้นทาง";
+    }
+
     return "คลังสินค้าต้นทาง";
   }
 
-  // ต้นทาง
-  if (
-    th.includes("สร้างออเดอร์") ||
-    th.includes("ใบปะหน้า") ||
-    th.includes("ออกคลัง")
-  ) {
-    return "คลังสินค้าต้นทาง";
+  function badgeOf(th){
+    if (!th) return { cls:"warn", label:"กำลังดำเนินการ" };
+    if (th.includes("ถึงผู้รับ")) return { cls:"ok", label:"ถึงแล้ว" };
+    if (th.includes("โปรดตรวจสอบ") || th.includes("ไม่สอดคล้อง") || th.includes("ติดต่อ")) {
+      return { cls:"bad", label:"มีปัญหา" };
+    }
+    return { cls:"warn", label:"กำลังขนส่ง" };
   }
 
-  // ศุลกากร
-  if (
-    th.includes("กำลังดำเนินการนำสินค้า") ||
-    th.includes("ระบบศุลกากรรับ") ||
-    th.includes("เนื่องจากระบบศุลกากรไม่พบข้อมูล") ||
-    th.includes("ข้อมูลที่ใช้เดินพิธีการ") ||
-    th.includes("ไม่พบข้อมูลผู้เดินพิธีการ")
-  ) {
-    return "ศุลกากรประเทศปลายทาง";
-  }
+  function buildSummaryFromTimeline(events){
+    const arr = Array.isArray(events) ? events : (events ? [events] : []);
+    const thAll = arr.map(e => toThaiStatus(pickStatusText(e))).filter(Boolean);
+    const whichCase = detectCaseFromThaiStatuses(thAll);
 
-  // ปลายทาง
-  if (
-    th.includes("พัสดุอยู่ศูนย์คัดแยกพัสดุ") ||
-    th.includes("อยู่ระหว่างจัดส่ง") ||
-    th.includes("พัสดุถึงผู้รับเรียบร้อยแล้ว")
-  ) {
-    return "ขนส่งปลายทาง";
-  }
+    const mapped = arr.map(e => {
+      const th = toThaiStatus(pickStatusText(e));
+      if (!th) return null;
 
-  return "คลังสินค้าต้นทาง";
-}
+      const pct = getProgressPct(th, whichCase);
+      if (pct == null) return null;
 
-function badgeOf(th){
+      return {
+        th,
+        pct,
+        group: groupOf(th),
+        time: pickTimeText(e)
+      };
+    }).filter(Boolean);
 
-  if (!th) {
+    if (!mapped.length) {
+      return {
+        whichCase,
+        currentGroup: "คลังสินค้าต้นทาง",
+        latestPct: null,
+        latestTh: null
+      };
+    }
+
+    mapped.sort((a, b) => {
+      const timeA = new Date(a.time).getTime() || 0;
+      const timeB = new Date(b.time).getTime() || 0;
+      return timeB - timeA;
+    });
+
+    const latest = mapped[0];
+
     return {
-      cls:"warn",
-      label:"กำลังดำเนินการ"
+      whichCase,
+      currentGroup: latest.group,
+      latestPct: latest.pct,
+      latestTh: latest.th
     };
   }
 
-  // ถึงแล้ว
-  if (th.includes("ถึงผู้รับ")) {
-    return {
-      cls:"ok",
-      label:"ถึงแล้ว"
-    };
+  function renderSummary(data, latestTh, latestPct, whichCase, currentGroup){
+    if (!latestTh) {
+      summary.style.display = "none";
+      summary.innerHTML = "";
+      return;
+    }
+
+    summary.style.display = "block";
+    const badge = badgeOf(latestTh);
+
+    const curGroup = currentGroup || groupOf(latestTh);
+    const steps = [
+      { key: "คลังสินค้าต้นทาง", max: 30 },
+      { key: "ศุลกากรประเทศปลายทาง", max: 70 },
+      { key: "ขนส่งปลายทาง", max: 100 },
+    ];
+
+    const pctSafe =
+      (typeof latestPct === "number" && latestPct >= 0 && latestPct <= 100)
+        ? latestPct
+        : null;
+
+    const stepsHtml = steps.map((s) => {
+      const isDone = typeof pctSafe === "number" ? pctSafe >= s.max : false;
+      const isActive = s.key === curGroup;
+
+      return `
+        <div class="step ${isDone ? "done" : ""} ${isActive ? "active" : ""}">
+          <div class="stepTop">
+            <span class="stepDot" aria-hidden="true"></span>
+            <div class="stepTitle">${s.key} (${s.max}%)</div>
+          </div>
+        </div>
+      `;
+    }).join("");
+
+    const helpHtml = (whichCase === "case2")
+      ? `<div class="helpNote" style="margin-top:12px">
+           พบสถานะที่ต้องตรวจสอบข้อมูลศุลกากร/ผู้เดินพิธีการ (EZ WAY) แนะนำให้ตรวจสอบการลงทะเบียน และติดต่อเจ้าหน้าที่ผ่าน
+           <a href="https://line.me/R/ti/p/@wmex" target="_blank" rel="noopener noreferrer">LINE</a>
+         </div>`
+      : "";
+
+    summary.innerHTML = `
+      <div class="summaryTop">
+        <div class="kv">
+          <div><b>อัปเดตล่าสุด</b> <span class="value">${data.last_update || data.lastUpdate || "-"}</span></div>
+        </div>
+
+        <span class="badge ${badge.cls}">
+          <span class="dot"></span>
+          ${badge.label}
+        </span>
+      </div>
+
+      <div class="progressWrap">
+        <div class="progressHead">
+          <b>ความคืบหน้าโดยรวม</b>
+          <div>${pctSafe == null ? "-" : pctSafe + "%"}</div>
+        </div>
+        <div class="progressBar">
+          <div class="progressFill" style="width:${pctSafe == null ? 0 : pctSafe}%;"></div>
+        </div>
+      </div>
+
+      <div class="stepper">
+        <div class="steps">
+          ${stepsHtml}
+        </div>
+      </div>
+
+      ${helpHtml}
+    `;
   }
 
-  // มีปัญหา
-  if (
-    th.includes("โปรดตรวจสอบ") ||
-    th.includes("ไม่สอดคล้อง") ||
-    th.includes("ติดต่อ")
-  ) {
-    return {
-      cls:"bad",
-      label:"มีปัญหา"
-    };
-  }
+  function renderGroupedTimeline(events, whichCaseArg){
+    const arr = Array.isArray(events) ? events : (events ? [events] : []);
 
-  // ต้นทาง
-  if (
-    th.includes("สร้างออเดอร์") ||
-    th.includes("ใบปะหน้า") ||
-    th.includes("ออกคลัง")
-  ) {
-    return {
-      cls:"warn",
-      label:"ดำเนินการต้นทาง"
-    };
-  }
+    const translated = arr.map(e => {
+      const th = toThaiStatus(pickStatusText(e));
+      return { time: pickTimeText(e), th };
+    }).filter(x => !!x.th);
 
-  // ศุลกากร
-  if (
-    th.includes("ศุลกากร") ||
-    th.includes("ผู้เดินพิธีการ")
-  ) {
-    return {
-      cls:"warn",
-      label:"ดำเนินพิธีศุลกากร"
-    };
-  }
+    if (!translated.length) {
+      if (history) history.style.display = "none";
+      return;
+    }
 
-  // ขนส่ง
-  return {
-    cls:"warn",
-    label:"กำลังขนส่ง"
-  };
-}
+    const whichCase = whichCaseArg || detectCaseFromThaiStatuses(translated.map(x => x.th));
+
+    const latestByStatus = new Map();
+
+    for (const x of translated) {
+      const pct = getProgressPct(x.th, whichCase);
+      if (pct == null) continue;
+
+      latestByStatus.set(x.th, { ...x, pct, group: groupOf(x.th) });
+    }
+
+    const deduped = Array.from(latestByStatus.values());
+
+    if (!deduped.length) {
+      history.style.display = "none";
+      return;
+    }
+
+    const buckets = new Map(GROUP_ORDER.map(g => [g, []]));
+    for (const x of deduped) {
+      if (!buckets.has(x.group)) buckets.set(x.group, []);
+      buckets.get(x.group).push(x);
+    }
+
+    const html = GROUP_ORDER
+      .filter(g => (buckets.get(g) || []).length > 0)
+      .map(g => {
+        const items = buckets.get(g) || [];
+        const itemsHtml = items.map(it => `
+          <div class="event">
+            <div class="time">${it.time || "-"}</div>
+            <div class="text">${it.th}</div>
+          </div>
+        `).join("");
+
+        return `
+          <div class="group">
+            <div class="groupTitle"><div>${g}</div></div>
+            <div class="timeline">${itemsHtml}</div>
+          </div>
+        `;
+      })
+      .join("");
+
+    groupsEl.innerHTML = html;
+    history.style.display = "block";
+  }
 
   function setLoading(){
     summary.style.display = "block";
@@ -665,4 +762,4 @@ function badgeOf(th){
   });
 </script>
 </body>
-</html>
+</html>   จากโค้ดนี้อยากให้เเก้ เเก้หัวข้อตามนี้

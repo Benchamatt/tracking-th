@@ -505,15 +505,54 @@
     return "คลังสินค้าต้นทาง";
   }
 
-  function badgeOf(th){
-    if (!th) return { cls:"warn", label:"กำลังดำเนินการ" };
-    if (th.includes("ถึงผู้รับ")) return { cls:"ok", label:"ถึงแล้ว" };
-    if (th.includes("โปรดตรวจสอบ") || th.includes("ไม่สอดคล้อง") || th.includes("ติดต่อ")) {
-      return { cls:"bad", label:"มีปัญหา" };
-    }
+ function badgeOf(th){
+  if (!th) return { cls:"warn", label:"กำลังดำเนินการ" };
+
+  const t = th.trim();
+
+  // 🟢 สำเร็จ / ถึงแล้ว
+  if (
+    t.includes("พัสดุถึงผู้รับเรียบร้อยแล้ว") ||
+    t.includes("順利送達") ||
+    t.includes("已簽收")
+  ) {
+    return { cls:"ok", label:"ถึงแล้ว" };
+  }
+
+  // 🔴 มีปัญหา / ศุลกากร / เอกสาร
+  if (
+    t.includes("ระบบศุลกากรรับ") ||
+    t.includes("เนื่องจากระบบศุลกากรไม่พบข้อมูล") ||
+    t.includes("ข้อมูลที่ใช้เดินพิธีการไม่สอดคล้องกัน") ||
+    t.includes("ไม่พบข้อมูลผู้เดินพิธีการ") ||
+    t.includes("โปรดตรวจสอบ") ||
+    t.includes("ติดต่อ")
+  ) {
+    return { cls:"bad", label:"มีปัญหา" };
+  }
+
+  // 🔵 ดำเนินการต้นทาง
+  if (
+    t.includes("สร้างออเดอร์") ||
+    t.includes("ใบปะหน้า") ||
+    t.includes("ออกคลัง") ||
+    t.includes("กำลังดำเนินการนำสินค้าออกจากคลัง")
+  ) {
+    return { cls:"blue", label:"ดำเนินการต้นทาง" };
+  }
+
+  // 🟡 ระหว่างขนส่ง
+  if (
+    t.includes("อยู่ระหว่างจัดส่ง") ||
+    t.includes("พัสดุอยู่ศูนย์คัดแยกพัสดุ") ||
+    t.includes("配送中") ||
+    t.includes("已集貨")
+  ) {
     return { cls:"warn", label:"กำลังขนส่ง" };
   }
 
+  return { cls:"warn", label:"กำลังดำเนินการ" };
+}
   function buildSummaryFromTimeline(events){
     const arr = Array.isArray(events) ? events : (events ? [events] : []);
     const thAll = arr.map(e => toThaiStatus(pickStatusText(e))).filter(Boolean);

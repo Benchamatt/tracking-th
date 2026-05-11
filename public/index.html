@@ -505,23 +505,20 @@
     return "คลังสินค้าต้นทาง";
   }
 
- function badgeOf(th){
+function badgeOf(th){
   if (!th) return { cls:"warn", label:"กำลังดำเนินการ" };
 
   const t = th.trim();
 
   // 🟢 สำเร็จ / ถึงแล้ว
   if (
-    t.includes("พัสดุถึงผู้รับเรียบร้อยแล้ว") ||
-    t.includes("順利送達") ||
-    t.includes("已簽收")
+    t.includes("พัสดุถึงผู้รับเรียบร้อยแล้ว")
   ) {
     return { cls:"ok", label:"ถึงแล้ว" };
   }
 
-  // 🔴 มีปัญหา / ศุลกากร / เอกสาร
+  // 🔴 พบปัญหา
   if (
-    t.includes("ระบบศุลกากรรับ") ||
     t.includes("เนื่องจากระบบศุลกากรไม่พบข้อมูล") ||
     t.includes("ข้อมูลที่ใช้เดินพิธีการไม่สอดคล้องกัน") ||
     t.includes("ไม่พบข้อมูลผู้เดินพิธีการ") ||
@@ -531,12 +528,19 @@
     return { cls:"bad", label:"มีปัญหา" };
   }
 
+  // 🟠 ศุลกากร / ตรวจสอบ (เพิ่มให้แล้ว)
+  if (
+    t.includes("ระบบศุลกากรรับ") ||
+    t.includes("กำลังดำเนินการนำสินค้าออกจากคลัง")
+  ) {
+    return { cls:"orange", label:"ศุลกากร / ดำเนินการตรวจสอบ" };
+  }
+
   // 🔵 ดำเนินการต้นทาง
   if (
     t.includes("สร้างออเดอร์") ||
     t.includes("ใบปะหน้า") ||
-    t.includes("ออกคลัง") ||
-    t.includes("กำลังดำเนินการนำสินค้าออกจากคลัง")
+    t.includes("ออกคลัง")
   ) {
     return { cls:"blue", label:"ดำเนินการต้นทาง" };
   }
@@ -544,59 +548,13 @@
   // 🟡 ระหว่างขนส่ง
   if (
     t.includes("อยู่ระหว่างจัดส่ง") ||
-    t.includes("พัสดุอยู่ศูนย์คัดแยกพัสดุ") ||
-    t.includes("配送中") ||
-    t.includes("已集貨")
+    t.includes("พัสดุอยู่ศูนย์คัดแยกพัสดุ")
   ) {
     return { cls:"warn", label:"กำลังขนส่ง" };
   }
 
   return { cls:"warn", label:"กำลังดำเนินการ" };
 }
-  function buildSummaryFromTimeline(events){
-    const arr = Array.isArray(events) ? events : (events ? [events] : []);
-    const thAll = arr.map(e => toThaiStatus(pickStatusText(e))).filter(Boolean);
-    const whichCase = detectCaseFromThaiStatuses(thAll);
-
-    const mapped = arr.map(e => {
-      const th = toThaiStatus(pickStatusText(e));
-      if (!th) return null;
-
-      const pct = getProgressPct(th, whichCase);
-      if (pct == null) return null;
-
-      return {
-        th,
-        pct,
-        group: groupOf(th),
-        time: pickTimeText(e)
-      };
-    }).filter(Boolean);
-
-    if (!mapped.length) {
-      return {
-        whichCase,
-        currentGroup: "คลังสินค้าต้นทาง",
-        latestPct: null,
-        latestTh: null
-      };
-    }
-
-    mapped.sort((a, b) => {
-      const timeA = new Date(a.time).getTime() || 0;
-      const timeB = new Date(b.time).getTime() || 0;
-      return timeB - timeA;
-    });
-
-    const latest = mapped[0];
-
-    return {
-      whichCase,
-      currentGroup: latest.group,
-      latestPct: latest.pct,
-      latestTh: latest.th
-    };
-  }
 
   function renderSummary(data, latestTh, latestPct, whichCase, currentGroup){
     if (!latestTh) {

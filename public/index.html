@@ -810,10 +810,9 @@
         cache: "no-store"
       }),
 
-      fetch(`https://teleport.delivery/track?layout=none&tracking_number=${encodeURIComponent(no)}`, {
-        cache: "no-store"
-      })
-    ]);
+      fetch(`/api/teleport-track?no=${encodeURIComponent(no)}`, {
+  cache: "no-store"
+})
 
     let wmData = {};
     let tpData = {};

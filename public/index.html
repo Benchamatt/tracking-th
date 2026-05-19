@@ -827,12 +827,20 @@
     }
 
     // Teleport API
-    if (
-      tpRes.status === "fulfilled" &&
-      tpRes.value.ok
-    ) {
-      tpData = await tpRes.value.json();
-    }
+    // Teleport API
+if (
+  tpRes.status === "fulfilled" &&
+  tpRes.value.ok
+) {
+
+  try {
+    tpData = await tpRes.value.json();
+    console.log("Teleport:", tpData);
+  } catch {
+    tpData = {};
+  }
+
+}
 
     // รวม events จากทั้ง 2 ที่
     const events = [

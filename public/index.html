@@ -398,6 +398,12 @@
     { zh: "您的貨物已準備從集運倉出倉", th: "พัสดุของคุณออกคลัง เพื่อเตรียมส่งไปยังสนามบินแล้ว" },
     { zh: "已經打印好地址面單", th: "พิมพ์ใบปะหน้าที่อยู่เรียบร้อยแล้ว" },
     { zh: "您已下單成功", th: "สร้างออเดอร์การจัดส่งเรียบร้อย" },
+    { zh: "Delivered", th: "พัสดุถึงผู้รับเรียบร้อยแล้ว" },
+    { zh: "Out for delivery", th: "อยู่ระหว่างจัดส่ง" },
+    { zh: "Shipment with Courier", th: "พัสดุอยู่ศูนย์คัดแยกพัสดุ" },
+    { zh: "Export customs clearance success", th: "พัสดุอยู่ระหว่างการเดินพิธีการศุลกากรในประเทศปลายทาง" },
+    { zh: "Pickup", th: "พัสดุของคุณออกคลัง เพื่อเตรียมส่งไปยังสนามบินแล้ว" },
+    { zh: "Order", th: "สร้างออเดอร์การจัดส่งเรียบร้อย" },
   ];
 
   const PROGRESS_RULES = {
@@ -490,7 +496,6 @@
   function toThaiStatus(rawAny) {
     const raw = extractZh(rawAny);
     if (!raw) return null;
-    if (!hasChinese(raw)) return null;
 
     const zh = normalizeText(raw);
 
@@ -787,46 +792,94 @@
   }
 
   async function run(){
-    const no = (noEl.value || "").trim();
-    if(!no){
-      alert("กรุณากรอกเลขพัสดุ");
+  const no = (noEl.value || "").trim();
+
+  if(!no){
+    alert("กรุณากรอกเลขพัสดุ");
+    return;
+  }
+
+  btn.disabled = true;
+  setLoading();
+
+  try{
+
+    // ยิง 2 API พร้อมกัน
+    const [wmRes, tpRes] = await Promise.allSettled([
+      fetch(`/api/track?no=${encodeURIComponent(no)}`, {
+        cache: "no-store"
+      }),
+
+      fetch(`https://teleport.delivery/track?layout=none&tracking_number=${encodeURIComponent(no)}`, {
+        cache: "no-store"
+      })
+    ]);
+
+    let wmData = {};
+    let tpData = {};
+
+    // Weiming API
+    if (
+      wmRes.status === "fulfilled" &&
+      wmRes.value.ok
+    ) {
+      wmData = await wmRes.value.json();
+    }
+
+    // Teleport API
+    if (
+      tpRes.status === "fulfilled" &&
+      tpRes.value.ok
+    ) {
+      tpData = await tpRes.value.json();
+    }
+
+    // รวม events จากทั้ง 2 ที่
+    const events = [
+      ...(wmData.events || wmData.history || []),
+      ...(tpData.events || tpData.history || tpData.traces || [])
+    ];
+
+    if (!events.length) {
+      setError("ไม่พบข้อมูลพัสดุ");
       return;
     }
 
-    btn.disabled = true;
-    setLoading();
+    // เรียงเวลาล่าสุดก่อน
+    events.sort((a,b)=>{
+      const ta = new Date(
+        a.time || a.datetime || a.timestamp || 0
+      ).getTime();
 
-    try{
-      const url = `/api/track?no=${encodeURIComponent(no)}`;
-      const r = await fetch(url, { cache: "no-store" });
-      const text = await r.text();
+      const tb = new Date(
+        b.time || b.datetime || b.timestamp || 0
+      ).getTime();
 
-      let data;
-      try {
-        data = JSON.parse(text);
-      } catch {
-        setError(`API ไม่ได้ส่ง JSON (HTTP ${r.status})`);
-        return;
-      }
+      return tb - ta;
+    });
 
-      if(!r.ok){
-        setError(data.error || `HTTP ${r.status}`);
-        return;
-      }
+    const sm = buildSummaryFromTimeline(events);
 
-      const events = data.events || data.history || data.traces || data.track || [];
-      const sm = buildSummaryFromTimeline(events);
+    renderSummary(
+      wmData,
+      sm.latestTh,
+      sm.latestPct,
+      sm.whichCase,
+      sm.currentGroup
+    );
 
-      renderSummary(data, sm.latestTh, sm.latestPct, sm.whichCase, sm.currentGroup);
-      renderGroupedTimeline(events, sm.whichCase);
+    renderGroupedTimeline(events, sm.whichCase);
 
-    }catch(e){
-      setError(String(e));
-    }finally{
-      btn.disabled = false;
-    }
+  } catch(e){
+
+    setError(String(e));
+
+  } finally {
+
+    btn.disabled = false;
+
   }
-
+}
   btn.addEventListener("click", run);
   noEl.addEventListener("keydown", (e) => {
     if(e.key === "Enter") run();

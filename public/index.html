@@ -805,14 +805,15 @@
   try{
 
     // ยิง 2 API พร้อมกัน
-    const [wmRes, tpRes] = await Promise.allSettled([
-      fetch(`/api/track?no=${encodeURIComponent(no)}`, {
-        cache: "no-store"
-      }),
+   const [wmRes, tpRes] = await Promise.allSettled([
+  fetch(`/api/track?no=${encodeURIComponent(no)}`, {
+    cache: "no-store"
+  }),
 
-      fetch(`/api/teleport-track?no=${encodeURIComponent(no)}`, {
-  cache: "no-store"
-})
+  fetch(`/api/teleport-track?no=${encodeURIComponent(no)}`, {
+    cache: "no-store"
+  })
+]);
 
     let wmData = {};
     let tpData = {};

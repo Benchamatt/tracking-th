@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Weiming Tracking</title>
+  <title>Weiming & Teleport Tracking</title>
 
   <style>
     :root{
@@ -81,6 +81,35 @@
     .muted{color:var(--muted); font-size:13px}
     .small{font-size:12px; color:var(--muted)}
 
+    .route-tabs {
+      display: flex;
+      gap: 8px;
+      margin: 14px 0;
+      background: var(--surface-2);
+      padding: 4px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+    }
+    .route-tab {
+      flex: 1;
+      padding: 10px 8px;
+      border: none;
+      background: transparent;
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 700;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: all .15s ease;
+      white-space: nowrap;
+    }
+    .route-tab.active {
+      background: var(--surface);
+      color: var(--brand);
+      box-shadow: 0 4px 10px rgba(2, 6, 23, 0.05);
+      border: 1px solid rgba(15, 95, 191, 0.15);
+    }
+
     .searchRow{
       display:grid;
       grid-template-columns: 1fr 132px;
@@ -138,31 +167,11 @@
     }
     .dot{width:8px;height:8px;border-radius:999px;background: currentColor;opacity:.95}
 
-    .badge.ok{
-      background: rgba(34,197,94,.12);
-      color: #16a34a;
-      border-color: rgba(34,197,94,.25);
-    }
-    .badge.customs{
-      background: rgba(234,179,8,.12);
-      color: #ca8a04;
-      border-color: rgba(234,179,8,.25);
-    }
-    .badge.bad{
-      background: rgba(239,68,68,.12);
-      color: #dc2626;
-      border-color: rgba(239,68,68,.25);
-    }
-    .badge.shipping{
-      background: rgba(249,115,22,.12);
-      color: #ea580c;
-      border-color: rgba(249,115,22,.25);
-    }
-    .badge.origin{
-      background: rgba(59,130,246,.12);
-      color: #2563eb;
-      border-color: rgba(59,130,246,.25);
-    }
+    .badge.ok{ background: rgba(34,197,94,.12); color: #16a34a; border-color: rgba(34,197,94,.25); }
+    .badge.customs{ background: rgba(234,179,8,.12); color: #ca8a04; border-color: rgba(234,179,8,.25); }
+    .badge.bad{ background: rgba(239,68,68,.12); color: #dc2626; border-color: rgba(239,68,68,.25); }
+    .badge.shipping{ background: rgba(249,115,22,.12); color: #ea580c; border-color: rgba(249,115,22,.25); }
+    .badge.origin{ background: rgba(59,130,246,.12); color: #2563eb; border-color: rgba(59,130,246,.25); }
 
     .group{margin-top:12px}
     .groupTitle{
@@ -199,13 +208,8 @@
     .event:before{
       content:"";
       position:absolute;
-      left:-18px;
-      top: 16px;
-      width: 12px;
-      height: 12px;
-      border-radius: 999px;
-      background: var(--surface);
-      border: 3px solid rgba(15,95,191,.55);
+      left:-18px; top: 16px; width: 12px; height: 12px; border-radius: 999px;
+      background: var(--surface); border: 3px solid rgba(15,95,191,.55);
       box-shadow: 0 0 0 3px rgba(15,95,191,.10);
     }
     .event .time{font-size:12px;color:var(--muted)}
@@ -214,38 +218,20 @@
     .errorBox{
       border: 1px solid rgba(185,28,28,.25);
       background: rgba(185,28,28,.08);
-      color: var(--bad);
-      border-radius: 14px;
-      padding: 10px 12px;
-      font-size: 13px;
+      color: var(--bad); border-radius: 14px; padding: 10px 12px; font-size: 13px;
     }
 
-    .loading{
-      display:flex;align-items:center;gap:10px;
-      font-size:13px;color:var(--muted);
-    }
+    .loading{ display:flex;align-items:center;gap:10px; font-size:13px;color:var(--muted); }
     .spinner{
       width:16px;height:16px;border-radius:999px;
-      border:2px solid rgba(15,95,191,.25);
-      border-top-color: rgba(15,95,191,.85);
+      border:2px solid rgba(15,95,191,.25); border-top-color: rgba(15,95,191,.85);
       animation: spin 0.9s linear infinite;
     }
     @keyframes spin{to{transform:rotate(360deg)}}
 
-    .footer{
-      margin-top: 14px;
-      padding: 12px 6px 2px;
-      text-align:center;
-      color: var(--muted);
-      font-size: 12px;
-    }
+    .footer{ margin-top: 14px; padding: 12px 6px 2px; text-align:center; color: var(--muted); font-size: 12px; }
     .footer a{color: var(--muted); text-decoration:none}
     .footer a:hover{text-decoration:underline}
-
-    #rule,
-    #groupHint {
-      display: none !important;
-    }
 
     .stepper{margin-top:14px}
     .steps{display:flex;gap:12px;align-items:stretch}
@@ -260,14 +246,10 @@
     .stepTop{display:flex;align-items:center;gap:10px}
     .stepDot{
       width:12px;height:12px;border-radius:999px;
-      background: rgba(100,116,139,.22);
-      border:3px solid rgba(100,116,139,.16);
+      background: rgba(100,116,139,.22); border:3px solid rgba(100,116,139,.16);
       flex:0 0 auto;
     }
-    .stepTitle{
-      font-size:12px; font-weight:900; color:var(--muted);
-      letter-spacing:.2px; line-height:1.2;
-    }
+    .stepTitle{ font-size:12px; font-weight:900; color:var(--muted); letter-spacing:.2px; line-height:1.2; }
     .step.active{background: rgba(15,95,191,.06); border-color: rgba(15,95,191,.22)}
     .step.active .stepDot{
       background: var(--brand); border-color: rgba(15,95,191,.22);
@@ -281,9 +263,7 @@
     
     @media(max-width:520px){
       .steps{flex-direction:column;gap:10px}
-      .step:not(:last-child)::after{
-        top:auto; bottom:-10px; left:18px; right:auto; width:2px; height:10px;
-      }
+      .step:not(:last-child)::after{ top:auto; bottom:-10px; left:18px; right:auto; width:2px; height:10px; }
     }
 
     .progressWrap{
@@ -291,52 +271,13 @@
       border: 1px solid var(--border);
       background: linear-gradient(180deg, rgba(15,95,191,.05), rgba(15,95,191,.02));
     }
-    .progressHead{
-      display:flex; align-items:center; justify-content:space-between; gap:10px;
-      margin-bottom: 8px;
-    }
+    .progressHead{ display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom: 8px; }
     .progressHead b{font-size:13px}
     .progressBar{
-      width:100%; height:10px; border-radius999px;
-      background: rgba(100,116,139,.18);
-      overflow:hidden;
-      border:1px solid rgba(100,116,139,.18);
+      width:100%; height:10px; border-radius:999px;
+      background: rgba(100,116,139,.18); overflow:hidden; border:1px solid rgba(100,116,139,.18);
     }
-    .progressFill{
-      height:100%; width:0%;
-      background: linear-gradient(135deg, var(--brand), var(--brand-2));
-      border-radius:999px;
-    }
-
-    /* แก้ไขปีกกาครอบโค้ดแท็บตรงนี้ให้ถูกต้อง */
-    .route-tabs {
-      display: flex;
-      gap: 8px;
-      margin-bottom: 14px;
-      background: var(--surface-2);
-      padding: 4px;
-      border-radius: 12px;
-      border: 1px solid var(--border);
-    }
-    .route-tab {
-      flex: 1;
-      padding: 10px 8px;
-      border: none;
-      background: transparent;
-      color: var(--muted);
-      font-size: 13px;
-      font-weight: 700;
-      border-radius: 10px;
-      cursor: pointer;
-      transition: all .15s ease;
-      white-space: nowrap;
-    }
-    .route-tab.active {
-      background: var(--surface);
-      color: var(--brand);
-      box-shadow: 0 4px 10px rgba(2, 6, 23, 0.05);
-      border: 1px solid rgba(15, 95, 191, 0.15);
-    }
+    .progressFill{ height:100%; width:0%; background: linear-gradient(135deg, var(--brand), var(--brand-2)); border-radius:999px; }
   </style>
 </head>
 
@@ -375,10 +316,6 @@
             <input id="no" placeholder="กรอกเลขพัสดุที่นี่..." inputmode="numeric" autocomplete="off" />
             <button class="btn" id="btn">ค้นหา</button>
           </div>
-
-          <div id="rule" style="margin-top:10px" class="small">
-            ระบบจะดึงข้อมูลตามเส้นทางและรูปแบบการจัดส่งที่เลือกอัตโนมัติ
-          </div>
         </div>
 
         <div class="card" id="summary" style="display:none"></div>
@@ -387,9 +324,6 @@
       <div>
         <div class="card" id="history" style="display:none">
           <h2>ไทม์ไลน์สถานะ</h2>
-          <div id="groupHint" class="muted">
-            จัดกลุ่ม: ขนส่งปลายทาง / ศุลกากรประเทศปลายทาง / คลังสินค้าต้นทาง
-          </div>
           <div id="groups"></div>
         </div>
       </div>
@@ -411,11 +345,18 @@ const btn = $("btn");
 const noEl = $("no");
 let currentRoute = "tw"; 
 
+// เคลียร์ผลลัพธ์เก่าออกทั้งหมดเมื่อสลับแท็บ
 document.querySelectorAll('.route-tab').forEach(tab => {
   tab.addEventListener('click', function() {
     document.querySelectorAll('.route-tab').forEach(t => t.classList.remove('active'));
     this.classList.add('active');
     currentRoute = this.getAttribute('data-route');
+    
+    // ล้างหน้าจอเก่า ป้องกันหน้าจอค้าง
+    summary.style.display = "none";
+    summary.innerHTML = "";
+    history.style.display = "none";
+    groupsEl.innerHTML = "";
   });
 });
 
@@ -501,7 +442,7 @@ function getProgressPct(th, whichCase){
   for (const r of rules){
     if (t.includes(normalizeText(r.contains))) return r.pct;
   }
-  return null;
+  return 30; // คืนค่าเริ่มต้นเป็น 30% (อยู่คลังต้นทาง) แทนการโยน null ทิ้งไปเฉยๆ เพื่อให้แถบเปอร์เซ็นต์ขยับ
 }
 
 function extractZh(mixed) {
@@ -517,7 +458,7 @@ function pickStatusText(obj) {
     "status_zh","status_cn","status","status_text","statusText",
     "latest_status_zh","latest_status_cn","latest_status","latestStatus",
     "desc_zh","description_zh","description","remark","remark_zh",
-    "message","state","event"
+    "message","state","event","title"
   ];
   for (const k of keys) {
     const v = obj[k];
@@ -528,10 +469,9 @@ function pickStatusText(obj) {
 
 function pickTimeText(obj) {
   if (!obj || typeof obj !== "object") return "-";
-  return obj.time || obj.datetime || obj.dateTime || obj.date_time || obj.timestamp || "-";
+  return obj.time || obj.datetime || obj.dateTime || obj.date_time || obj.timestamp || obj.date || "-";
 }
 
-/* แก้ไขจุดบกพร่องคำสะกดผิดกรณีตรวจสอบคำภาษาจีนสิงคโปร์ */
 function toThaiStatus(rawAny) {
   const raw = extractZh(rawAny);
   if (!raw) return null;
@@ -543,34 +483,28 @@ function toThaiStatus(rawAny) {
   const loose = STATUS_MAP.find(x => zh.includes(normalizeText(x.zh)) || normalizeText(x.zh).includes(zh));
   if (loose) return loose.th;
 
-  return null;
+  return raw; // ถ้าแปลไม่ได้ ให้แสดงค่าข้อความดิบเดิมที่ได้จาก API แทนการซ่อนตัวหนังสือทิ้ง
 }
 
 function groupOf(th){
   if (!th) return "คลังสินค้าต้นทาง";
-  if (th.includes("พัสดุถึงผู้รับเรียบร้อยแล้ว") || th.includes("อยู่ระหว่างจัดส่ง") || th.includes("พัสดุอยู่ศูนย์คัดแยกพัสดุ")) {
+  if (th.includes("ผู้รับ") || th.includes("จัดส่ง") || th.includes("คัดแยก") || th.includes("Delivered") || th.includes("delivery") || th.includes("Courier")) {
     return "ขนส่งปลายทาง";
   }
-  if (th.includes("กำลังดำเนินการนำสินค้า") || th.includes("ระบบศุลกากรรับ") || th.includes("เนื่องจากระบบศุลกากรไม่พบข้อมูล") || th.includes("ข้อมูลที่ใช้เดินพิธีการ") || th.includes("ไม่พบข้อมูลผู้เดินพิธีการ")) {
+  if (th.includes("คลัง") || th.includes("ศุลกากร") || th.includes("EZ WAY") || th.includes("พิธีการ") || th.includes("customs") || th.includes("Clearance")) {
     return "ศุลกากรประเทศปลายทาง";
-  }
-  if (th.includes("ออกคลัง") || th.includes("ใบปะหน้า") || th.includes("สร้างออเดอร์")) {
-    return "คลังสินค้าต้นทาง";
   }
   return "คลังสินค้าต้นทาง";
 }
 
 function badgeOf(th){
   if (!th) return { cls:"origin", label:"ดำเนินการต้นทาง" };
-  if (th.includes("พัสดุถึงผู้รับเรียบร้อยแล้ว")) return { cls:"ok", label:"จัดส่งสำเร็จ" };
-  if (th.includes("โปรดตรวจสอบ") || th.includes("ไม่สอดคล้อง") || th.includes("ติดต่อ") || th.includes("ไม่พบข้อมูลผู้เดินพิธีการ")) {
+  if (th.includes("เรียบร้อยแล้ว") || th.includes("Delivered")) return { cls:"ok", label:"จัดส่งสำเร็จ" };
+  if (th.includes("ตรวจสอบ") || th.includes("ไม่สอดคล้อง") || th.includes("ปัญหา") || th.includes("ไม่พบข้อมูล")) {
     return { cls:"bad", label:"พบปัญหา" };
   }
-  if (th.includes("กำลังดำเนินการนำสินค้า") || th.includes("ระบบศุลกากรรับ")) return { cls:"customs", label:"ดำเนินพิธีการศุลกากร" };
-  if (th.includes("อยู่ระหว่างจัดส่ง") || th.includes("พัสดุอยู่ศูนย์คัดแยกพัสดุ")) return { cls:"shipping", label:"กำลังขนส่ง" };
-  if (th.includes("พัสดุของคุณออกคลัง") || th.includes("พิมพ์ใบปะหน้าที่อยู่เรียบร้อยแล้ว") || th.includes("สร้างออเดอร์การจัดส่งเรียบร้อย")) {
-    return { cls:"origin", label:"ดำเนินการต้นทาง" };
-  }
+  if (th.includes("ศุลกากร") || th.includes("customs") || th.includes("Clearance") || th.includes("พิธีการ")) return { cls:"customs", label:"ดำเนินพิธีการศุลกากร" };
+  if (th.includes("จัดส่ง") || th.includes("คัดแยก") || th.includes("delivery") || th.includes("Courier")) return { cls:"shipping", label:"กำลังขนส่ง" };
   return { cls:"origin", label:"ดำเนินการต้นทาง" };
 }
 
@@ -584,18 +518,11 @@ function buildSummaryFromTimeline(events){
     if (!th) return null;
 
     const pct = getProgressPct(th, whichCase);
-    if (pct == null) return null;
-
-    return {
-      th,
-      pct,
-      group: groupOf(th),
-      time: pickTimeText(e)
-    };
+    return { th, pct, group: groupOf(th), time: pickTimeText(e) };
   }).filter(Boolean);
 
   if (!mapped.length) {
-    return { whichCase, currentGroup: "คลังสินค้าต้นทาง", latestPct: null, latestTh: null, latestTime: "-" };
+    return { whichCase, currentGroup: "คลังสินค้าต้นทาง", latestPct: 10, latestTh: "กำลังตรวจสอบระบบ", latestTime: "-" };
   }
 
   mapped.sort((a, b) => parseSafeDate(b.time) - parseSafeDate(a.time));
@@ -604,7 +531,7 @@ function buildSummaryFromTimeline(events){
   return {
     whichCase,
     currentGroup: latest.group,
-    latestPct: latest.pct,
+    latestPct: latest.pct || 30,
     latestTh: latest.th,
     latestTime: latest.time
   };
@@ -626,10 +553,10 @@ function renderSummary(latestTh, latestPct, whichCase, currentGroup, latestTime)
     { key: "ขนส่งปลายทาง", max: 100 },
   ];
 
-  const pctSafe = (typeof latestPct === "number" && latestPct >= 0 && latestPct <= 100) ? latestPct : null;
+  const pctSafe = (typeof latestPct === "number" && latestPct >= 0 && latestPct <= 100) ? latestPct : 30;
 
   const stepsHtml = steps.map((s) => {
-    const isDone = typeof pctSafe === "number" ? pctSafe >= s.max : false;
+    const isDone = pctSafe >= s.max;
     const isActive = s.key === curGroup;
     return `
       <div class="step ${isDone ? "done" : ""} ${isActive ? "active" : ""}">
@@ -662,10 +589,10 @@ function renderSummary(latestTh, latestPct, whichCase, currentGroup, latestTime)
     <div class="progressWrap">
       <div class="progressHead">
         <b>ความคืบหน้าโดยรวม</b>
-        <div>${pctSafe == null ? "-" : pctSafe + "%"}</div>
+        <div>${pctSafe}%</div>
       </div>
       <div class="progressBar">
-        <div class="progressFill" style="width:${pctSafe == null ? 0 : pctSafe}%;"></div>
+        <div class="progressFill" style="width:${pctSafe}%;"></div>
       </div>
     </div>
 
@@ -687,7 +614,7 @@ function renderGroupedTimeline(events, whichCaseArg){
   }).filter(x => !!x.th);
 
   if (!translated.length) {
-    if (history) history.style.display = "none";
+    history.style.display = "none";
     return;
   }
 
@@ -696,8 +623,7 @@ function renderGroupedTimeline(events, whichCaseArg){
 
   for (const x of translated) {
     const pct = getProgressPct(x.th, whichCase);
-    if (pct == null) continue;
-    latestByStatus.set(x.th, { ...x, pct, group: groupOf(x.th) });
+    latestByStatus.set(x.th, { ...x, pct: pct || 30, group: groupOf(x.th) });
   }
 
   const deduped = Array.from(latestByStatus.values());
@@ -713,9 +639,10 @@ function renderGroupedTimeline(events, whichCaseArg){
   }
 
   const html = GROUP_ORDER
-    .filter(g => (buckets.get(g) || []).length > 0)
     .map(g => {
       const items = buckets.get(g) || [];
+      if (items.length === 0) return "";
+      
       items.sort((a,b) => parseSafeDate(b.time) - parseSafeDate(a.time));
       
       const itemsHtml = items.map(it => `
@@ -775,51 +702,49 @@ async function run(){
       const wmRes = await fetch(`/api/track?no=${encodeURIComponent(no)}`, { cache: "no-store" });
       if (wmRes.ok) {
         const wmData = await wmRes.json();
-        events = [...(wmData.events || wmData.history || [])];
+        // แก้ไขจุดดักจับโครงสร้างอาร์เรย์แบบ Dynamic กันเหนียวทุกรูปแบบคีย์ข้อมูล
+        events = wmData.events || wmData.history || wmData.traces || wmData.data || (Array.isArray(wmData) ? wmData : []);
       }
     } else if (currentRoute === "sg") {
       const tpRes = await fetch(`/api/teleport-track?no=${encodeURIComponent(no)}`, { cache: "no-store" });
       if (tpRes.ok) {
         try {
           const tpData = await tpRes.json();
-          events = [...(tpData.events || tpData.history || tpData.traces || [])];
+          events = tpData.events || tpData.history || tpData.traces || tpData.data || (Array.isArray(tpData) ? tpData : []);
         } catch {
           events = [];
         }
       }
     }
 
-    if (!events.length) {
+    // หากได้โครงสร้างเป็น Object ก้อนเดียว ไม่ใช่ Array ให้แปลงเข้า Array เพื่อนำไปประมวลผลต่อได้ทันที
+    if (events && !Array.isArray(events) && typeof events === 'object') {
+      events = [events];
+    }
+
+    if (!events || !events.length) {
       setError("ไม่พบข้อมูลพัสดุสำหรับเส้นทางนี้");
       return;
     }
 
     events.sort((a,b) => {
-      const ta = parseSafeDate(a.time || a.datetime || a.timestamp);
-      const tb = parseSafeDate(b.time || b.datetime || b.timestamp);
+      const ta = parseSafeDate(a.time || a.datetime || a.timestamp || a.date);
+      const tb = parseSafeDate(b.time || b.datetime || b.timestamp || b.date);
       return tb - ta;
     });
 
     const sm = buildSummaryFromTimeline(events);
 
-    renderSummary(
-      sm.latestTh,
-      sm.latestPct,
-      sm.whichCase,
-      sm.currentGroup,
-      sm.latestTime
-    );
-
+    renderSummary(sm.latestTh, sm.latestPct, sm.whichCase, sm.currentGroup, sm.latestTime);
     renderGroupedTimeline(events, sm.whichCase);
 
   } catch(e){
-    setError(String(e));
+    setError("ระบบปลายทางขัดข้องชั่วคราว: " + String(e));
   } finally {
     btn.disabled = false;
   }
 }
 
-// ผูกเหตุการณ์ปุ่มกดตัวจริง (ไม่มีโค้ดส่วนเกินหลุดมาแล้ว)
 btn.addEventListener("click", run);
 noEl.addEventListener("keydown", (e) => {
   if(e.key === "Enter") run();

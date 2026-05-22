@@ -137,40 +137,32 @@
       white-space:nowrap;
     }
     .dot{width:8px;height:8px;border-radius:999px;background: currentColor;opacity:.95}
-/* เขียว = จัดส่งสำเร็จ */
-.badge.ok{
-  background: rgba(34,197,94,.12);
-  color: #16a34a;
-  border-color: rgba(34,197,94,.25);
-}
 
-/* เหลือง = ศุลกากร */
-.badge.customs{
-  background: rgba(234,179,8,.12);
-  color: #ca8a04;
-  border-color: rgba(234,179,8,.25);
-}
-
-/* แดง = มีปัญหา */
-.badge.bad{
-  background: rgba(239,68,68,.12);
-  color: #dc2626;
-  border-color: rgba(239,68,68,.25);
-}
-
-/* ส้ม = กำลังขนส่ง */
-.badge.shipping{
-  background: rgba(249,115,22,.12);
-  color: #ea580c;
-  border-color: rgba(249,115,22,.25);
-}
-
-/* น้ำเงิน = ต้นทาง */
-.badge.origin{
-  background: rgba(59,130,246,.12);
-  color: #2563eb;
-  border-color: rgba(59,130,246,.25);
-}
+    .badge.ok{
+      background: rgba(34,197,94,.12);
+      color: #16a34a;
+      border-color: rgba(34,197,94,.25);
+    }
+    .badge.customs{
+      background: rgba(234,179,8,.12);
+      color: #ca8a04;
+      border-color: rgba(234,179,8,.25);
+    }
+    .badge.bad{
+      background: rgba(239,68,68,.12);
+      color: #dc2626;
+      border-color: rgba(239,68,68,.25);
+    }
+    .badge.shipping{
+      background: rgba(249,115,22,.12);
+      color: #ea580c;
+      border-color: rgba(249,115,22,.25);
+    }
+    .badge.origin{
+      background: rgba(59,130,246,.12);
+      color: #2563eb;
+      border-color: rgba(59,130,246,.25);
+    }
 
     .group{margin-top:12px}
     .groupTitle{
@@ -286,6 +278,7 @@
     .step.done .stepDot{background: var(--brand); border-color: rgba(15,95,191,.18)}
     .step.done .stepTitle{color: rgba(15,23,42,.90)}
     .step.done:not(:last-child)::after{background: rgba(15,95,191,.40)}
+    
     @media(max-width:520px){
       .steps{flex-direction:column;gap:10px}
       .step:not(:last-child)::after{
@@ -304,7 +297,7 @@
     }
     .progressHead b{font-size:13px}
     .progressBar{
-      width:100%; height:10px; border-radius:999px;
+      width:100%; height:10px; border-radius999px;
       background: rgba(100,116,139,.18);
       overflow:hidden;
       border:1px solid rgba(100,116,139,.18);
@@ -313,6 +306,36 @@
       height:100%; width:0%;
       background: linear-gradient(135deg, var(--brand), var(--brand-2));
       border-radius:999px;
+    }
+
+    /* แก้ไขปีกกาครอบโค้ดแท็บตรงนี้ให้ถูกต้อง */
+    .route-tabs {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 14px;
+      background: var(--surface-2);
+      padding: 4px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+    }
+    .route-tab {
+      flex: 1;
+      padding: 10px 8px;
+      border: none;
+      background: transparent;
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 700;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: all .15s ease;
+      white-space: nowrap;
+    }
+    .route-tab.active {
+      background: var(--surface);
+      color: var(--brand);
+      box-shadow: 0 4px 10px rgba(2, 6, 23, 0.05);
+      border: 1px solid rgba(15, 95, 191, 0.15);
     }
   </style>
 </head>
@@ -335,12 +358,10 @@
 
     <div class="grid">
       <div>
-        <!-- 🟢 โค้ดใหม่ที่วางเรียบร้อยแล้ว -->
         <div class="card">
           <h2>ค้นหาเลขพัสดุ (Tracking)</h2>
           <div class="muted">เลือกเส้นทางขนส่ง กรอกเลขพัสดุ แล้วกด “ค้นหา”</div>
 
-          <!-- เพิ่มตัวเลือกเส้นทาง (Route Selector) -->
           <div class="route-tabs">
             <button class="route-tab active" data-route="tw" type="button">
               🇹🇭 ไทย ➔ 🇹🇼 ไต้หวัน (Weiming)
@@ -359,7 +380,6 @@
             ระบบจะดึงข้อมูลตามเส้นทางและรูปแบบการจัดส่งที่เลือกอัตโนมัติ
           </div>
         </div>
-        <!-- 🟢 --------------------------- -->
 
         <div class="card" id="summary" style="display:none"></div>
       </div>
@@ -383,12 +403,21 @@
   </div>
 
 <script>
-  const $ = (id) => document.getElementById(id);
+const $ = (id) => document.getElementById(id);
 const summary = $("summary");
 const history = $("history");
 const groupsEl = $("groups");
 const btn = $("btn");
 const noEl = $("no");
+let currentRoute = "tw"; 
+
+document.querySelectorAll('.route-tab').forEach(tab => {
+  tab.addEventListener('click', function() {
+    document.querySelectorAll('.route-tab').forEach(t => t.classList.remove('active'));
+    this.classList.add('active');
+    currentRoute = this.getAttribute('data-route');
+  });
+});
 
 const yearEl = $("year");
 if (yearEl) yearEl.textContent = String(new Date().getFullYear());
@@ -443,10 +472,8 @@ const PROGRESS_RULES = {
 
 const GROUP_ORDER = ["ขนส่งปลายทาง", "ศุลกากรประเทศปลายทาง", "คลังสินค้าต้นทาง"];
 
-// ฟังก์ชันแปลง Date String เป็น Timestamp ที่ปลอดภัยสำหรับทุกบราวเซอร์
 function parseSafeDate(dateStr) {
   if (!dateStr || dateStr === "-") return 0;
-  // แปลงรูปแบบยอดฮิต "YYYY-MM-DD HH:mm:ss" ให้เป็นมาตรฐาน ISO เพื่อความปลอดภัย
   const standardized = String(dateStr).replace(/-/g, "/");
   const t = Date.parse(standardized);
   return isNaN(t) ? 0 : t;
@@ -504,6 +531,7 @@ function pickTimeText(obj) {
   return obj.time || obj.datetime || obj.dateTime || obj.date_time || obj.timestamp || "-";
 }
 
+/* แก้ไขจุดบกพร่องคำสะกดผิดกรณีตรวจสอบคำภาษาจีนสิงคโปร์ */
 function toThaiStatus(rawAny) {
   const raw = extractZh(rawAny);
   if (!raw) return null;
@@ -570,7 +598,6 @@ function buildSummaryFromTimeline(events){
     return { whichCase, currentGroup: "คลังสินค้าต้นทาง", latestPct: null, latestTh: null, latestTime: "-" };
   }
 
-  // เรียกใช้ตัวแปลงเวลาที่ปลอดภัยสำหรับ Safari/iOS
   mapped.sort((a, b) => parseSafeDate(b.time) - parseSafeDate(a.time));
   const latest = mapped[0];
 
@@ -689,7 +716,6 @@ function renderGroupedTimeline(events, whichCaseArg){
     .filter(g => (buckets.get(g) || []).length > 0)
     .map(g => {
       const items = buckets.get(g) || [];
-      // เรียงลำดับเหตุการณ์ย่อยในกลุ่มจากใหม่ไปเก่า
       items.sort((a,b) => parseSafeDate(b.time) - parseSafeDate(a.time));
       
       const itemsHtml = items.map(it => `
@@ -743,37 +769,31 @@ async function run(){
   setLoading();
 
   try {
-    const [wmRes, tpRes] = await Promise.allSettled([
-      fetch(`/api/track?no=${encodeURIComponent(no)}`, { cache: "no-store" }),
-      fetch(`/api/teleport-track?no=${encodeURIComponent(no)}`, { cache: "no-store" })
-    ]);
+    let events = [];
 
-    let wmData = {};
-    let tpData = {};
-
-    if (wmRes.status === "fulfilled" && wmRes.value.ok) {
-      wmData = await wmRes.value.json();
-    }
-
-    if (tpRes.status === "fulfilled" && tpRes.value.ok) {
-      try {
-        tpData = await tpRes.value.json();
-      } catch {
-        tpData = {};
+    if (currentRoute === "tw") {
+      const wmRes = await fetch(`/api/track?no=${encodeURIComponent(no)}`, { cache: "no-store" });
+      if (wmRes.ok) {
+        const wmData = await wmRes.json();
+        events = [...(wmData.events || wmData.history || [])];
+      }
+    } else if (currentRoute === "sg") {
+      const tpRes = await fetch(`/api/teleport-track?no=${encodeURIComponent(no)}`, { cache: "no-store" });
+      if (tpRes.ok) {
+        try {
+          const tpData = await tpRes.json();
+          events = [...(tpData.events || tpData.history || tpData.traces || [])];
+        } catch {
+          events = [];
+        }
       }
     }
 
-    const events = [
-      ...(wmData.events || wmData.history || []),
-      ...(tpData.events || tpData.history || tpData.traces || [])
-    ];
-
     if (!events.length) {
-      setError("ไม่พบข้อมูลพัสดุ");
+      setError("ไม่พบข้อมูลพัสดุสำหรับเส้นทางนี้");
       return;
     }
 
-    // จัดการเรียงเวลาทั้งหมดให้ถูกต้องปลอดภัย
     events.sort((a,b) => {
       const ta = parseSafeDate(a.time || a.datetime || a.timestamp);
       const tb = parseSafeDate(b.time || b.datetime || b.timestamp);
@@ -782,7 +802,6 @@ async function run(){
 
     const sm = buildSummaryFromTimeline(events);
 
-    // ปรับเปลี่ยนการส่งพารามิเตอร์ให้ดึงเวลาล่าสุดโดยตรง
     renderSummary(
       sm.latestTh,
       sm.latestPct,
@@ -800,7 +819,11 @@ async function run(){
   }
 }
 
+// ผูกเหตุการณ์ปุ่มกดตัวจริง (ไม่มีโค้ดส่วนเกินหลุดมาแล้ว)
 btn.addEventListener("click", run);
 noEl.addEventListener("keydown", (e) => {
   if(e.key === "Enter") run();
 });
+</script>
+</body>
+</html>

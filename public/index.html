@@ -304,10 +304,10 @@
           <div class="muted">เลือกเส้นทางขนส่ง กรอกเลขพัสดุ แล้วกด “ค้นหา”</div>
 
           <div class="route-tabs">
-            <button class="route-tab active" data-route="tw" type="button">
+            <button class="route-tab active" data-route="tw" id="tab-tw" type="button">
               🇹🇭 ไทย ➔ 🇹🇼 ไต้หวัน (Weiming)
             </button>
-            <button class="route-tab" data-route="sg" type="button">
+            <button class="route-tab" data-route="sg" id="tab-sg" type="button">
               🇹🇭 ไทย ➔ 🇸🇬 สิงคโปร์ (Teleport)
             </button>
           </div>
@@ -345,18 +345,25 @@ const btn = $("btn");
 const noEl = $("no");
 let currentRoute = "tw"; 
 
-// เคลียร์ผลลัพธ์เก่าออกทั้งหมดเมื่อสลับแท็บ
+function switchRouteTab(routeCode) {
+  document.querySelectorAll('.route-tab').forEach(t => t.classList.remove('active'));
+  if (routeCode === "tw") {
+    $("tab-tw").classList.add('active');
+    currentRoute = "tw";
+  } else {
+    $("tab-sg").classList.add('active');
+    currentRoute = "sg";
+  }
+  summary.style.display = "none";
+  summary.innerHTML = "";
+  history.style.display = "none";
+  groupsEl.innerHTML = "";
+}
+
 document.querySelectorAll('.route-tab').forEach(tab => {
   tab.addEventListener('click', function() {
-    document.querySelectorAll('.route-tab').forEach(t => t.classList.remove('active'));
-    this.classList.add('active');
-    currentRoute = this.getAttribute('data-route');
-    
-    // ล้างหน้าจอเก่า ป้องกันหน้าจอค้าง
-    summary.style.display = "none";
-    summary.innerHTML = "";
-    history.style.display = "none";
-    groupsEl.innerHTML = "";
+    const targetRoute = this.getAttribute('data-route');
+    switchRouteTab(targetRoute);
   });
 });
 
@@ -442,7 +449,7 @@ function getProgressPct(th, whichCase){
   for (const r of rules){
     if (t.includes(normalizeText(r.contains))) return r.pct;
   }
-  return 30; // คืนค่าเริ่มต้นเป็น 30% (อยู่คลังต้นทาง) แทนการโยน null ทิ้งไปเฉยๆ เพื่อให้แถบเปอร์เซ็นต์ขยับ
+  return 30;
 }
 
 function extractZh(mixed) {
@@ -483,7 +490,7 @@ function toThaiStatus(rawAny) {
   const loose = STATUS_MAP.find(x => zh.includes(normalizeText(x.zh)) || normalizeText(x.zh).includes(zh));
   if (loose) return loose.th;
 
-  return raw; // ถ้าแปลไม่ได้ ให้แสดงค่าข้อความดิบเดิมที่ได้จาก API แทนการซ่อนตัวหนังสือทิ้ง
+  return raw;
 }
 
 function groupOf(th){
@@ -685,11 +692,18 @@ function setError(msg){
 }
 
 async function run(){
-  const no = (noEl.value || "").trim();
+  let no = (noEl.value || "").trim();
 
   if(!no){
     alert("กรุณากรอกเลขพัสดุ");
     return;
+  }
+
+  // ระบบดักจับคำนำหน้าอัจฉริยะ ป้องกันคนลืมสลับแท็บ
+  if (no.toUpperCase().startsWith("TP")) {
+    if (currentRoute !== "sg") {
+      switchRouteTab("sg");
+    }
   }
 
   btn.disabled = true;
@@ -702,7 +716,6 @@ async function run(){
       const wmRes = await fetch(`/api/track?no=${encodeURIComponent(no)}`, { cache: "no-store" });
       if (wmRes.ok) {
         const wmData = await wmRes.json();
-        // แก้ไขจุดดักจับโครงสร้างอาร์เรย์แบบ Dynamic กันเหนียวทุกรูปแบบคีย์ข้อมูล
         events = wmData.events || wmData.history || wmData.traces || wmData.data || (Array.isArray(wmData) ? wmData : []);
       }
     } else if (currentRoute === "sg") {
@@ -717,7 +730,6 @@ async function run(){
       }
     }
 
-    // หากได้โครงสร้างเป็น Object ก้อนเดียว ไม่ใช่ Array ให้แปลงเข้า Array เพื่อนำไปประมวลผลต่อได้ทันที
     if (events && !Array.isArray(events) && typeof events === 'object') {
       events = [events];
     }

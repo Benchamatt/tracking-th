@@ -678,27 +678,7 @@
 
           <h2>ค้นหาเลขพัสดุ (Tracking)</h2>
 
-          <div class="muted">เลือกเส้นทางขนส่ง กรอกเลขพัสดุ แล้วกด “ค้นหา”</div>
-
-
-
-          <!-- เพิ่มตัวเลือกเส้นทาง (Route Selector) -->
-
-          <div class="route-tabs">
-
-            <button class="route-tab active" data-route="tw" type="button">
-
-              🇹🇭 ไทย ➔ 🇹🇼 ไต้หวัน (Weiming)
-
-            </button>
-
-            <button class="route-tab" data-route="sg" type="button">
-
-              🇹🇭 ไทย ➔ 🇸🇬 สิงคโปร์ (Teleport)
-
-            </button>
-
-          </div>
+          <div class="muted">กรอกเลขพัสดุ แล้วกด “ค้นหา”</div>
 
 
 
@@ -714,7 +694,7 @@
 
           <div id="rule" style="margin-top:10px" class="small">
 
-            ระบบจะดึงข้อมูลตามเส้นทางและรูปแบบการจัดส่งที่เลือกอัตโนมัติ
+            ระบบจะดึงข้อมูลพัสดุจาก Weiming อัตโนมัติ
 
           </div>
 
@@ -864,6 +844,8 @@ const PROGRESS_RULES = {
 
     { contains: "พัสดุของคุณออกคลัง เพื่อเตรียมส่งไปยังสนามบินแล้ว", pct: 30 },
 
+    { contains: "กรุณาเข้าแอป EZ WAY และกดยืนยันการนำเข้าพัสดุ", pct: 40 },
+
     { contains: "ไม่พบข้อมูลผู้เดินพิธีการ", pct: 40 },
 
     { contains: "ข้อมูลที่ใช้เดินพิธีการไม่สอดคล้องกัน", pct: 50 },
@@ -911,6 +893,8 @@ function detectCaseFromThaiStatuses(thList){
   const joined = (thList || []).join(" ");
 
   if (
+
+    joined.includes("EZ WAY") ||
 
     joined.includes("ไม่พบข้อมูลผู้เดินพิธีการ") ||
 
@@ -1048,7 +1032,7 @@ function groupOf(th){
 
   }
 
-  if (th.includes("กำลังดำเนินการนำสินค้า") || th.includes("ระบบศุลกากรรับ") || th.includes("เนื่องจากระบบศุลกากรไม่พบข้อมูล") || th.includes("ข้อมูลที่ใช้เดินพิธีการ") || th.includes("ไม่พบข้อมูลผู้เดินพิธีการ")) {
+  if (th.includes("EZ WAY") || th.includes("กำลังดำเนินการนำสินค้า") || th.includes("ระบบศุลกากรรับ") || th.includes("เนื่องจากระบบศุลกากรไม่พบข้อมูล") || th.includes("ข้อมูลที่ใช้เดินพิธีการ") || th.includes("ไม่พบข้อมูลผู้เดินพิธีการ")) {
 
     return "ศุลกากรประเทศปลายทาง";
 
@@ -1071,6 +1055,8 @@ function badgeOf(th){
   if (!th) return { cls:"origin", label:"ดำเนินการต้นทาง" };
 
   if (th.includes("พัสดุถึงผู้รับเรียบร้อยแล้ว")) return { cls:"ok", label:"จัดส่งสำเร็จ" };
+
+  if (th.includes("EZ WAY")) return { cls:"bad", label:"ต้องดำเนินการ" };
 
   if (th.includes("โปรดตรวจสอบ") || th.includes("ไม่สอดคล้อง") || th.includes("ติดต่อ") || th.includes("ไม่พบข้อมูลผู้เดินพิธีการ")) {
 
@@ -1488,51 +1474,21 @@ async function run(){
 
   try {
 
-    const [wmRes, tpRes] = await Promise.allSettled([
+    const wmRes = await fetch(`/api/track?no=${encodeURIComponent(no)}`, { cache: "no-store" });
 
-      fetch(`/api/track?no=${encodeURIComponent(no)}`, { cache: "no-store" }),
+    if (!wmRes.ok) {
 
-      fetch(`/api/teleport-track?no=${encodeURIComponent(no)}`, { cache: "no-store" })
+      setError("ไม่สามารถดึงข้อมูลพัสดุได้");
 
-    ]);
-
-
-
-    let wmData = {};
-
-    let tpData = {};
-
-
-
-    if (wmRes.status === "fulfilled" && wmRes.value.ok) {
-
-      wmData = await wmRes.value.json();
+      return;
 
     }
 
-
-
-    if (tpRes.status === "fulfilled" && tpRes.value.ok) {
-
-      try {
-
-        tpData = await tpRes.value.json();
-
-      } catch {
-
-        tpData = {};
-
-      }
-
-    }
-
-
+    const wmData = await wmRes.json();
 
     const events = [
 
-      ...(wmData.events || wmData.history || []),
-
-      ...(tpData.events || tpData.history || tpData.traces || [])
+      ...(wmData.events || wmData.history || [])
 
     ];
 

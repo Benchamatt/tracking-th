@@ -1025,7 +1025,7 @@ function groupOf(th){
 
   }
 
-  if (th.includes("EZ WAY") || th.includes("กำลังดำเนินการนำสินค้า") || th.includes("ระบบศุลกากรรับ") || th.includes("เนื่องจากระบบศุลกากรไม่พบข้อมูล") || th.includes("ข้อมูลที่ใช้เดินพิธีการ") || th.includes("ไม่พบข้อมูลผู้เดินพิธีการ")) {
+  if (th.includes("EZ WAY") || th.includes("กำลังดำเนินการนำสินค้า") || th.includes("ระบบศุลกากรรับ") || th.includes("กรุณาเข้าแอป EZ WAY") || th.includes("ข้อมูลที่ใช้เดินพิธีการ") || th.includes("ไม่พบข้อมูลผู้เดินพิธีการ")) {
 
     return "ศุลกากรประเทศปลายทาง";
 
@@ -1051,7 +1051,7 @@ function badgeOf(th){
 
   if (th.includes("EZ WAY")) return { cls:"bad", label:"ต้องดำเนินการ" };
 
-  if (th.includes("โปรดตรวจสอบ") || th.includes("ไม่สอดคล้อง") || th.includes("ติดต่อ") || th.includes("ไม่พบข้อมูลผู้เดินพิธีการ")) {
+  if (th.includes("โปรดตรวจสอบ") || th.includes("ไม่สอดคล้อง") || th.includes("ติดต่อ") || th.includes("กรุณาเข้าแอป EZ WAY")) {
 
     return { cls:"bad", label:"พบปัญหา" };
 
